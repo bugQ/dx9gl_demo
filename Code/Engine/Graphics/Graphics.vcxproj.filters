@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Windows">
+      <UniqueIdentifier>{653217aa-3d76-4372-9a4d-e5ec18684021}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="OpenGL Extentions">
+      <UniqueIdentifier>{fc618a7c-9b1b-4c68-8c10-d7d9127be0fc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -24,10 +30,46 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\WindowsFunctions.h">
+      <Filter>Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\WindowsIncludes.h">
+      <Filter>Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="UserOutput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGLExtensions\wglext.h">
+      <Filter>OpenGL Extentions</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGLExtensions\OpenGlExtensions.h">
+      <Filter>OpenGL Extentions</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGLExtensions\glext.h">
+      <Filter>OpenGL Extentions</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics.gl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics.d3d.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\WindowsFunctions.cpp">
+      <Filter>Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="UserOutput.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OpenGLExtensions\OpenGlExtensions.cpp">
+      <Filter>OpenGL Extentions</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

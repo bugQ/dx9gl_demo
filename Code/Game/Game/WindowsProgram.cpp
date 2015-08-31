@@ -14,6 +14,10 @@
 // in this example program we just use it to get error messages
 #include "Windows/WindowsFunctions.h"
 
+// Graphics.h contains engine functions that perform all necessary
+// graphics API calls during gameplay
+#include "../../Engine/Graphics/Graphics.h"
+
 // Static Data Initialization
 //===========================
 
@@ -73,6 +77,11 @@ bool CreateMainWindow( const HINSTANCE i_thisInstanceOfTheProgram, const int i_i
 	{
 		s_mainWindow = CreateMainWindowHandle( i_thisInstanceOfTheProgram, i_initialWindowDisplayState );
 		if ( s_mainWindow == NULL )
+		{
+			goto OnError;
+		}
+
+		if ( !eae6320::Graphics::Initialize(s_mainWindow) )
 		{
 			goto OnError;
 		}
@@ -339,6 +348,11 @@ bool OnMainWindowClosed( const HINSTANCE i_thisInstanceOfTheProgram )
 {
 	bool wereThereErrors = false;
 
+	if ( !eae6320::Graphics::ShutDown() )
+	{
+		wereThereErrors = true;
+	};
+
 	if ( !CleanupMainWindow() )
 	{
 		wereThereErrors = true;
@@ -480,11 +494,7 @@ bool WaitForMainWindowToClose( int& o_exitCode )
 		{
 			// Usually there will be no messages in the queue, and the game can run
 
-			// (This example program has nothing to do,
-			// and so it will just constantly run this while loop using up CPU cycles.
-			// A real game might have something like the following:
-			//	someGameClass.OnNewFrame();
-			// or similar, though.)
+			eae6320::Graphics::Render();
 		}
 		else
 		{
