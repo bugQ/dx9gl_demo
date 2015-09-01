@@ -21,6 +21,12 @@
 
 # Temporary Files
 #============
+*.idb
+*.log
+*.obj
+*.pch
+*.pdb
+*.tlog/
 
 # Generated files
 /temp
