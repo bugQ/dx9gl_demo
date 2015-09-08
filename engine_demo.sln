@@ -13,6 +13,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{706B430C-5DB4-48F4-A81B-4B0B51D59217}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AssetBuilder", "Code\Tools\AssetBuilder\AssetBuilder.vcxproj", "{ABF804FE-993A-43E2-A242-F3090A290B12}"
+	ProjectSection(ProjectDependencies) = postProject
+		{45CDCFF0-7F57-457F-9706-C3C15E7EA597} = {45CDCFF0-7F57-457F-9706-C3C15E7EA597}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BuildAssets", "Code\Game\BuildAssets\BuildAssets.vcxproj", "{3670C64E-AAA0-4056-BF89-744D0276F609}"
 	ProjectSection(ProjectDependencies) = postProject

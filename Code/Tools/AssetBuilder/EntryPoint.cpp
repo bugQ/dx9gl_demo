@@ -6,28 +6,40 @@
 //=============
 
 #include <cstdlib>
-#include "HelperFunctions.h"
+#include "AssetBuilder.h"
 
 // Entry Point
 //============
 
-int main( int argumentCount, char** arguments )
+int main( int i_argumentCount, char** i_arguments )
 {
-	if ( !InitializeAssetBuild() )
-	{
-		return EXIT_FAILURE;
-	}
-
 	bool wereThereErrors = false;
 
-	// The command line should have a list of assets to build
-	for ( int i = 1; i < argumentCount; ++i )
+	if ( !eae6320::AssetBuilder::Initialize() )
 	{
-		const char* relativePath = arguments[i];
-		if ( !BuildAsset( relativePath ) )
+		wereThereErrors = true;
+		goto OnExit;
+	}
+
+	// The command line should have a list of assets to build
+	for ( int i = 1; i < i_argumentCount; ++i )
+	{
+		const char* const relativePath = i_arguments[i];
+		if ( !eae6320::AssetBuilder::BuildAsset( relativePath ) )
 		{
 			wereThereErrors = true;
+			// Instead of exiting immediately any assets that can be built should be built
+			// (both because it gives a better idea of the number of errors
+			// but also because it could potentially allow the game to still be run with the
+			// assets that _did_ build successfully)
 		}
+	}
+
+OnExit:
+
+	if ( !eae6320::AssetBuilder::ShutDown() )
+	{
+		wereThereErrors = true;
 	}
 
 	if ( !wereThereErrors )
