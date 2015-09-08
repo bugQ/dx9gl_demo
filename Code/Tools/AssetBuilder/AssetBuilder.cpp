@@ -184,6 +184,7 @@ namespace
 			{
 				lua_pushboolean( io_luaState, FALSE );
 				lua_pushstring( io_luaState, errorMessage.c_str() );
+				return 2;
 			}
 		}
 	}

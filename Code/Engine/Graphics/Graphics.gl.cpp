@@ -509,7 +509,7 @@ namespace
 				vertexData[5].x = 0.0f;
 				vertexData[5].y = 1.0f;
 			}
-			glBufferData( GL_ARRAY_BUFFER, sizeof( sVertexData ), reinterpret_cast<GLvoid*>( vertexData ),
+			glBufferData( GL_ARRAY_BUFFER, sizeof( vertexData ), reinterpret_cast<GLvoid*>( vertexData ),
 				// Our code will only ever write to the buffer
 				GL_STATIC_DRAW );
 			const GLenum errorCode = glGetError();
