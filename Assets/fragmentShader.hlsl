@@ -10,8 +10,10 @@ void main(
 	// Input
 	//======
 
-	// None; the only data that the vertex shader output was POSITION,
-	// and that is used by the GPU
+	// Whatever arbitrary data (i.e. everything excluding position) was output from the vertex shader
+	// will be interpolated across the triangle and given as input to the fragment shader
+
+	in float4 i_color : COLOR0,
 
 	// Output
 	//=======
@@ -22,10 +24,9 @@ void main(
 
 	)
 {
-	// For now set the fragment to white
-	// (where color is represented by 4 floats representing "RGBA" == "Red/Green/Blue/Alpha").
-	// If you are curious you should experiment with changing the values of the first three numbers
-	// to something in the range [0,1] and observing the results
-	// (although when you submit your Assignment 01 the color output must be white).
-	o_color = float4( 1.0, 1.0, 1.0, 1.0 );
+	// Set the fragment to the interpolated color that originated as per-vertex data
+	// (where color is represented by 4 floats representing "RGBA" == "Red/Green/Blue/Alpha")
+	{
+		o_color = i_color;
+	}
 }
