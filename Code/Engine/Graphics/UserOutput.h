@@ -7,7 +7,6 @@
 // Header Files
 //=============
 
-#include "Windows/WindowsIncludes.h"
 #include <string>
 
 // Interface
