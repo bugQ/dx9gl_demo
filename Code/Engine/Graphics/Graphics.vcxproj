@@ -160,6 +160,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Graphics.h" />
+    <ClInclude Include="Mesh.h" />
     <ClInclude Include="OpenGLExtensions\glext.h" />
     <ClInclude Include="OpenGLExtensions\OpenGlExtensions.h" />
     <ClInclude Include="OpenGLExtensions\wglext.h" />
