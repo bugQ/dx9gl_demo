@@ -170,7 +170,8 @@ void eae6320::Graphics::Render()
 			const GLsizei vertexCountPerTriangle = 3;
 			const GLsizei vertexCountToRender = primitiveCountToRender * vertexCountPerTriangle;
 			glDrawElements( mode, vertexCountToRender, indexType, offset );
-			assert( glGetError() == GL_NO_ERROR );
+			const GLenum errorCode = glGetError();
+			assert( errorCode == GL_NO_ERROR );
 		}
 	}
 
@@ -1087,7 +1088,14 @@ namespace
 		// Verify that compiling shaders at run-time is supported
 		{
 			GLboolean isShaderCompilingSupported;
+#if defined ( _WIN32 )
+			// Win32 should always support this (GL 2.0 +).
+			// The check is bypassed because it's not supported in Windows' GL API for some reason.
+			isShaderCompilingSupported = GL_TRUE;
+#else
 			glGetBooleanv( GL_SHADER_COMPILER, &isShaderCompilingSupported );
+#endif
+
 			if ( !isShaderCompilingSupported )
 			{
 				eae6320::UserOutput::Print( "Compiling shaders at run-time isn't supported on this implementation (this should never happen)" );
@@ -1113,6 +1121,7 @@ namespace
 					goto OnExit;
 				}
 			}
+
 			// Generate a shader
 			vertexShaderId = glCreateShader( GL_VERTEX_SHADER );
 			{
