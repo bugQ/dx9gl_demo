@@ -9,6 +9,7 @@
 //=============
 
 #include "Windows/WindowsIncludes.h"
+#include "Mesh.h"
 
 // Interface
 //==========
@@ -18,6 +19,7 @@ namespace eae6320
 	namespace Graphics
 	{
 		bool Initialize( const HWND i_renderingWindow );
+		void DrawMesh( Mesh & mesh );
 		void Render();
 		bool ShutDown();
 	}

@@ -39,7 +39,7 @@ namespace
 	};
 
 	// A vertex array encapsulates both the vertex and index data as well as the vertex format
-	GLuint s_vertexArrayId = 0;
+	eae6320::Mesh s_mesh;
 
 	// OpenGL encapsulates a matching vertex shader and fragment shader into what it calls a "program".
 
@@ -126,6 +126,34 @@ OnError:
 	return false;
 }
 
+void eae6320::Graphics::DrawMesh( Mesh & mesh )
+{
+	// Bind a specific vertex buffer to the device as a data source
+	{
+		glBindVertexArray(mesh.gl_id);
+		assert(glGetError() == GL_NO_ERROR);
+	}
+	// Render objects from the current streams
+	{
+		// We are using triangles as the "primitive" type,
+		// and we have defined the vertex buffer as a triangle list
+		// (meaning that every triangle is defined by three vertices)
+		const GLenum mode = GL_TRIANGLES;
+		// We'll use 32-bit indices in this class to keep things simple
+		// (i.e. every index will be a 32 bit unsigned integer)
+		const GLenum indexType = GL_UNSIGNED_INT;
+		// It is possible to start rendering in the middle of an index buffer
+		const GLvoid* const offset = 0;
+		// We are drawing a square
+		const GLsizei primitiveCountToRender = mesh.num_triangles;	// How many triangles will be drawn?
+		const GLsizei vertexCountPerTriangle = 3;
+		const GLsizei vertexCountToRender = primitiveCountToRender * vertexCountPerTriangle;
+		glDrawElements(mode, vertexCountToRender, indexType, offset);
+		const GLenum errorCode = glGetError();
+		assert(errorCode == GL_NO_ERROR);
+	}
+}
+
 void eae6320::Graphics::Render()
 {
 	// Every frame an entirely new image will be created.
@@ -149,30 +177,7 @@ void eae6320::Graphics::Render()
 			glUseProgram( s_programId );
 			assert( glGetError() == GL_NO_ERROR );
 		}
-		// Bind a specific vertex buffer to the device as a data source
-		{
-			glBindVertexArray( s_vertexArrayId );
-			assert( glGetError() == GL_NO_ERROR );
-		}
-		// Render objects from the current streams
-		{
-			// We are using triangles as the "primitive" type,
-			// and we have defined the vertex buffer as a triangle list
-			// (meaning that every triangle is defined by three vertices)
-			const GLenum mode = GL_TRIANGLES;
-			// We'll use 32-bit indices in this class to keep things simple
-			// (i.e. every index will be a 32 bit unsigned integer)
-			const GLenum indexType = GL_UNSIGNED_INT;
-			// It is possible to start rendering in the middle of an index buffer
-			const GLvoid* const offset = 0;
-			// We are drawing a square
-			const GLsizei primitiveCountToRender = 2;	// How many triangles will be drawn?
-			const GLsizei vertexCountPerTriangle = 3;
-			const GLsizei vertexCountToRender = primitiveCountToRender * vertexCountPerTriangle;
-			glDrawElements( mode, vertexCountToRender, indexType, offset );
-			const GLenum errorCode = glGetError();
-			assert( errorCode == GL_NO_ERROR );
-		}
+		DrawMesh( s_mesh );
 	}
 
 	// Everything has been drawn to the "back buffer", which is just an image in memory.
@@ -203,10 +208,10 @@ bool eae6320::Graphics::ShutDown()
 			}
 			s_programId = 0;
 		}
-		if ( s_vertexArrayId != 0 )
+		if ( s_mesh.gl_id != 0 )
 		{
 			const GLsizei arrayCount = 1;
-			glDeleteVertexArrays( arrayCount, &s_vertexArrayId );
+			glDeleteVertexArrays( arrayCount, &s_mesh.gl_id );
 			const GLenum errorCode = glGetError();
 			if ( errorCode != GL_NO_ERROR )
 			{
@@ -215,7 +220,7 @@ bool eae6320::Graphics::ShutDown()
 					reinterpret_cast<const char*>( gluErrorString( errorCode ) );
 				UserOutput::Print( errorMessage.str() );
 			}
-			s_vertexArrayId = 0;
+			s_mesh.gl_id = 0;
 		}
 
 		if ( wglMakeCurrent( s_deviceContext, NULL ) != FALSE )
@@ -438,11 +443,11 @@ namespace
 		// Create a vertex array object and make it active
 		{
 			const GLsizei arrayCount = 1;
-			glGenVertexArrays( arrayCount, &s_vertexArrayId );
+			glGenVertexArrays( arrayCount, &s_mesh.gl_id );
 			const GLenum errorCode = glGetError();
 			if ( errorCode == GL_NO_ERROR )
 			{
-				glBindVertexArray( s_vertexArrayId );
+				glBindVertexArray( s_mesh.gl_id );
 				const GLenum errorCode = glGetError();
 				if ( errorCode != GL_NO_ERROR )
 				{
@@ -545,6 +550,7 @@ namespace
 				vertexData[3].b = 123;
 				vertexData[3].a = 255;
 			}
+			s_mesh.num_vertices = vertexCount;
 			glBufferData( GL_ARRAY_BUFFER, vertexCount * sizeof( sVertex ), reinterpret_cast<GLvoid*>( vertexData ),
 				// Our code will only ever write to the buffer
 				GL_STATIC_DRAW );
@@ -700,7 +706,7 @@ namespace
 				indexData[4] = 1;
 				indexData[5] = 0;
 			}
-
+			s_mesh.num_triangles = triangleCount;
 			const GLsizeiptr bufferSize = triangleCount * vertexCountPerTriangle * sizeof( uint32_t );
 			glBufferData( GL_ELEMENT_ARRAY_BUFFER, bufferSize, reinterpret_cast<const GLvoid*>( indexData ),
 				// Our code will only ever write to the buffer
@@ -721,7 +727,7 @@ namespace
 
 		// Delete the buffer object
 		// (the vertex array will hold a reference to it)
-		if ( s_vertexArrayId != 0 )
+		if ( s_mesh.gl_id != 0 )
 		{
 			// Unbind the vertex array
 			// (this must be done before deleting the vertex buffer)

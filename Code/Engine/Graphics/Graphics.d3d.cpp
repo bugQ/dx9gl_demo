@@ -33,13 +33,8 @@ namespace
 		// Offset = 8
 		uint8_t b, g, r, a;	// Direct3D expects the byte layout of a color to be different from what you might expect
 	};
-	IDirect3DVertexDeclaration9* s_vertexDeclaration = NULL;
 
-	// The vertex buffer holds the data for each vertex
-	IDirect3DVertexBuffer9* s_vertexBuffer = NULL;
-	// An index buffer describes how to make triangles with the vertices
-	// (i.e. it defines the vertex connectivity)
-	IDirect3DIndexBuffer9* s_indexBuffer = NULL;
+	eae6320::Mesh s_mesh;
 
 	// The vertex shader is a program that operates on vertices.
 	// Its input comes from a C/C++ "draw call" and is:
@@ -119,6 +114,48 @@ OnError:
 	return false;
 }
 
+void eae6320::Graphics::DrawMesh( Mesh & mesh )
+{
+	// Set the vertex declaration for this mesh
+	{
+		HRESULT result = s_direct3dDevice->SetVertexDeclaration(mesh.vertex_declaration);
+		assert(SUCCEEDED(result));
+	}
+	// Bind a specific vertex buffer to the device as a data source
+	{
+		// There can be multiple streams of data feeding the display adaptor at the same time
+		const unsigned int streamIndex = 0;
+		// It's possible to start streaming data in the middle of a vertex buffer
+		const unsigned int bufferOffset = 0;
+		// The "stride" defines how large a single vertex is in the stream of data
+		const unsigned int bufferStride = sizeof(sVertex);
+		HRESULT result = s_direct3dDevice->SetStreamSource(streamIndex, mesh.vertex_buffer, bufferOffset, bufferStride);
+		assert(SUCCEEDED(result));
+	}
+	// Bind a specific index buffer to the device as a data source
+	{
+		HRESULT result = s_direct3dDevice->SetIndices(mesh.index_buffer);
+		assert(SUCCEEDED(result));
+	}
+	// Render objects from the current streams
+	{
+		// We are using triangles as the "primitive" type,
+		// and we have defined the vertex buffer as a triangle list
+		// (meaning that every triangle is defined by three vertices)
+		const D3DPRIMITIVETYPE primitiveType = D3DPT_TRIANGLELIST;
+		// It's possible to start rendering primitives in the middle of the stream
+		const unsigned int indexOfFirstVertexToRender = 0;
+		const unsigned int indexOfFirstIndexToUse = 0;
+		// We are drawing a square
+		const unsigned int vertexCountToRender = mesh.num_vertices;	// How vertices from the vertex buffer will be used?
+		const unsigned int primitiveCountToRender = mesh.num_triangles;	// How many triangles will be drawn?
+		HRESULT result = s_direct3dDevice->DrawIndexedPrimitive(primitiveType,
+			indexOfFirstVertexToRender, indexOfFirstVertexToRender, vertexCountToRender,
+			indexOfFirstIndexToUse, primitiveCountToRender);
+		assert(SUCCEEDED(result));
+	}
+}
+
 void eae6320::Graphics::Render()
 {
 	// Every frame an entirely new image will be created.
@@ -153,39 +190,8 @@ void eae6320::Graphics::Render()
 				result = s_direct3dDevice->SetPixelShader( s_fragmentShader );
 				assert( SUCCEEDED( result ) );
 			}
-			// Bind a specific vertex buffer to the device as a data source
-			{
-				// There can be multiple streams of data feeding the display adaptor at the same time
-				const unsigned int streamIndex = 0;
-				// It's possible to start streaming data in the middle of a vertex buffer
-				const unsigned int bufferOffset = 0;
-				// The "stride" defines how large a single vertex is in the stream of data
-				const unsigned int bufferStride = sizeof( sVertex );
-				result = s_direct3dDevice->SetStreamSource( streamIndex, s_vertexBuffer, bufferOffset, bufferStride );
-				assert( SUCCEEDED( result ) );
-			}
-			// Bind a specific index buffer to the device as a data source
-			{
-				result = s_direct3dDevice->SetIndices( s_indexBuffer );
-				assert( SUCCEEDED( result ) );
-			}
-			// Render objects from the current streams
-			{
-				// We are using triangles as the "primitive" type,
-				// and we have defined the vertex buffer as a triangle list
-				// (meaning that every triangle is defined by three vertices)
-				const D3DPRIMITIVETYPE primitiveType = D3DPT_TRIANGLELIST;
-				// It's possible to start rendering primitives in the middle of the stream
-				const unsigned int indexOfFirstVertexToRender = 0;
-				const unsigned int indexOfFirstIndexToUse = 0;
-				// We are drawing a square
-				const unsigned int vertexCountToRender = 4;	// How vertices from the vertex buffer will be used?
-				const unsigned int primitiveCountToRender = 2;	// How many triangles will be drawn?
-				result = s_direct3dDevice->DrawIndexedPrimitive( primitiveType,
-					indexOfFirstVertexToRender, indexOfFirstVertexToRender, vertexCountToRender,
-					indexOfFirstIndexToUse, primitiveCountToRender );
-				assert( SUCCEEDED( result ) );
-			}
+
+			DrawMesh( s_mesh );
 		}
 		result = s_direct3dDevice->EndScene();
 		assert( SUCCEEDED( result ) );
@@ -223,21 +229,21 @@ bool eae6320::Graphics::ShutDown()
 				s_fragmentShader = NULL;
 			}
 
-			if ( s_vertexBuffer )
+			if ( s_mesh.vertex_buffer )
 			{
-				s_vertexBuffer->Release();
-				s_vertexBuffer = NULL;
+				s_mesh.vertex_buffer->Release();
+				s_mesh.vertex_buffer = NULL;
 			}
-			if ( s_indexBuffer )
+			if ( s_mesh.index_buffer )
 			{
-				s_indexBuffer->Release();
-				s_indexBuffer = NULL;
+				s_mesh.index_buffer->Release();
+				s_mesh.index_buffer = NULL;
 			}
-			if ( s_vertexDeclaration )
+			if ( s_mesh.vertex_declaration )
 			{
 				s_direct3dDevice->SetVertexDeclaration( NULL );
-				s_vertexDeclaration->Release();
-				s_vertexDeclaration = NULL;
+				s_mesh.vertex_declaration->Release();
+				s_mesh.vertex_declaration = NULL;
 			}
 
 			s_direct3dDevice->Release();
@@ -319,8 +325,9 @@ namespace
 			// Place the index buffer into memory that Direct3D thinks is the most appropriate
 			const D3DPOOL useDefaultPool = D3DPOOL_DEFAULT;
 			HANDLE* notUsed = NULL;
+			s_mesh.num_triangles = triangleCount;
 			const HRESULT result = s_direct3dDevice->CreateIndexBuffer( bufferSize, usage, format, useDefaultPool,
-				&s_indexBuffer, notUsed );
+				&s_mesh.index_buffer, notUsed );
 			if ( FAILED( result ) )
 			{
 				eae6320::UserOutput::Print( "Direct3D failed to create an index buffer" );
@@ -334,7 +341,7 @@ namespace
 			{
 				const unsigned int lockEntireBuffer = 0;
 				const DWORD useDefaultLockingBehavior = 0;
-				const HRESULT result = s_indexBuffer->Lock( lockEntireBuffer, lockEntireBuffer,
+				const HRESULT result = s_mesh.index_buffer->Lock( lockEntireBuffer, lockEntireBuffer,
 					reinterpret_cast<void**>( &indexData ), useDefaultLockingBehavior );
 				if ( FAILED( result ) )
 				{
@@ -364,7 +371,7 @@ namespace
 			}
 			// The buffer must be "unlocked" before it can be used
 			{
-				const HRESULT result = s_indexBuffer->Unlock();
+				const HRESULT result = s_mesh.index_buffer->Unlock();
 				if ( FAILED( result ) )
 				{
 					eae6320::UserOutput::Print( "Direct3D failed to unlock the index buffer" );
@@ -432,17 +439,8 @@ namespace
 				// The following marker signals the end of the vertex declaration
 				D3DDECL_END()
 			};
-			HRESULT result = s_direct3dDevice->CreateVertexDeclaration( vertexElements, &s_vertexDeclaration );
-			if ( SUCCEEDED( result ) )
-			{
-				result = s_direct3dDevice->SetVertexDeclaration( s_vertexDeclaration );
-				if ( FAILED( result ) )
-				{
-					eae6320::UserOutput::Print( "Direct3D failed to set the vertex declaration" );
-					return false;
-				}
-			}
-			else
+			HRESULT result = s_direct3dDevice->CreateVertexDeclaration( vertexElements, &s_mesh.vertex_declaration);
+			if ( ! SUCCEEDED( result ) )
 			{
 				eae6320::UserOutput::Print( "Direct3D failed to create a Direct3D9 vertex declaration" );
 				return false;
@@ -459,8 +457,9 @@ namespace
 			// Place the vertex buffer into memory that Direct3D thinks is the most appropriate
 			const D3DPOOL useDefaultPool = D3DPOOL_DEFAULT;
 			HANDLE* const notUsed = NULL;
+			s_mesh.num_vertices = vertexCount;
 			const HRESULT result = s_direct3dDevice->CreateVertexBuffer( bufferSize, usage, useSeparateVertexDeclaration, useDefaultPool,
-				&s_vertexBuffer, notUsed );
+				&s_mesh.vertex_buffer, notUsed );
 			if ( FAILED( result ) )
 			{
 				eae6320::UserOutput::Print( "Direct3D failed to create a vertex buffer" );
@@ -474,7 +473,7 @@ namespace
 			{
 				const unsigned int lockEntireBuffer = 0;
 				const DWORD useDefaultLockingBehavior = 0;
-				const HRESULT result = s_vertexBuffer->Lock( lockEntireBuffer, lockEntireBuffer,
+				const HRESULT result = s_mesh.vertex_buffer->Lock( lockEntireBuffer, lockEntireBuffer,
 					reinterpret_cast<void**>( &vertexData ), useDefaultLockingBehavior );
 				if ( FAILED( result ) )
 				{
@@ -530,7 +529,7 @@ namespace
 			}
 			// The buffer must be "unlocked" before it can be used
 			{
-				const HRESULT result = s_vertexBuffer->Unlock();
+				const HRESULT result = s_mesh.vertex_buffer->Unlock();
 				if ( FAILED( result ) )
 				{
 					eae6320::UserOutput::Print( "Direct3D failed to unlock the vertex buffer" );
