@@ -23,5 +23,7 @@ namespace eae6320
 		IDirect3DIndexBuffer9 * index_buffer;
 		IDirect3DVertexDeclaration9 * vertex_declaration;
 #endif
+
+		static Mesh * FromLua(const char * path);
 	};
 }
