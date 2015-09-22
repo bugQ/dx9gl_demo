@@ -563,15 +563,19 @@ namespace
 		// Load the source code from file and compile it
 		ID3DXBuffer* compiledShader;
 		{
-			const char* sourceCodeFileName = "data/fragmentShader.hlsl";
-			const D3DXMACRO* noMacros = NULL;
-			ID3DXInclude* noIncludes = NULL;
+			const char* sourceCodeFileName = "data/fragment.shd";
+			const D3DXMACRO macros[] =
+			{
+				{ "EAE6320_PLATFORM_D3D", "1" },
+				{ NULL, NULL }
+			};
+			ID3DXInclude* includes = NULL;
 			const char* entryPoint = "main";
 			const char* profile = "ps_3_0";
 			const DWORD noFlags = 0;
 			ID3DXBuffer* errorMessages = NULL;
 			ID3DXConstantTable** noConstants = NULL;
-			HRESULT result = D3DXCompileShaderFromFile( sourceCodeFileName, noMacros, noIncludes, entryPoint, profile, noFlags,
+			HRESULT result = D3DXCompileShaderFromFile( sourceCodeFileName, macros, includes, entryPoint, profile, noFlags,
 				&compiledShader, &errorMessages, noConstants );
 			if ( SUCCEEDED( result ) )
 			{
@@ -619,15 +623,19 @@ namespace
 		// Load the source code from file and compile it
 		ID3DXBuffer* compiledShader;
 		{
-			const char* sourceCodeFileName = "data/vertexShader.hlsl";
-			const D3DXMACRO* noMacros = NULL;
-			ID3DXInclude* noIncludes = NULL;
+			const char* sourceCodeFileName = "data/vertex.shd";
+			const D3DXMACRO macros[] =
+			{
+				{ "EAE6320_PLATFORM_D3D", "1" },
+				{ NULL, NULL }
+			};
+			ID3DXInclude* includes = NULL;
 			const char* entryPoint = "main";
 			const char* profile = "vs_3_0";
 			const DWORD noFlags = 0;
 			ID3DXBuffer* errorMessages = NULL;
 			ID3DXConstantTable** noConstants = NULL;
-			HRESULT result = D3DXCompileShaderFromFile( sourceCodeFileName, noMacros, noIncludes, entryPoint, profile, noFlags,
+			HRESULT result = D3DXCompileShaderFromFile( sourceCodeFileName, macros, includes, entryPoint, profile, noFlags,
 				&compiledShader, &errorMessages, noConstants );
 			if ( SUCCEEDED( result ) )
 			{
@@ -658,7 +666,8 @@ namespace
 		// Create the vertex shader object
 		bool wereThereErrors = false;
 		{
-			HRESULT result = s_direct3dDevice->CreateVertexShader( reinterpret_cast<DWORD*>( compiledShader->GetBufferPointer() ),
+			const HRESULT result = s_direct3dDevice->CreateVertexShader(
+				reinterpret_cast<DWORD*>( compiledShader->GetBufferPointer() ),
 				&s_vertexShader );
 			if ( FAILED( result ) )
 			{

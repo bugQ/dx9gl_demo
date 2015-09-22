@@ -837,6 +837,9 @@ namespace
 					}
 					goto OnExit;
 				}
+
+				// Add an extra byte for a NULL terminator
+				o_size += 1;
 			}
 			// Read the file's contents into temporary memory
 			o_shader = malloc( o_size );
@@ -869,6 +872,8 @@ namespace
 				}
 				goto OnExit;
 			}
+			// Add the NULL terminator
+			reinterpret_cast<char *>(o_shader)[o_size - 1] = '\0';
 		}
 
 	OnExit:
@@ -950,9 +955,14 @@ namespace
 			}
 			// Set the source code into the shader
 			{
-				const GLsizei shaderSourceCount = 1;
-				const GLint length = static_cast<GLuint>( fileSize );
-				glShaderSource( fragmentShaderId, shaderSourceCount, reinterpret_cast<GLchar**>( &shaderSource ), &length );
+				const GLsizei shaderSourceCount = 3;
+				const GLchar* shaderSources[] =
+				{
+					"#version 330 // first line, as required by GLSL"
+					"#define EAE6320_PLATFORM_GL\n",
+					reinterpret_cast<GLchar *>(shaderSource);
+				};
+				glShaderSource( fragmentShaderId, shaderSourceCount, shaderSources, NULL );
 				const GLenum errorCode = glGetError();
 				if ( errorCode != GL_NO_ERROR )
 				{
@@ -1150,9 +1160,14 @@ namespace
 			}
 			// Set the source code into the shader
 			{
-				const GLsizei shaderSourceCount = 1;
-				const GLint length = static_cast<GLuint>( fileSize );
-				glShaderSource( vertexShaderId, shaderSourceCount, reinterpret_cast<GLchar**>( &shaderSource ), &length );
+				const GLsizei shaderSourceCount = 3;
+				const GLchar* shaderSources[] =
+				{
+					"#version 330 // first line, as required by GLSL"
+					"#define EAE6320_PLATFORM_GL\n",
+					reinterpret_cast<GLchar *>( shaderSource );
+				};
+				glShaderSource( vertexShaderId, shaderSourceCount, shaderSources, NULL );
 				const GLenum errorCode = glGetError();
 				if ( errorCode != GL_NO_ERROR )
 				{
