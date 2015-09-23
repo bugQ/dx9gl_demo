@@ -25,19 +25,6 @@ namespace
 	HDC s_deviceContext = NULL;
 	HGLRC s_openGlRenderingContext = NULL;
 
-	// This struct determines the layout of the data that the CPU will send to the GPU
-	struct sVertex
-	{
-		// POSITION
-		// 2 floats == 8 bytes
-		// Offset = 0
-		float x, y;
-		// COLOR0
-		// 4 uint8_ts == 4 bytes
-		// Offset = 8
-		uint8_t r, g, b, a;	// 8 bits [0,255] per RGBA channel (the alpha channel is unused but is present so that color uses a full 4 bytes)
-	};
-
 	// A vertex array encapsulates both the vertex and index data as well as the vertex format
 	eae6320::Mesh s_mesh;
 
@@ -68,9 +55,11 @@ namespace
 
 namespace
 {
+	using namespace eae6320;
+
 	bool CreateProgram();
 	bool CreateRenderingContext();
-	bool CreateVertexArray();
+	bool CreateVertexArray( Mesh & mesh, Mesh::Data & data );
 	bool LoadAndAllocateShaderProgram( const char* i_path, void*& o_shader, size_t& o_size, std::string* o_errorMessage );
 	bool LoadFragmentShader( const GLuint i_programId );
 	bool LoadVertexShader( const GLuint i_programId );
@@ -109,7 +98,13 @@ bool eae6320::Graphics::Initialize( const HWND i_renderingWindow )
 	}
 
 	// Initialize the graphics objects
-	if ( !CreateVertexArray() )
+
+	Mesh::Data * data = Mesh::Data::FromFile("data/square.msh");
+	if (!data)
+	{
+		goto OnError;
+	}
+	if ( !CreateVertexArray( s_mesh, *data ) )
 	{
 		goto OnError;
 	}
@@ -434,7 +429,7 @@ namespace
 		return true;
 	}
 
-	bool CreateVertexArray()
+	bool CreateVertexArray( Mesh & mesh, Mesh::Data & data )
 	{
 		bool wereThereErrors = false;
 		GLuint vertexBufferId = 0;
@@ -443,11 +438,11 @@ namespace
 		// Create a vertex array object and make it active
 		{
 			const GLsizei arrayCount = 1;
-			glGenVertexArrays( arrayCount, &s_mesh.gl_id );
+			glGenVertexArrays( arrayCount, &mesh.gl_id );
 			const GLenum errorCode = glGetError();
 			if ( errorCode == GL_NO_ERROR )
 			{
-				glBindVertexArray( s_mesh.gl_id );
+				glBindVertexArray( mesh.gl_id );
 				const GLenum errorCode = glGetError();
 				if ( errorCode != GL_NO_ERROR )
 				{
@@ -502,56 +497,9 @@ namespace
 		// Assign the data to the buffer
 		{
 			// We are drawing a square
-			const unsigned int vertexCount = 4;	// What is the minimum number of vertices a square needs (so that no data is duplicated)?
-			sVertex vertexData[vertexCount];
-			// Fill in the data for the triangle
-			{
-				// You will need to fill in two pieces of information for each vertex:
-				//	* 2 floats for the POSITION
-				//	* 4 uint8_ts for the COLOR
-
-				// The floats for POSITION are for the X and Y coordinates, like in Assignment 02.
-				// The difference this time is that there should be fewer (because we are sharing data).
-
-				// The uint8_ts for COLOR are "RGBA", where "RGB" stands for "Red Green Blue" and "A" for "Alpha".
-				// Conceptually each of these values is a [0,1] value, but we store them as an 8-bit value to save space
-				// (color doesn't need as much precision as position),
-				// which means that the data we send to the GPU will be [0,255].
-				// For now the alpha value should _always_ be 255, and so you will choose color by changing the first three RGB values.
-				// To make white you should use (255, 255, 255), to make black (0, 0, 0).
-				// To make pure red you would use the max for R and nothing for G and B, so (1, 0, 0).
-				// Experiment with other values to see what happens!
-
-				vertexData[0].x = 0.0f;
-				vertexData[0].y = 0.0f;
-				vertexData[0].r = 231;
-				vertexData[0].g = 123;
-				vertexData[0].b = 0;
-				vertexData[0].a = 255;
-
-				vertexData[1].x = 0.0f;
-				vertexData[1].y = 1.0f;
-				vertexData[1].r = 123;
-				vertexData[1].g = 0;
-				vertexData[1].b = 231;
-				vertexData[1].a = 255;
-
-				vertexData[2].x = 1.0f;
-				vertexData[2].y = 1.0f;
-				vertexData[2].r = 123;
-				vertexData[2].g = 231;
-				vertexData[2].b = 0;
-				vertexData[2].a = 255;
-
-				vertexData[3].x = 1.0f;
-				vertexData[3].y = 0.0f;
-				vertexData[3].r = 0;
-				vertexData[3].g = 231;
-				vertexData[3].b = 123;
-				vertexData[3].a = 255;
-			}
-			s_mesh.num_vertices = vertexCount;
-			glBufferData( GL_ARRAY_BUFFER, vertexCount * sizeof( sVertex ), reinterpret_cast<GLvoid*>( vertexData ),
+			s_mesh.num_vertices = data.num_vertices;
+			glBufferData( GL_ARRAY_BUFFER, data.num_vertices * sizeof(Mesh::Vertex),
+				reinterpret_cast<GLvoid*>( data.vertices ),
 				// Our code will only ever write to the buffer
 				GL_STATIC_DRAW );
 			const GLenum errorCode = glGetError();
@@ -567,7 +515,7 @@ namespace
 		}
 		// Initialize the vertex format
 		{
-			const GLsizei stride = sizeof( sVertex );
+			const GLsizei stride = sizeof( Mesh::Vertex );
 			GLvoid* offset = 0;
 
 			// Position (0)
@@ -682,33 +630,8 @@ namespace
 		}
 		// Allocate space and copy the triangle data into the index buffer
 		{
-			// We are drawing a square
-			const unsigned int triangleCount = 2;	// How many triangles does a square have?
-			const unsigned int vertexCountPerTriangle = 3;
-			uint32_t indexData[triangleCount * vertexCountPerTriangle];
-			// Fill in the data for the triangle
-			{
-				// EAE6320_TODO:
-				// You will need to fill in 3 indices for each triangle that needs to be drawn.
-				// Each index will be a 32-bit unsigned integer,
-				// and will index into the vertex buffer array that you have created.
-				// The order of indices is important, but the correct order will depend on
-				// which vertex you have assigned to which spot in your vertex buffer
-				// (also remember to maintain the correct handedness for the triangle winding order).
-
-				// Triangle 0
-				indexData[0] = 0;
-				indexData[1] = 3;
-				indexData[2] = 2;
-
-				// Triangle 1
-				indexData[3] = 2;
-				indexData[4] = 1;
-				indexData[5] = 0;
-			}
-			s_mesh.num_triangles = triangleCount;
-			const GLsizeiptr bufferSize = triangleCount * vertexCountPerTriangle * sizeof( uint32_t );
-			glBufferData( GL_ELEMENT_ARRAY_BUFFER, bufferSize, reinterpret_cast<const GLvoid*>( indexData ),
+			glBufferData( GL_ELEMENT_ARRAY_BUFFER, data.num_triangles * 3 * sizeof(Mesh::Index),
+				reinterpret_cast<const GLvoid*>( data.indices ),
 				// Our code will only ever write to the buffer
 				GL_STATIC_DRAW );
 			const GLenum errorCode = glGetError();

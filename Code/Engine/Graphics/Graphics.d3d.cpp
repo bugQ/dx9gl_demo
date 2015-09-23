@@ -21,19 +21,6 @@ namespace
 	IDirect3D9* s_direct3dInterface = NULL;
 	IDirect3DDevice9* s_direct3dDevice = NULL;
 
-	// This struct determines the layout of the data that the CPU will send to the GPU
-	struct sVertex
-	{
-		// POSITION
-		// 2 floats == 8 bytes
-		// Offset = 0
-		float x, y;
-		// COLOR0
-		// 4 uint8_ts == 4 bytes
-		// Offset = 8
-		uint8_t b, g, r, a;	// Direct3D expects the byte layout of a color to be different from what you might expect
-	};
-
 	eae6320::Mesh s_mesh;
 
 	// The vertex shader is a program that operates on vertices.
@@ -61,10 +48,12 @@ namespace
 
 namespace
 {
+	using namespace eae6320;
+
 	bool CreateDevice();
-	bool CreateIndexBuffer();
+	bool CreateIndexBuffer( Mesh & mesh, Mesh::Data & data );
 	bool CreateInterface();
-	bool CreateVertexBuffer();
+	bool CreateVertexBuffer( Mesh & mesh, Mesh::Data & data );
 	HRESULT GetVertexProcessingUsage( DWORD& o_usage );
 	bool LoadFragmentShader();
 	bool LoadVertexShader();
@@ -89,14 +78,26 @@ bool eae6320::Graphics::Initialize( const HWND i_renderingWindow )
 	}
 
 	// Initialize the graphics objects
-	if ( !CreateVertexBuffer() )
+
+	Mesh::Data * data = Mesh::Data::FromFile("data/square.msh");
+	if ( !data )
 	{
 		goto OnError;
 	}
-	if ( !CreateIndexBuffer() )
+	if ( !CreateVertexBuffer( s_mesh, *data ) )
 	{
+		delete data;
 		goto OnError;
 	}
+	if ( !CreateIndexBuffer( s_mesh, *data ) )
+	{
+		delete data;
+		goto OnError;
+	}
+
+	delete data;
+	data = NULL;
+
 	if ( !LoadVertexShader() )
 	{
 		goto OnError;
@@ -109,7 +110,6 @@ bool eae6320::Graphics::Initialize( const HWND i_renderingWindow )
 	return true;
 
 OnError:
-
 	ShutDown();
 	return false;
 }
@@ -128,7 +128,7 @@ void eae6320::Graphics::DrawMesh( Mesh & mesh )
 		// It's possible to start streaming data in the middle of a vertex buffer
 		const unsigned int bufferOffset = 0;
 		// The "stride" defines how large a single vertex is in the stream of data
-		const unsigned int bufferStride = sizeof(sVertex);
+		const unsigned int bufferStride = sizeof(Mesh::Vertex);
 		HRESULT result = s_direct3dDevice->SetStreamSource(streamIndex, mesh.vertex_buffer, bufferOffset, bufferStride);
 		assert(SUCCEEDED(result));
 	}
@@ -297,7 +297,7 @@ namespace
 		}
 	}
 
-	bool CreateIndexBuffer()
+	bool CreateIndexBuffer( Mesh & mesh, Mesh::Data & data )
 	{
 		// The usage tells Direct3D how this vertex buffer will be used
 		DWORD usage = 0;
@@ -312,22 +312,18 @@ namespace
 			usage |= D3DUSAGE_WRITEONLY;
 		}
 
+		const unsigned int bufferSize = sizeof(Mesh::Index) * data.num_triangles * 3;
 		// Create an index buffer
-		unsigned int bufferSize;
 		{
-			// We are drawing a square
-			const unsigned int triangleCount = 2;	// How many triangles does a square have?
-			const unsigned int vertexCountPerTriangle = 3;
-			bufferSize = triangleCount * vertexCountPerTriangle * sizeof( uint32_t );
+			mesh.num_triangles = data.num_triangles;
 			// We'll use 32-bit indices in this class to keep things simple
 			// (i.e. every index will be a 32 bit unsigned integer)
 			const D3DFORMAT format = D3DFMT_INDEX32;
 			// Place the index buffer into memory that Direct3D thinks is the most appropriate
 			const D3DPOOL useDefaultPool = D3DPOOL_DEFAULT;
 			HANDLE* notUsed = NULL;
-			s_mesh.num_triangles = triangleCount;
-			const HRESULT result = s_direct3dDevice->CreateIndexBuffer( bufferSize, usage, format, useDefaultPool,
-				&s_mesh.index_buffer, notUsed );
+			const HRESULT result = s_direct3dDevice->CreateIndexBuffer( bufferSize,
+				usage, format, useDefaultPool, &mesh.index_buffer, notUsed );
 			if ( FAILED( result ) )
 			{
 				eae6320::UserOutput::Print( "Direct3D failed to create an index buffer" );
@@ -341,7 +337,7 @@ namespace
 			{
 				const unsigned int lockEntireBuffer = 0;
 				const DWORD useDefaultLockingBehavior = 0;
-				const HRESULT result = s_mesh.index_buffer->Lock( lockEntireBuffer, lockEntireBuffer,
+				const HRESULT result = mesh.index_buffer->Lock( lockEntireBuffer, bufferSize,
 					reinterpret_cast<void**>( &indexData ), useDefaultLockingBehavior );
 				if ( FAILED( result ) )
 				{
@@ -351,27 +347,16 @@ namespace
 			}
 			// Fill the buffer
 			{
-				// EAE6320_TODO:
-				// You will need to fill in 3 indices for each triangle that needs to be drawn.
-				// Each index will be a 32-bit unsigned integer,
-				// and will index into the vertex buffer array that you have created.
-				// The order of indices is important, but the correct order will depend on
-				// which vertex you have assigned to which spot in your vertex buffer
-				// (also remember to maintain the correct handedness for the triangle winding order).
+				for (unsigned int i = 0; i < data.num_triangles; ++i) {
+					indexData[i * 3] = data.indices[i * 3];
+					indexData[i * 3 + 1] = data.indices[i * 3 + 2];
+					indexData[i * 3 + 2] = data.indices[i * 3 + 1];
+				}
 
-				// Triangle 0
-				indexData[0] = 0;
-				indexData[1] = 1;
-				indexData[2] = 2;
-
-				// Triangle 1
-				indexData[3] = 2;
-				indexData[4] = 3;
-				indexData[5] = 0;
 			}
 			// The buffer must be "unlocked" before it can be used
 			{
-				const HRESULT result = s_mesh.index_buffer->Unlock();
+				const HRESULT result = mesh.index_buffer->Unlock();
 				if ( FAILED( result ) )
 				{
 					eae6320::UserOutput::Print( "Direct3D failed to unlock the index buffer" );
@@ -399,7 +384,7 @@ namespace
 		}
 	}
 
-	bool CreateVertexBuffer()
+	bool CreateVertexBuffer( Mesh & mesh, Mesh::Data & data )
 	{
 		// The usage tells Direct3D how this vertex buffer will be used
 		DWORD usage = 0;
@@ -439,7 +424,7 @@ namespace
 				// The following marker signals the end of the vertex declaration
 				D3DDECL_END()
 			};
-			HRESULT result = s_direct3dDevice->CreateVertexDeclaration( vertexElements, &s_mesh.vertex_declaration);
+			HRESULT result = s_direct3dDevice->CreateVertexDeclaration( vertexElements, &mesh.vertex_declaration);
 			if ( ! SUCCEEDED( result ) )
 			{
 				eae6320::UserOutput::Print( "Direct3D failed to create a Direct3D9 vertex declaration" );
@@ -447,19 +432,17 @@ namespace
 			}
 		}
 
+		const unsigned int bufferSize = sizeof(Mesh::Vertex) * data.num_vertices;
 		// Create a vertex buffer
 		{
-			// We are drawing one square
-			const unsigned int vertexCount = 4;	// What is the minimum number of vertices a square needs (so that no data is duplicated)?
-			const unsigned int bufferSize = vertexCount * sizeof( sVertex );
+			mesh.num_vertices = data.num_vertices;
 			// We will define our own vertex format
 			const DWORD useSeparateVertexDeclaration = 0;
 			// Place the vertex buffer into memory that Direct3D thinks is the most appropriate
 			const D3DPOOL useDefaultPool = D3DPOOL_DEFAULT;
 			HANDLE* const notUsed = NULL;
-			s_mesh.num_vertices = vertexCount;
-			const HRESULT result = s_direct3dDevice->CreateVertexBuffer( bufferSize, usage, useSeparateVertexDeclaration, useDefaultPool,
-				&s_mesh.vertex_buffer, notUsed );
+			const HRESULT result = s_direct3dDevice->CreateVertexBuffer( bufferSize,
+				usage, useSeparateVertexDeclaration, useDefaultPool, &mesh.vertex_buffer, notUsed );
 			if ( FAILED( result ) )
 			{
 				eae6320::UserOutput::Print( "Direct3D failed to create a vertex buffer" );
@@ -469,11 +452,11 @@ namespace
 		// Fill the vertex buffer with the triangle's vertices
 		{
 			// Before the vertex buffer can be changed it must be "locked"
-			sVertex* vertexData;
+			Mesh::Vertex * vertexData;
 			{
 				const unsigned int lockEntireBuffer = 0;
 				const DWORD useDefaultLockingBehavior = 0;
-				const HRESULT result = s_mesh.vertex_buffer->Lock( lockEntireBuffer, lockEntireBuffer,
+				const HRESULT result = mesh.vertex_buffer->Lock( lockEntireBuffer, bufferSize,
 					reinterpret_cast<void**>( &vertexData ), useDefaultLockingBehavior );
 				if ( FAILED( result ) )
 				{
@@ -483,53 +466,12 @@ namespace
 			}
 			// Fill the buffer
 			{
-				// You will need to fill in two pieces of information for each vertex:
-				//	* 2 floats for the POSITION
-				//	* 4 uint8_ts for the COLOR
-
-				// The floats for POSITION are for the X and Y coordinates, like in Assignment 02.
-				// The difference this time is that there should be fewer (because we are sharing data).
-				
-				// The uint8_ts for COLOR are "RGBA", where "RGB" stands for "Red Green Blue" and "A" for "Alpha".
-				// Conceptually each of these values is a [0,1] value, but we store them as an 8-bit value to save space
-				// (color doesn't need as much precision as position),
-				// which means that the data we send to the GPU will be [0,255].
-				// For now the alpha value should _always_ be 255, and so you will choose color by changing the first three RGB values.
-				// To make white you should use (255, 255, 255), to make black (0, 0, 0).
-				// To make pure red you would use the max for R and nothing for G and B, so (1, 0, 0).
-				// Experiment with other values to see what happens!
-
-				vertexData[0].x = 0.0f;
-				vertexData[0].y = 0.0f;
-				vertexData[0].r = 231;
-				vertexData[0].g = 123;
-				vertexData[0].b = 0;
-				vertexData[0].a = 255;
-
-				vertexData[1].x = 0.0f;
-				vertexData[1].y = 1.0f;
-				vertexData[1].r = 123;
-				vertexData[1].g = 0;
-				vertexData[1].b = 231;
-				vertexData[1].a = 255;
-
-				vertexData[2].x = 1.0f;
-				vertexData[2].y = 1.0f;
-				vertexData[2].r = 123;
-				vertexData[2].g = 231;
-				vertexData[2].b = 0;
-				vertexData[2].a = 255;
-
-				vertexData[3].x = 1.0f;
-				vertexData[3].y = 0.0f;
-				vertexData[3].r = 0;
-				vertexData[3].g = 231;
-				vertexData[3].b = 123;
-				vertexData[3].a = 255;
+				for (unsigned int i = 0; i < data.num_vertices; ++i)
+					vertexData[i] = data.vertices[i];
 			}
 			// The buffer must be "unlocked" before it can be used
 			{
-				const HRESULT result = s_mesh.vertex_buffer->Unlock();
+				const HRESULT result = mesh.vertex_buffer->Unlock();
 				if ( FAILED( result ) )
 				{
 					eae6320::UserOutput::Print( "Direct3D failed to unlock the vertex buffer" );

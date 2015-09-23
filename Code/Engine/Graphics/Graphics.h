@@ -20,6 +20,7 @@ namespace eae6320
 	{
 		bool Initialize( const HWND i_renderingWindow );
 		void DrawMesh( Mesh & mesh );
+		Mesh LoadMesh( Mesh::Data & data );
 		void Render();
 		bool ShutDown();
 	}
