@@ -768,6 +768,9 @@ namespace
 					}
 					goto OnExit;
 				}
+
+				// Add an extra byte for a NULL terminator
+				o_size += 1;
 			}
 			// Read the file's contents into temporary memory
 			o_shader = malloc( o_size );
@@ -800,6 +803,8 @@ namespace
 				}
 				goto OnExit;
 			}
+			// Add the NULL terminator
+			reinterpret_cast<char *>(o_shader)[o_size - 1] = '\0';
 		}
 
 	OnExit:
@@ -893,7 +898,7 @@ namespace
 					static_cast<GLint>(strlen(shaderSources[0])),
 					static_cast<GLint>(fileSize)
 				};
-				glShaderSource( fragmentShaderId, shaderSourceCount, shaderSources, shaderSourceLengths );
+				glShaderSource( fragmentShaderId, shaderSourceCount, shaderSources, NULL );
 				const GLenum errorCode = glGetError();
 				if ( errorCode != GL_NO_ERROR )
 				{
@@ -1103,7 +1108,7 @@ namespace
 					static_cast<GLint>(strlen(shaderSources[0])),
 					static_cast<GLint>(fileSize)
 				};
-				glShaderSource( vertexShaderId, shaderSourceCount, shaderSources, shaderSourceLengths );
+				glShaderSource( vertexShaderId, shaderSourceCount, shaderSources, NULL );
 				const GLenum errorCode = glGetError();
 				if ( errorCode != GL_NO_ERROR )
 				{
