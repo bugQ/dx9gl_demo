@@ -25,6 +25,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Engine", "Engine", "{1AE00594-D85F-4A0B-ADE8-D241FDE887BB}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Graphics", "Code\Engine\Graphics\Graphics.vcxproj", "{1DBC6E80-4EB5-4390-8821-6C56520AD603}"
+	ProjectSection(ProjectDependencies) = postProject
+		{45CDCFF0-7F57-457F-9706-C3C15E7EA597} = {45CDCFF0-7F57-457F-9706-C3C15E7EA597}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{0019D984-9784-48C1-9D80-6736CB474CCB}"
 EndProject
