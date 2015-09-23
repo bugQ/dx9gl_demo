@@ -99,7 +99,7 @@ bool eae6320::Graphics::Initialize( const HWND i_renderingWindow )
 
 	// Initialize the graphics objects
 
-	Mesh::Data * data = Mesh::Data::FromFile("data/square.msh");
+	Mesh::Data * data = Mesh::Data::FromFile("data\\square.msh");
 	if (!data)
 	{
 		goto OnError;
@@ -222,15 +222,17 @@ bool eae6320::Graphics::ShutDown()
 		{
 			if ( wglDeleteContext( s_openGlRenderingContext ) == FALSE )
 			{
+				std::string err = GetLastWindowsError();
 				std::stringstream errorMessage;
-				errorMessage << "Windows failed to delete the OpenGL rendering context: " << GetLastWindowsError();
+				errorMessage << "Windows failed to delete the OpenGL rendering context: " << err;
 				UserOutput::Print( errorMessage.str() );
 			}
 		}
 		else
 		{
+			std::string err = GetLastWindowsError();
 			std::stringstream errorMessage;
-			errorMessage << "Windows failed to unset the current OpenGL rendering context: " << GetLastWindowsError();
+			errorMessage << "Windows failed to unset the current OpenGL rendering context: " << err;
 			UserOutput::Print( errorMessage.str() );
 		}
 		s_openGlRenderingContext = NULL;
@@ -392,8 +394,9 @@ namespace
 					pixelFormatId = ChoosePixelFormat( s_deviceContext, &desiredPixelFormat );
 					if ( pixelFormatId == 0 )
 					{
+						std::string err = eae6320::GetLastWindowsError();
 						std::stringstream errorMessage;
-						errorMessage << "Windows couldn't choose the closest pixel format: " << eae6320::GetLastWindowsError();
+						errorMessage << "Windows couldn't choose the closest pixel format: " << err;
 						eae6320::UserOutput::Print( errorMessage.str() );
 						return false;
 					}
@@ -401,8 +404,9 @@ namespace
 				// Set it
 				if ( SetPixelFormat( s_deviceContext, pixelFormatId, &desiredPixelFormat ) == FALSE )
 				{
+					std::string err = eae6320::GetLastWindowsError();
 					std::stringstream errorMessage;
-					errorMessage << "Windows couldn't set the desired pixel format: " << eae6320::GetLastWindowsError();
+					errorMessage << "Windows couldn't set the desired pixel format: " << err;
 					eae6320::UserOutput::Print( errorMessage.str() );
 					return false;
 				}
@@ -411,16 +415,18 @@ namespace
 			s_openGlRenderingContext = wglCreateContext( s_deviceContext );
 			if ( s_openGlRenderingContext == NULL )
 			{
+				std::string err = eae6320::GetLastWindowsError();
 				std::stringstream errorMessage;
-				errorMessage << "Windows failed to create an OpenGL rendering context: " << eae6320::GetLastWindowsError();
+				errorMessage << "Windows failed to create an OpenGL rendering context: " << err;
 				eae6320::UserOutput::Print( errorMessage.str() );
 				return false;
 			}
 			// Set it as the rendering context of this thread
 			if ( wglMakeCurrent( s_deviceContext, s_openGlRenderingContext ) == FALSE )
 			{
+				std::string err = eae6320::GetLastWindowsError();
 				std::stringstream errorMessage;
-				errorMessage << "Windows failed to set the current OpenGL rendering context: " << eae6320::GetLastWindowsError();
+				errorMessage << "Windows failed to set the current OpenGL rendering context: " << err;
 				eae6320::UserOutput::Print( errorMessage.str() );
 				return false;
 			}
@@ -496,9 +502,8 @@ namespace
 		}
 		// Assign the data to the buffer
 		{
-			// We are drawing a square
 			s_mesh.num_vertices = data.num_vertices;
-			glBufferData( GL_ARRAY_BUFFER, data.num_vertices * sizeof(Mesh::Vertex),
+			glBufferData( GL_ARRAY_BUFFER, data.num_vertices * alignof(Mesh::Vertex),
 				reinterpret_cast<GLvoid*>( data.vertices ),
 				// Our code will only ever write to the buffer
 				GL_STATIC_DRAW );
@@ -630,7 +635,7 @@ namespace
 		}
 		// Allocate space and copy the triangle data into the index buffer
 		{
-			glBufferData( GL_ELEMENT_ARRAY_BUFFER, data.num_triangles * 3 * sizeof(Mesh::Index),
+			glBufferData( GL_ELEMENT_ARRAY_BUFFER, data.num_triangles * 3 * alignof(Mesh::Index),
 				reinterpret_cast<const GLvoid*>( data.indices ),
 				// Our code will only ever write to the buffer
 				GL_STATIC_DRAW );
@@ -732,9 +737,9 @@ namespace
 					wereThereErrors = true;
 					if ( o_errorMessage )
 					{
+						std::string err = eae6320::GetLastWindowsError();
 						std::stringstream errorMessage;
-						errorMessage << "Windows failed to open the shader file: " <<
-							eae6320::GetLastWindowsError();
+						errorMessage << "Windows failed to open the shader file " << i_path << ": " << err ;
 						*o_errorMessage = errorMessage.str();
 					}
 					goto OnExit;
@@ -753,16 +758,13 @@ namespace
 					wereThereErrors = true;
 					if ( o_errorMessage )
 					{
+						std::string err = eae6320::GetLastWindowsError();
 						std::stringstream errorMessage;
-						errorMessage << "Windows failed to get the size of shader: " <<
-							eae6320::GetLastWindowsError();
+						errorMessage << "Windows failed to get the size of shader: " << err;
 						*o_errorMessage = errorMessage.str();
 					}
 					goto OnExit;
 				}
-
-				// Add an extra byte for a NULL terminator
-				o_size += 1;
 			}
 			// Read the file's contents into temporary memory
 			o_shader = malloc( o_size );
@@ -776,9 +778,9 @@ namespace
 					wereThereErrors = true;
 					if ( o_errorMessage )
 					{
+						std::string err = eae6320::GetLastWindowsError();
 						std::stringstream errorMessage;
-						errorMessage << "Windows failed to read the contents of shader: " <<
-							eae6320::GetLastWindowsError();
+						errorMessage << "Windows failed to read the contents of shader: " << err;
 						*o_errorMessage = errorMessage.str();
 					}
 					goto OnExit;
@@ -795,8 +797,6 @@ namespace
 				}
 				goto OnExit;
 			}
-			// Add the NULL terminator
-			reinterpret_cast<char *>(o_shader)[o_size - 1] = '\0';
 		}
 
 	OnExit:
@@ -812,9 +812,9 @@ namespace
 			{
 				if ( !wereThereErrors && o_errorMessage )
 				{
+					std::string err = eae6320::GetLastWindowsError();
 					std::stringstream errorMessage;
-					errorMessage << "Windows failed to close the shader file handle: " <<
-						eae6320::GetLastWindowsError();
+					errorMessage << "Windows failed to close the shader file handle: " << err;
 					*o_errorMessage = errorMessage.str();
 				}
 				wereThereErrors = true;
@@ -847,7 +847,7 @@ namespace
 			// Load the shader source code
 			size_t fileSize;
 			{
-				const char* sourceCodeFileName = "data/fragmentShader.glsl";
+				const char* sourceCodeFileName = "data/fragment.shd";
 				std::string errorMessage;
 				if ( !LoadAndAllocateShaderProgram( sourceCodeFileName, shaderSource, fileSize, &errorMessage ) )
 				{
@@ -878,14 +878,19 @@ namespace
 			}
 			// Set the source code into the shader
 			{
-				const GLsizei shaderSourceCount = 3;
-				const GLchar* shaderSources[] =
+				const GLsizei shaderSourceCount = 2;
+				const GLchar* shaderSources[shaderSourceCount] =
 				{
-					"#version 330 // first line, as required by GLSL"
+					"#version 330 // first line, as required by GLSL\n"
 					"#define EAE6320_PLATFORM_GL\n",
-					reinterpret_cast<GLchar *>(shaderSource);
+					reinterpret_cast<GLchar *>(shaderSource)
 				};
-				glShaderSource( fragmentShaderId, shaderSourceCount, shaderSources, NULL );
+				const GLint shaderSourceLengths[shaderSourceCount] =
+				{
+					static_cast<GLint>(strlen(shaderSources[0])),
+					static_cast<GLint>(fileSize)
+				};
+				glShaderSource( fragmentShaderId, shaderSourceCount, shaderSources, shaderSourceLengths );
 				const GLenum errorCode = glGetError();
 				if ( errorCode != GL_NO_ERROR )
 				{
@@ -1051,7 +1056,7 @@ namespace
 			// Load the shader source code
 			size_t fileSize;
 			{
-				const char* sourceCodeFileName = "data/vertexShader.glsl";
+				const char* sourceCodeFileName = "data/vertex.shd";
 				std::string errorMessage;
 				if ( !LoadAndAllocateShaderProgram( sourceCodeFileName, shaderSource, fileSize, &errorMessage ) )
 				{
@@ -1083,14 +1088,19 @@ namespace
 			}
 			// Set the source code into the shader
 			{
-				const GLsizei shaderSourceCount = 3;
-				const GLchar* shaderSources[] =
+				const GLsizei shaderSourceCount = 2;
+				const GLchar* shaderSources[shaderSourceCount] =
 				{
-					"#version 330 // first line, as required by GLSL"
+					"#version 330 // first line, as required by GLSL\n"
 					"#define EAE6320_PLATFORM_GL\n",
-					reinterpret_cast<GLchar *>( shaderSource );
+					reinterpret_cast<GLchar *>( shaderSource )
 				};
-				glShaderSource( vertexShaderId, shaderSourceCount, shaderSources, NULL );
+				const GLint shaderSourceLengths[shaderSourceCount] =
+				{
+					static_cast<GLint>(strlen(shaderSources[0])),
+					static_cast<GLint>(fileSize)
+				};
+				glShaderSource( vertexShaderId, shaderSourceCount, shaderSources, shaderSourceLengths );
 				const GLenum errorCode = glGetError();
 				if ( errorCode != GL_NO_ERROR )
 				{

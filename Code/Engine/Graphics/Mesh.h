@@ -1,6 +1,10 @@
 #pragma once
 
 #if defined ( EAE6320_PLATFORM_GL )
+#if defined ( _WIN32 )
+// <windows.h> must be #included before <gl/GL.h>
+#include "Windows/WindowsIncludes.h"
+#endif
 #include <gl/GL.h>
 #elif defined ( EAE6320_PLATFORM_D3D )
 #include <d3d9.h>

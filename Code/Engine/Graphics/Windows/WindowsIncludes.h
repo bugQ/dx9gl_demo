@@ -11,8 +11,8 @@
 // Prevent Windows from creating min/max macros
 #define NOMINMAX
 
-	// Initialize Windows
-	#include <Windows.h>
+// Initialize Windows
+#include <Windows.h>
 
 #undef NOMINMAX
 #undef WIN32_LEAN_AND_MEAN
