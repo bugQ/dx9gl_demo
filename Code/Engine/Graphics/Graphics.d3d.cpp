@@ -94,9 +94,7 @@ bool eae6320::Graphics::Initialize( const HWND i_renderingWindow )
 		delete data;
 		goto OnError;
 	}
-
 	delete data;
-	data = NULL;
 
 	if ( !LoadVertexShader() )
 	{

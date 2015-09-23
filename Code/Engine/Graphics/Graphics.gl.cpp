@@ -106,8 +106,11 @@ bool eae6320::Graphics::Initialize( const HWND i_renderingWindow )
 	}
 	if ( !CreateVertexArray( s_mesh, *data ) )
 	{
+		delete data;
 		goto OnError;
 	}
+	delete data;
+
 	if ( !CreateProgram() )
 	{
 		goto OnError;
