@@ -12,13 +12,7 @@ namespace eae6320
 {
 	namespace AssetBuilder
 	{
-		bool BuildAsset( const char* const i_relativePath );
-
-		// Initialization / Shutdown
-		//--------------------------
-
-		bool Initialize();
-		bool ShutDown();
+		bool BuildAssets();
 	}
 }
 

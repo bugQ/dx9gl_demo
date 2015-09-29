@@ -9,7 +9,7 @@
 //=============
 
 // <windows.h> must be #included before <gl/GL.h>
-#include "../Windows/WindowsIncludes.h"
+#include "../../Windows/WindowsIncludes.h"
 #include <gl/GL.h>
 
 // The two extension headers come from https://www.opengl.org/registry/

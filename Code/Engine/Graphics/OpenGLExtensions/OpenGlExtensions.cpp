@@ -6,7 +6,7 @@
 #include "OpenGlExtensions.h"
 
 #include <sstream>
-#include "../Windows/WindowsFunctions.h"
+#include "../../Windows/WindowsFunctions.h"
 
 // Helper Function Declarations
 //=============================
