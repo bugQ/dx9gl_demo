@@ -4,9 +4,6 @@
     <Filter Include="Resources">
       <UniqueIdentifier>{e0328041-b8dd-4cef-ba85-273b31debd92}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Windows">
-      <UniqueIdentifier>{a1c2b0df-688a-4a9b-9e8c-c1d92821701e}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resources\Game.rc">
@@ -29,18 +26,9 @@
       <Filter>Resources</Filter>
     </ClInclude>
     <ClInclude Include="WindowsProgram.h" />
-    <ClInclude Include="Windows\WindowsFunctions.h">
-      <Filter>Windows</Filter>
-    </ClInclude>
-    <ClInclude Include="Windows\WindowsIncludes.h">
-      <Filter>Windows</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EntryPoint.cpp" />
     <ClCompile Include="WindowsProgram.cpp" />
-    <ClCompile Include="Windows\WindowsFunctions.cpp">
-      <Filter>Windows</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>

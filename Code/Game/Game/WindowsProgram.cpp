@@ -12,7 +12,7 @@
 #include "Resources/Resource.h"
 // WindowsFunctions.h contains convenience functionality for Windows features;
 // in this example program we just use it to get error messages
-#include "Windows/WindowsFunctions.h"
+#include "../../Engine/Windows/WindowsFunctions.h"
 
 // Graphics.h contains engine functions that perform all necessary
 // graphics API calls during gameplay

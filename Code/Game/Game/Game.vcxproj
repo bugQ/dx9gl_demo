@@ -198,13 +198,10 @@
     <ClInclude Include="Resources\Resource.h" />
     <ClInclude Include="Resources\targetver.h" />
     <ClInclude Include="WindowsProgram.h" />
-    <ClInclude Include="Windows\WindowsFunctions.h" />
-    <ClInclude Include="Windows\WindowsIncludes.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EntryPoint.cpp" />
     <ClCompile Include="WindowsProgram.cpp" />
-    <ClCompile Include="Windows\WindowsFunctions.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
