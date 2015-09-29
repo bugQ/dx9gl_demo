@@ -6,6 +6,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\Scripts\BuildAssets.lua" />
+    <None Include="..\..\..\Scripts\AssetList.lua" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssetBuilder.h" />
