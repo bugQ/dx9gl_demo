@@ -1,15 +1,17 @@
 return
 {
 	meshes = {
-		ext = 'msh',
+		srcext = 'msh', dstext = 'msh'
 		tool = 'GenericBuilder.exe',
-		{ src = "square", dst = "square" },
-		{ src = "triangle", dst = "triangle" },
+		-- mesh list proper
+		"square",
+		"triangle",
 	},
 	shaders = {
-		ext = 'shd',
+		srcext = 'shd', dstext = 'mesh'
 		tool = 'GenericBuilder.exe',
-		{ src = "vertex", dst = "vertex" },
-		{ src = "fragment", dst = "fragment" },
-	},
+		-- shader list proper
+		"vertex",
+		"fragment",
+	}
 }
