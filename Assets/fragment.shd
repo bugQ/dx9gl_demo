@@ -4,9 +4,6 @@
 
 #if defined( EAE6320_PLATFORM_GL )
 
-// The version of GLSL to use must come first
-#version 330
-
 // This extension is required in order to specify explicit locations for shader inputs and outputs
 #extension GL_ARB_separate_shader_objects : require
 
