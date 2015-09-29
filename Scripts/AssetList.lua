@@ -1,13 +1,15 @@
 return
 {
 	meshes = {
-		extension = 'msh',
-		"square",
-		"triangle",
+		ext = 'msh',
+		tool = 'GenericBuilder.exe',
+		{ src = "square", dst = "square" },
+		{ src = "triangle", dst = "triangle" },
 	},
 	shaders = {
-		extension = 'shd',
-		"vertex",
-		"fragment",
-	}
+		ext = 'shd',
+		tool = 'GenericBuilder.exe',
+		{ src = "vertex", dst = "vertex" },
+		{ src = "fragment", dst = "fragment" },
+	},
 }
