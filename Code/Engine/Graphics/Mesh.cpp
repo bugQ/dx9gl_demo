@@ -353,5 +353,4 @@ namespace eae6320
 
 		return meshData;
 	}
-	
 }

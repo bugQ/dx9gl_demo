@@ -25,8 +25,8 @@ namespace
 	HDC s_deviceContext = NULL;
 	HGLRC s_openGlRenderingContext = NULL;
 
-	// A vertex array encapsulates both the vertex and index data as well as the vertex format
-	eae6320::Mesh s_mesh;
+	eae6320::Mesh * sa_meshes;
+	unsigned int s_num_meshes;
 
 	// OpenGL encapsulates a matching vertex shader and fragment shader into what it calls a "program".
 
@@ -97,19 +97,28 @@ bool eae6320::Graphics::Initialize( const HWND i_renderingWindow )
 		}
 	}
 
-	// Initialize the graphics objects
-
-	Mesh::Data * data = Mesh::Data::FromFile("data\\square.msh");
-	if (!data)
+	// Initialize meshes
+	const unsigned int num_meshes = 2;
+	sa_meshes = new Mesh[num_meshes];
+	s_num_meshes = num_meshes;
+	const char * const meshfilenames[num_meshes] = {
+		"data/square.msh",
+		"data/triangle.msh"
+	};
+	for (unsigned int i = 0; i < s_num_meshes; ++i)
 	{
-		goto OnError;
-	}
-	if ( !CreateVertexArray( s_mesh, *data ) )
-	{
+		Mesh::Data * data = Mesh::Data::FromFile(meshfilenames[i]);
+		if (!data)
+		{
+			goto OnError;
+		}
+		if (!CreateVertexArray(sa_meshes[i], *data))
+		{
+			delete data;
+			goto OnError;
+		}
 		delete data;
-		goto OnError;
 	}
-	delete data;
 
 	if ( !CreateProgram() )
 	{
@@ -175,7 +184,9 @@ void eae6320::Graphics::Render()
 			glUseProgram( s_programId );
 			assert( glGetError() == GL_NO_ERROR );
 		}
-		DrawMesh( s_mesh );
+
+		for (unsigned int i = 0; i < s_num_meshes; ++i)
+			DrawMesh( sa_meshes[i] );
 	}
 
 	// Everything has been drawn to the "back buffer", which is just an image in memory.
@@ -206,20 +217,25 @@ bool eae6320::Graphics::ShutDown()
 			}
 			s_programId = 0;
 		}
-		if ( s_mesh.gl_id != 0 )
+
+		for (unsigned int i = 0; i < s_num_meshes; ++i)
 		{
-			const GLsizei arrayCount = 1;
-			glDeleteVertexArrays( arrayCount, &s_mesh.gl_id );
-			const GLenum errorCode = glGetError();
-			if ( errorCode != GL_NO_ERROR )
+			if (sa_meshes[i].gl_id != 0)
 			{
-				std::stringstream errorMessage;
-				errorMessage << "OpenGL failed to delete the vertex array: " <<
-					reinterpret_cast<const char*>( gluErrorString( errorCode ) );
-				UserOutput::Print( errorMessage.str() );
+				const GLsizei arrayCount = 1;
+				glDeleteVertexArrays(arrayCount, &sa_meshes[i].gl_id);
+				const GLenum errorCode = glGetError();
+				if (errorCode != GL_NO_ERROR)
+				{
+					std::stringstream errorMessage;
+					errorMessage << "OpenGL failed to delete the vertex array: " <<
+						reinterpret_cast<const char*>(gluErrorString(errorCode));
+					UserOutput::Print(errorMessage.str());
+				}
+				sa_meshes[i].gl_id = 0;
 			}
-			s_mesh.gl_id = 0;
 		}
+		delete[] sa_meshes;
 
 		if ( wglMakeCurrent( s_deviceContext, NULL ) != FALSE )
 		{
@@ -505,7 +521,7 @@ namespace
 		}
 		// Assign the data to the buffer
 		{
-			s_mesh.num_vertices = data.num_vertices;
+			mesh.num_vertices = data.num_vertices;
 			glBufferData( GL_ARRAY_BUFFER, data.num_vertices * alignof(Mesh::Vertex),
 				reinterpret_cast<GLvoid*>( data.vertices ),
 				// Our code will only ever write to the buffer
@@ -658,7 +674,7 @@ namespace
 
 		// Delete the buffer object
 		// (the vertex array will hold a reference to it)
-		if ( s_mesh.gl_id != 0 )
+		if ( mesh.gl_id != 0 )
 		{
 			// Unbind the vertex array
 			// (this must be done before deleting the vertex buffer)

@@ -21,7 +21,8 @@ namespace
 	IDirect3D9* s_direct3dInterface = NULL;
 	IDirect3DDevice9* s_direct3dDevice = NULL;
 
-	eae6320::Mesh s_mesh;
+	eae6320::Mesh * sa_meshes;
+	unsigned int s_num_meshes;
 
 	// The vertex shader is a program that operates on vertices.
 	// Its input comes from a C/C++ "draw call" and is:
@@ -77,25 +78,35 @@ bool eae6320::Graphics::Initialize( const HWND i_renderingWindow )
 		goto OnError;
 	}
 
-	// Initialize the graphics objects
-
-	Mesh::Data * data = Mesh::Data::FromFile("data/square.msh");
-	if ( !data )
+	// Initialize meshes
+	const unsigned int num_meshes = 2;
+	sa_meshes = new Mesh[num_meshes];
+	s_num_meshes = num_meshes;
+	const char * const meshfilenames[num_meshes] = {
+		"data/square.msh",
+		"data/triangle.msh"
+	};
+	for (unsigned int i = 0; i < s_num_meshes; ++i)
 	{
-		goto OnError;
-	}
-	if ( !CreateVertexBuffer( s_mesh, *data ) )
-	{
+		Mesh::Data * data = Mesh::Data::FromFile(meshfilenames[i]);
+		if (!data)
+		{
+			goto OnError;
+		}
+		if (!CreateVertexBuffer(sa_meshes[i], *data))
+		{
+			delete data;
+			goto OnError;
+		}
+		if (!CreateIndexBuffer(sa_meshes[i], *data))
+		{
+			delete data;
+			goto OnError;
+		}
 		delete data;
-		goto OnError;
 	}
-	if ( !CreateIndexBuffer( s_mesh, *data ) )
-	{
-		delete data;
-		goto OnError;
-	}
-	delete data;
 
+	// Initialize shaders
 	if ( !LoadVertexShader() )
 	{
 		goto OnError;
@@ -189,7 +200,10 @@ void eae6320::Graphics::Render()
 				assert( SUCCEEDED( result ) );
 			}
 
-			DrawMesh( s_mesh );
+			for (unsigned int i = 0; i < s_num_meshes; ++i)
+			{
+				DrawMesh( sa_meshes[i] );
+			}
 		}
 		result = s_direct3dDevice->EndScene();
 		assert( SUCCEEDED( result ) );
@@ -227,22 +241,26 @@ bool eae6320::Graphics::ShutDown()
 				s_fragmentShader = NULL;
 			}
 
-			if ( s_mesh.vertex_buffer )
+			for (unsigned int i = 0; i < s_num_meshes; ++i)
 			{
-				s_mesh.vertex_buffer->Release();
-				s_mesh.vertex_buffer = NULL;
+				if (sa_meshes[i].vertex_buffer)
+				{
+					sa_meshes[i].vertex_buffer->Release();
+					sa_meshes[i].vertex_buffer = NULL;
+				}
+				if (sa_meshes[i].index_buffer)
+				{
+					sa_meshes[i].index_buffer->Release();
+					sa_meshes[i].index_buffer = NULL;
+				}
+				if (sa_meshes[i].vertex_declaration)
+				{
+					s_direct3dDevice->SetVertexDeclaration(NULL);
+					sa_meshes[i].vertex_declaration->Release();
+					sa_meshes[i].vertex_declaration = NULL;
+				}
 			}
-			if ( s_mesh.index_buffer )
-			{
-				s_mesh.index_buffer->Release();
-				s_mesh.index_buffer = NULL;
-			}
-			if ( s_mesh.vertex_declaration )
-			{
-				s_direct3dDevice->SetVertexDeclaration( NULL );
-				s_mesh.vertex_declaration->Release();
-				s_mesh.vertex_declaration = NULL;
-			}
+			delete[] sa_meshes;
 
 			s_direct3dDevice->Release();
 			s_direct3dDevice = NULL;
