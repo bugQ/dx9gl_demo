@@ -12,7 +12,7 @@
 #include <gl/GLU.h>
 #include <string>
 #include <sstream>
-#include "UserOutput.h"
+#include "../Debug_Runtime/UserOutput.h"
 #include "../Windows/WindowsFunctions.h"
 #include "OpenGlExtensions/OpenGlExtensions.h"
 

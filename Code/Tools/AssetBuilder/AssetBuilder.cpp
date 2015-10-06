@@ -5,7 +5,7 @@
 
 #include <iostream>
 #include <string>
-#include "../BuilderHelper/UtilityFunctions.h"
+#include "../Debug_Buildtime/UserOutput.h"
 #include "../../Engine/Windows/WindowsFunctions.h"
 #include "../../External/Lua/Includes.h"
 
@@ -59,7 +59,7 @@ bool eae6320::AssetBuilder::BuildAssets()
 		if ( !GetEnvironmentVariable( "ScriptDir", scriptDir, &errorMessage ) )
 		{
 			wereThereErrors = true;
-			OutputErrorMessage( errorMessage.c_str(), __FILE__ );
+			UserOutput::Print( errorMessage.c_str(), __FILE__ );
 			goto OnExit;
 		}
 	}
@@ -135,7 +135,7 @@ namespace
 			s_luaState = luaL_newstate();
 			if ( !s_luaState )
 			{
-				eae6320::OutputErrorMessage( "Memory allocation error creating Lua state", __FILE__ );
+				eae6320::UserOutput::Print( "Memory allocation error creating Lua state", __FILE__ );
 				return false;
 			}
 		}
@@ -387,7 +387,7 @@ namespace
 		}
 
 		// Output the error message
-		eae6320::OutputErrorMessage( i_errorMessage, i_optionalFileName );
+		eae6320::UserOutput::Print ( i_errorMessage, i_optionalFileName );
 
 		const int returnValueCount = 0;
 		return returnValueCount;

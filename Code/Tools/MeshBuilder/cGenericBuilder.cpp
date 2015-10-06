@@ -5,6 +5,7 @@
 
 #include <sstream>
 #include "../../Engine/Windows/WindowsFunctions.h"
+#include "../Debug_Buildtime/UserOutput.h"
 
 // Interface
 //==========
@@ -26,7 +27,7 @@ bool eae6320::cGenericBuilder::Build( const std::vector<std::string>& )
 			wereThereErrors = true;
 			std::stringstream decoratedErrorMessage;
 			decoratedErrorMessage << "Windows failed to copy \"" << m_path_source << "\" to \"" << m_path_target << "\": " << errorMessage;
-			eae6320::OutputErrorMessage( decoratedErrorMessage.str().c_str(), __FILE__ );
+			eae6320::UserOutput::Print( decoratedErrorMessage.str().c_str(), __FILE__ );
 		}
 	}
 	

@@ -10,7 +10,7 @@
 #include <d3d9.h>
 #include <d3dx9shader.h>
 #include <sstream>
-#include "UserOutput.h"
+#include "../Debug_Runtime/UserOutput.h"
 
 // Static Data Initialization
 //===========================

@@ -20,11 +20,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cbBuilder.cpp" />
-    <ClCompile Include="UtilityFunctions.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cbBuilder.h" />
-    <ClInclude Include="UtilityFunctions.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{5F8004A7-75AD-49AC-85C7-96D9B9F19533}</ProjectGuid>

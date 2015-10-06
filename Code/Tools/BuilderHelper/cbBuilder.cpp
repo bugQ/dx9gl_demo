@@ -5,6 +5,8 @@
 
 #include <sstream>
 
+#include "../Debug_Buildtime/UserOutput.h"
+
 // Interface
 //==========
 
@@ -45,7 +47,7 @@ bool eae6320::cbBuilder::ParseCommandArgumentsAndBuild( char** i_arguments, cons
 		{
 			errorMessage << "only " << actualArgumentCount << " were provided\n";
 		}
-		eae6320::OutputErrorMessage( errorMessage.str().c_str() );
+		eae6320::UserOutput::Print( errorMessage.str(), __FILE__ );
 		return false;
 	}
 }

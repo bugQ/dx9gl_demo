@@ -16,7 +16,7 @@
 
 // This file doesn't need the build utility functions,
 // but #including it here makes it available to every builder automatically
-#include "UtilityFunctions.h"
+#include "../Debug_Buildtime/UserOutput.h"
 
 // Class Declaration
 //==================
