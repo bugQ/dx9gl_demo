@@ -26,7 +26,11 @@ namespace eae6320
 			// COLOR0
 			// 4 uint8_ts == 4 bytes
 			// Offset = 8
+#if defined ( EAE6320_PLATFORM_GL )
+			uint8_t r, g, b, a; // OpenGL expects the byte layout of a color to be pretty much what you'd expect
+#elif defined ( EAE6320_PLATFORM_D3D )
 			uint8_t b, g, r, a;	// Direct3D expects the byte layout of a color to be different from what you might expect
+#endif
 		};
 
 		typedef uint32_t Index;
