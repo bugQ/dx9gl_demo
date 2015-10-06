@@ -55,9 +55,9 @@ bool eae6320::cMeshBuilder::Build( const std::vector<std::string>& )
 		outfile.write(reinterpret_cast<char *>(&(mesh_data->num_triangles)),
 			sizeof(mesh_data->num_triangles));
 		outfile.write(reinterpret_cast<char *>(mesh_data->vertices),
-			mesh_data->num_vertices * sizeof(*(mesh_data->vertices)));
-		outfile.write(reinterpret_cast<char *>(&(mesh_data->indices)),
-			3 * mesh_data->num_triangles * sizeof(*(mesh_data->indices)));
+			mesh_data->num_vertices * sizeof(Mesh::Vertex));
+		outfile.write(reinterpret_cast<char *>(mesh_data->indices),
+			3 * mesh_data->num_triangles * sizeof(Mesh::Index));
 
 		outfile.close();
 
