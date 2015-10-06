@@ -1,7 +1,7 @@
 return
 {
 	meshes = {
-		srcext = 'msh', dstext = 'bvi',
+		srcext = 'msh', dstext = 'vib',
 		tool = 'MeshBuilder.exe',
 		-- mesh list proper
 		"square",

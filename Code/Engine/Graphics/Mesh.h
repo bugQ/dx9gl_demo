@@ -48,7 +48,8 @@ namespace eae6320
 			Data();
 			~Data();
 
-			static Data * FromFile(const char * path);
+			static Data * FromLuaFile(const char * path);
+			static Data * FromBinFile(const char * path);
 		};
 
 		uint32_t num_vertices;

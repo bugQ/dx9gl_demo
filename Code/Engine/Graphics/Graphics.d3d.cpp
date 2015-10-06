@@ -83,12 +83,12 @@ bool eae6320::Graphics::Initialize( const HWND i_renderingWindow )
 	sa_meshes = new Mesh[num_meshes];
 	s_num_meshes = num_meshes;
 	const char * const meshfilenames[num_meshes] = {
-		"data/square.msh",
-		"data/triangle.msh"
+		"data/square.bvi",
+		"data/triangle.bvi"
 	};
 	for (unsigned int i = 0; i < s_num_meshes; ++i)
 	{
-		Mesh::Data * data = Mesh::Data::FromFile(meshfilenames[i]);
+		Mesh::Data * data = Mesh::Data::FromBinFile(meshfilenames[i]);
 		if (!data)
 		{
 			goto OnError;

@@ -4,6 +4,7 @@
 
 #include "../Debug_Runtime/UserOutput.h"
 #include <sstream>
+#include <fstream>
 #include <cassert>
 
 namespace {
@@ -264,7 +265,47 @@ namespace eae6320
 		indices = NULL;
 	}
 
-	Mesh::Data * Mesh::Data::FromFile(const char* path)
+	Mesh::Data * Mesh::Data::FromBinFile(const char* path)
+	{
+		Mesh::Data * meshData = new Mesh::Data();
+		std::ifstream infile(path, std::ifstream::binary);
+
+		if (infile.fail())
+		{
+			std::stringstream errstr;
+			errstr << "Could not open path " << path << "\n";
+			UserOutput::Print(errstr.str(), __FILE__);
+			delete meshData;
+			return NULL;
+		}
+
+		infile.read(reinterpret_cast<char *>(&meshData->num_vertices),
+			sizeof(meshData->num_vertices));
+		infile.read(reinterpret_cast<char *>(&meshData->num_triangles),
+			sizeof(meshData->num_triangles));
+
+		meshData->vertices = new Mesh::Vertex[meshData->num_vertices];
+		meshData->indices = new Mesh::Index[3 * meshData->num_triangles];
+
+		infile.read(reinterpret_cast<char *>(meshData->vertices),
+			meshData->num_vertices * sizeof(Mesh::Vertex));
+		infile.read(reinterpret_cast<char *>(meshData->indices),
+			3 * meshData->num_triangles * sizeof(Mesh::Index));
+		infile.close();
+
+		if (infile.fail())
+		{
+			std::stringstream errstr;
+			errstr << "Read error from path " << path << "\n";
+			UserOutput::Print(errstr.str(), __FILE__);
+			delete meshData;
+			return NULL;
+		}
+
+		return meshData;
+	}
+
+	Mesh::Data * Mesh::Data::FromLuaFile(const char* path)
 	{
 		Mesh::Data * meshData = NULL;
 

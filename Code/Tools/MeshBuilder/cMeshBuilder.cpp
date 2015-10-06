@@ -21,7 +21,7 @@ bool eae6320::cMeshBuilder::Build( const std::vector<std::string>& )
 
 	// Copy the source to the target
 	{
-		Mesh::Data * mesh_data = Mesh::Data::FromFile(m_path_source);
+		Mesh::Data * mesh_data = Mesh::Data::FromLuaFile(m_path_source);
 		std::ofstream outfile;
 
 		std::string errorMessage;
