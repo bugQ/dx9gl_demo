@@ -16,7 +16,7 @@
 
 namespace eae6320
 {
-	class cGenericBuilder : public cbBuilder
+	class cMeshBuilder : public cbBuilder
 	{
 		// Interface
 		//==========

@@ -16,7 +16,7 @@ namespace eae6320
 {
 	namespace UserOutput
 	{
-		void Print( std::string output );
+		void Print( std::string output, std::string filename = "" );
 	}
 }
 

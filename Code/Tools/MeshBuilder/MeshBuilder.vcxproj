@@ -19,11 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="cGenericBuilder.cpp" />
+    <ClCompile Include="cMeshBuilder.cpp" />
     <ClCompile Include="EntryPoint.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cGenericBuilder.h" />
+    <ClInclude Include="cMeshBuilder.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{2D2C4F1C-7078-4512-85B8-C2A82962DFE5}</ProjectGuid>
@@ -111,7 +111,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Debug_Buildtime.lib;BuilderHelper.lib;Windows.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Debug_Buildtime.lib;BuilderHelper.lib;Windows.lib;Lua.lib;Graphics.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -125,7 +125,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Debug_Buildtime.lib;BuilderHelper.lib;Windows.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Debug_Buildtime.lib;BuilderHelper.lib;Windows.lib;Lua.lib;Graphics.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -143,7 +143,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>Debug_Buildtime.lib;BuilderHelper.lib;Windows.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Debug_Buildtime.lib;BuilderHelper.lib;Windows.lib;Lua.lib;Graphics.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -161,7 +161,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>Debug_Buildtime.lib;BuilderHelper.lib;Windows.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Debug_Buildtime.lib;BuilderHelper.lib;Windows.lib;Lua.lib;Graphics.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
