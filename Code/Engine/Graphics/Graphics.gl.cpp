@@ -638,6 +638,7 @@ namespace
 		}
 		// Allocate space and copy the triangle data into the index buffer
 		{
+			s_mesh.num_triangles = data.num_triangles;
 			glBufferData( GL_ELEMENT_ARRAY_BUFFER, data.num_triangles * 3 * alignof(Mesh::Index),
 				reinterpret_cast<const GLvoid*>( data.indices ),
 				// Our code will only ever write to the buffer
