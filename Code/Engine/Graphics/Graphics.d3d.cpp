@@ -11,6 +11,7 @@
 #include <d3dx9shader.h>
 #include <sstream>
 #include "../Debug_Runtime/UserOutput.h"
+#include "Effect.h"
 
 // Static Data Initialization
 //===========================
@@ -32,7 +33,6 @@ namespace
 	//	* Position
 	//		(So that the graphics hardware knows which pixels to fill in for the triangle)
 	//	* Any other data we want
-	IDirect3DVertexShader9* s_vertexShader = NULL;
 	// The fragment shader is a program that operates on fragments
 	// (or potential pixels).
 	// Its input is:
@@ -41,7 +41,7 @@ namespace
 	//		to each vertex in the triangle.
 	// Its output is:
 	//	* The final color that the pixel should be
-	IDirect3DPixelShader9* s_fragmentShader = NULL;
+	eae6320::Effect * s_effect;
 }
 
 // Helper Function Declarations
@@ -83,8 +83,8 @@ bool eae6320::Graphics::Initialize( const HWND i_renderingWindow )
 	sa_meshes = new Mesh[num_meshes];
 	s_num_meshes = num_meshes;
 	const char * const meshfilenames[num_meshes] = {
-		"data/square.bvi",
-		"data/triangle.bvi"
+		"data/square.vib",
+		"data/triangle.vib"
 	};
 	for (unsigned int i = 0; i < s_num_meshes; ++i)
 	{
@@ -106,16 +106,11 @@ bool eae6320::Graphics::Initialize( const HWND i_renderingWindow )
 		delete data;
 	}
 
-	// Initialize shaders
-	if ( !LoadVertexShader() )
+	s_effect = Effect::FromFiles("data/vertex.shd", "data/fragment.shd", s_direct3dDevice);
+	if (!s_effect)
 	{
 		goto OnError;
 	}
-	if ( !LoadFragmentShader() )
-	{
-		goto OnError;
-	}
-
 	return true;
 
 OnError:
@@ -194,9 +189,9 @@ void eae6320::Graphics::Render()
 		{
 			// Set the shaders
 			{
-				result = s_direct3dDevice->SetVertexShader( s_vertexShader );
+				result = s_direct3dDevice->SetVertexShader( s_effect->vertex_shader );
 				assert( SUCCEEDED( result ) );
-				result = s_direct3dDevice->SetPixelShader( s_fragmentShader );
+				result = s_direct3dDevice->SetPixelShader( s_effect->fragment_shader );
 				assert( SUCCEEDED( result ) );
 			}
 
@@ -230,15 +225,15 @@ bool eae6320::Graphics::ShutDown()
 	{
 		if ( s_direct3dDevice )
 		{
-			if ( s_vertexShader )
+			if ( s_effect->vertex_shader )
 			{
-				s_vertexShader->Release();
-				s_vertexShader = NULL;
+				s_effect->vertex_shader->Release();
+				s_effect->vertex_shader = NULL;
 			}
-			if ( s_fragmentShader )
+			if ( s_effect->fragment_shader )
 			{
-				s_fragmentShader->Release();
-				s_fragmentShader = NULL;
+				s_effect->fragment_shader->Release();
+				s_effect->fragment_shader = NULL;
 			}
 
 			for (unsigned int i = 0; i < s_num_meshes; ++i)
@@ -514,126 +509,5 @@ namespace
 			eae6320::UserOutput::Print( "Direct3D failed to get the device's creation parameters" );
 		}
 		return result;
-	}
-
-	bool LoadFragmentShader()
-	{
-		// Load the source code from file and compile it
-		ID3DXBuffer* compiledShader;
-		{
-			const char* sourceCodeFileName = "data/fragment.shd";
-			const D3DXMACRO macros[] =
-			{
-				{ "EAE6320_PLATFORM_D3D", "1" },
-				{ NULL, NULL }
-			};
-			ID3DXInclude* includes = NULL;
-			const char* entryPoint = "main";
-			const char* profile = "ps_3_0";
-			const DWORD noFlags = 0;
-			ID3DXBuffer* errorMessages = NULL;
-			ID3DXConstantTable** noConstants = NULL;
-			HRESULT result = D3DXCompileShaderFromFile( sourceCodeFileName, macros, includes, entryPoint, profile, noFlags,
-				&compiledShader, &errorMessages, noConstants );
-			if ( SUCCEEDED( result ) )
-			{
-				if ( errorMessages )
-				{
-					errorMessages->Release();
-				}
-			}
-			else
-			{
-				if ( errorMessages )
-				{
-					std::stringstream errorMessage;
-					errorMessage << "Direct3D failed to compile the fragment shader from the file " << sourceCodeFileName
-						<< ":\n" << reinterpret_cast<char*>( errorMessages->GetBufferPointer() );
-					eae6320::UserOutput::Print( errorMessage.str() );
-					errorMessages->Release();
-				}
-				else
-				{
-					std::stringstream errorMessage;
-					errorMessage << "Direct3D failed to compile the fragment shader from the file " << sourceCodeFileName;
-					eae6320::UserOutput::Print( errorMessage.str() );
-				}
-				return false;
-			}
-		}
-		// Create the fragment shader object
-		bool wereThereErrors = false;
-		{
-			HRESULT result = s_direct3dDevice->CreatePixelShader( reinterpret_cast<DWORD*>( compiledShader->GetBufferPointer() ),
-				&s_fragmentShader );
-			if ( FAILED( result ) )
-			{
-				eae6320::UserOutput::Print( "Direct3D failed to create the fragment shader" );
-				wereThereErrors = true;
-			}
-			compiledShader->Release();
-		}
-		return !wereThereErrors;
-	}
-
-	bool LoadVertexShader()
-	{
-		// Load the source code from file and compile it
-		ID3DXBuffer* compiledShader;
-		{
-			const char* sourceCodeFileName = "data/vertex.shd";
-			const D3DXMACRO macros[] =
-			{
-				{ "EAE6320_PLATFORM_D3D", "1" },
-				{ NULL, NULL }
-			};
-			ID3DXInclude* includes = NULL;
-			const char* entryPoint = "main";
-			const char* profile = "vs_3_0";
-			const DWORD noFlags = 0;
-			ID3DXBuffer* errorMessages = NULL;
-			ID3DXConstantTable** noConstants = NULL;
-			HRESULT result = D3DXCompileShaderFromFile( sourceCodeFileName, macros, includes, entryPoint, profile, noFlags,
-				&compiledShader, &errorMessages, noConstants );
-			if ( SUCCEEDED( result ) )
-			{
-				if ( errorMessages )
-				{
-					errorMessages->Release();
-				}
-			}
-			else
-			{
-				if ( errorMessages )
-				{
-					std::stringstream errorMessage;
-					errorMessage << "Direct3D failed to compile the vertex shader from the file " << sourceCodeFileName
-						<< ":\n" << reinterpret_cast<char*>( errorMessages->GetBufferPointer() );
-					eae6320::UserOutput::Print( errorMessage.str() );
-					errorMessages->Release();
-				}
-				else
-				{
-					std::stringstream errorMessage;
-					errorMessage << "Direct3D failed to compile the vertex shader from the file " << sourceCodeFileName;
-					eae6320::UserOutput::Print( errorMessage.str() );
-				}
-				return false;
-			}
-		}
-		// Create the vertex shader object
-		bool wereThereErrors = false;
-		{
-			const HRESULT result = s_direct3dDevice->CreateVertexShader(
-				reinterpret_cast<DWORD*>( compiledShader->GetBufferPointer() ),
-				&s_vertexShader );
-			if ( FAILED( result ) )
-			{
-				eae6320::UserOutput::Print( "Direct3D failed to create the vertex shader" );
-				wereThereErrors = true;
-			}
-			compiledShader->Release();
-		}
-		return !wereThereErrors;
 	}
 }

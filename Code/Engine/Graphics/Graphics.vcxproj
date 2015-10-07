@@ -159,6 +159,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Effect.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="OpenGLExtensions\glext.h" />
@@ -168,6 +169,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Effect.cpp" />
     <ClCompile Include="Graphics.d3d.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
