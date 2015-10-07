@@ -522,7 +522,7 @@ namespace
 		// Assign the data to the buffer
 		{
 			mesh.num_vertices = data.num_vertices;
-			glBufferData( GL_ARRAY_BUFFER, data.num_vertices * alignof(Mesh::Vertex),
+			glBufferData( GL_ARRAY_BUFFER, data.num_vertices * sizeof(Mesh::Vertex),
 				reinterpret_cast<GLvoid*>( data.vertices ),
 				// Our code will only ever write to the buffer
 				GL_STATIC_DRAW );
@@ -654,7 +654,8 @@ namespace
 		}
 		// Allocate space and copy the triangle data into the index buffer
 		{
-			glBufferData( GL_ELEMENT_ARRAY_BUFFER, data.num_triangles * 3 * alignof(Mesh::Index),
+			mesh.num_triangles = data.num_triangles;
+			glBufferData( GL_ELEMENT_ARRAY_BUFFER, data.num_triangles * 3 * sizeof(Mesh::Index),
 				reinterpret_cast<const GLvoid*>( data.indices ),
 				// Our code will only ever write to the buffer
 				GL_STATIC_DRAW );
