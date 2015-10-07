@@ -48,7 +48,8 @@ namespace
 	//		to each vertex in the triangle.
 	// Its output is:
 	//	* The final color that the pixel should be
-	GLuint s_programId = 0;
+	
+	eae6320::Effect * s_effect;
 }
 
 // Helper Function Declarations
@@ -61,8 +62,6 @@ namespace
 	bool CreateProgram();
 	bool CreateRenderingContext();
 	bool CreateVertexArray( Mesh & mesh, Mesh::Data & data );
-
-	Effect * effect;
 
 	// This helper struct exists to be able to dynamically allocate memory to get "log info"
 	// which will automatically be freed when the struct goes out of scope
@@ -181,7 +180,7 @@ void eae6320::Graphics::Render()
 	{
 		// Set the vertex and fragment shaders
 		{
-			glUseProgram( s_programId );
+			glUseProgram( s_effect->parent );
 			assert( glGetError() == GL_NO_ERROR );
 		}
 
@@ -204,9 +203,9 @@ bool eae6320::Graphics::ShutDown()
 
 	if ( s_openGlRenderingContext != NULL )
 	{
-		if ( s_programId != 0 )
+		if ( s_effect->parent != 0 )
 		{
-			glDeleteProgram( s_programId );
+			glDeleteProgram( s_effect->parent );
 			const GLenum errorCode = glGetError();
 			if ( errorCode != GL_NO_ERROR )
 			{
@@ -215,7 +214,7 @@ bool eae6320::Graphics::ShutDown()
 					reinterpret_cast<const char*>( gluErrorString( errorCode ) );
 				UserOutput::Print( errorMessage.str() );
 			}
-			s_programId = 0;
+			s_effect->parent = 0;
 		}
 
 		for (unsigned int i = 0; i < s_num_meshes; ++i)
@@ -276,35 +275,16 @@ namespace
 {
 	bool CreateProgram()
 	{
-		// Create a program
-		{
-			s_programId = glCreateProgram();
-			const GLenum errorCode = glGetError();
-			if ( errorCode != GL_NO_ERROR )
-			{
-				std::stringstream errorMessage;
-				errorMessage << "OpenGL failed to create a program: " <<
-					reinterpret_cast<const char*>( gluErrorString( errorCode ) );
-				eae6320::UserOutput::Print( errorMessage.str() );
-				return false;
-			}
-			else if ( s_programId == 0 )
-			{
-				eae6320::UserOutput::Print( "OpenGL failed to create a program" );
-				return false;
-			}
-		}
-
-		// Load and attach the shaders
-		effect = Effect::FromFiles("data/vertex.shd", "data/fragment.shd");
-		if (!effect)
+		// Load and attach the shaders, creating a program for them
+		s_effect = Effect::FromFiles("data/vertex.shd", "data/fragment.shd");
+		if (!s_effect)
 		{
 			return false;
 		}
 
 		// Link the program
 		{
-			glLinkProgram( s_programId );
+			glLinkProgram( s_effect->parent );
 			GLenum errorCode = glGetError();
 			if ( errorCode == GL_NO_ERROR )
 			{
@@ -314,13 +294,13 @@ namespace
 				std::string linkInfo;
 				{
 					GLint infoSize;
-					glGetProgramiv( s_programId, GL_INFO_LOG_LENGTH, &infoSize );
+					glGetProgramiv( s_effect->parent, GL_INFO_LOG_LENGTH, &infoSize );
 					errorCode = glGetError();
 					if ( errorCode == GL_NO_ERROR )
 					{
 						sLogInfo info( static_cast<size_t>( infoSize ) );
 						GLsizei* dontReturnLength = NULL;
-						glGetProgramInfoLog( s_programId, static_cast<GLsizei>( infoSize ), dontReturnLength, info.memory );
+						glGetProgramInfoLog( s_effect->parent, static_cast<GLsizei>( infoSize ), dontReturnLength, info.memory );
 						errorCode = glGetError();
 						if ( errorCode == GL_NO_ERROR )
 						{
@@ -347,7 +327,7 @@ namespace
 				// Check to see if there were link errors
 				GLint didLinkingSucceed;
 				{
-					glGetProgramiv( s_programId, GL_LINK_STATUS, &didLinkingSucceed );
+					glGetProgramiv(s_effect->parent, GL_LINK_STATUS, &didLinkingSucceed );
 					errorCode = glGetError();
 					if ( errorCode == GL_NO_ERROR )
 					{

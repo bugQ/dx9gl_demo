@@ -17,10 +17,11 @@
 
 namespace
 {
+	eae6320::Effect::Parent CreateParent();
 	char * LoadAndAllocateShaderProgram(const char* i_path, size_t& o_size, std::string& o_errorMessage);
-	eae6320::Effect::CompiledShader CompileShader(eae6320::Effect::Device device, const char * shaderStr, size_t size, const char *filename);
-	eae6320::Effect::VertexShader LoadVertexShader(eae6320::Effect::Device device, eae6320::Effect::CompiledShader compiledShader);
-	eae6320::Effect::FragmentShader LoadFragmentShader(eae6320::Effect::Device device, eae6320::Effect::CompiledShader compiledShader);
+	eae6320::Effect::CompiledShader CompileShader(eae6320::Effect::Parent parent, const char * shaderStr, size_t size, const char *filename);
+	eae6320::Effect::VertexShader LoadVertexShader(eae6320::Effect::Parent parent, eae6320::Effect::CompiledShader compiledShader);
+	eae6320::Effect::FragmentShader LoadFragmentShader(eae6320::Effect::Parent parent, eae6320::Effect::CompiledShader compiledShader);
 
 
 #if defined ( EAE6320_PLATFORM_GL )
@@ -37,10 +38,10 @@ namespace
 
 namespace eae6320
 {
-	Effect * Effect::FromFiles(const char * vertexShaderPath, const char * fragmentShaderPath, Device device)
+	Effect * Effect::FromFiles(const char * vertexShaderPath, const char * fragmentShaderPath, Parent parent)
 	{
 		Effect * effect = new Effect();
-		effect->device = device;
+		effect->parent = parent ? parent : CreateParent();
 		size_t vertex_shader_size, fragment_shader_size;
 
 		std::string error_str;
@@ -51,9 +52,8 @@ namespace eae6320
 			delete effect;
 			return NULL;
 		}
-		
-		effect->vertex_shader = LoadVertexShader(device, CompileShader(
-			device, vertex_shader_str, vertex_shader_size, vertexShaderPath));
+		effect->vertex_shader = LoadVertexShader(effect->parent, CompileShader(
+			effect->parent, vertex_shader_str, vertex_shader_size, vertexShaderPath));
 
 		const char * fragment_shader_str = LoadAndAllocateShaderProgram(
 			vertexShaderPath, fragment_shader_size, error_str);
@@ -62,13 +62,11 @@ namespace eae6320
 			delete effect;
 			return NULL;
 		}
-		effect->fragment_shader = LoadFragmentShader(device, CompileShader(
-			device, vertex_shader_str, vertex_shader_size, fragmentShaderPath));
+		effect->fragment_shader = LoadFragmentShader(effect->parent, CompileShader(
+			effect->parent, vertex_shader_str, vertex_shader_size, fragmentShaderPath));
 
 		return effect;
 	}
-	
-
 }
 
 namespace
@@ -180,7 +178,29 @@ namespace
 
 #if defined ( EAE6320_PLATFORM_GL )
 
-	eae6320::Effect::CompiledShader CompileShader(eae6320::Effect::Device device, const char * shaderStr, size_t size, const char *filename)
+	eae6320::Effect::Parent CreateParent()
+	{
+		// Create a program
+		GLuint program = glCreateProgram();
+		const GLenum errorCode = glGetError();
+		if (errorCode != GL_NO_ERROR)
+		{
+			std::stringstream errorMessage;
+			errorMessage << "OpenGL failed to create a program: " <<
+				reinterpret_cast<const char*>(gluErrorString(errorCode));
+			eae6320::UserOutput::Print(errorMessage.str());
+			return false;
+		}
+		else if (program == 0)
+		{
+			eae6320::UserOutput::Print("OpenGL failed to create a program");
+			return false;
+		}
+		
+		return program;
+	}
+
+	eae6320::Effect::CompiledShader CompileShader(eae6320::Effect::Parent program, const char * shaderStr, size_t size, const char *filename)
 	{
 		// Verify that compiling shaders at run-time is supported
 		{
@@ -197,7 +217,6 @@ namespace
 
 		// Load the source code from file and set it into a shader
 		GLuint shaderId = 0;
-		void* shaderSource = NULL;
 		{
 			// Generate a shader
 			shaderId = glCreateShader(GL_FRAGMENT_SHADER);
@@ -226,7 +245,7 @@ namespace
 				{
 					"#version 330 // first line, as required by GLSL\n"
 					"#define EAE6320_PLATFORM_GL\n",
-					reinterpret_cast<GLchar *>(shaderSource)
+					reinterpret_cast<const GLchar *>(shaderStr)
 				};
 				const GLint shaderSourceLengths[shaderSourceCount] =
 				{
@@ -329,20 +348,21 @@ namespace
 		}
 
 	OnExit:
-		if (shaderSource != NULL)
+		if (shaderStr != NULL)
 		{
-			free(shaderSource);
-			shaderSource = NULL;
+			// free not providing a const argument form is a bug.  this cast is necessary.
+			free((char *)shaderStr);
+			shaderStr = NULL;
 		}
 
 		return !wereThereErrors;
 	}
 
-	eae6320::Effect::VertexShader LoadVertexShader(eae6320::Effect::Device device, eae6320::Effect::CompiledShader compiledShader)
+	eae6320::Effect::VertexShader LoadVertexShader(eae6320::Effect::Parent program, eae6320::Effect::CompiledShader compiledShader)
 	{
 		// Attach the shader to the program
 		{
-			glAttachShader(device, compiledShader);
+			glAttachShader(program, compiledShader);
 			const GLenum errorCode = glGetError();
 			if (errorCode != GL_NO_ERROR)
 			{
@@ -375,11 +395,11 @@ namespace
 	}
 
 
-	eae6320::Effect::FragmentShader LoadFragmentShader(eae6320::Effect::Device device, eae6320::Effect::CompiledShader compiledShader)
+	eae6320::Effect::FragmentShader LoadFragmentShader(eae6320::Effect::Parent program, eae6320::Effect::CompiledShader compiledShader)
 	{
 		// Attach the shader to the program
 		{
-			glAttachShader(device, compiledShader);
+			glAttachShader(program, compiledShader);
 			const GLenum errorCode = glGetError();
 			if (errorCode != GL_NO_ERROR)
 			{
@@ -413,7 +433,13 @@ namespace
 
 #elif defined ( EAE6320_PLATFORM_D3D )
 
-	ID3DXBuffer * CompileShader(eae6320::Effect::Device device, const char * shaderStr, size_t size, const char *filename)
+	eae6320::Effect::Parent CreateParent()
+	{
+		assert(0);
+		return NULL;
+	}
+
+	ID3DXBuffer * CompileShader(eae6320::Effect::Parent device, const char * shaderStr, size_t size, const char *filename)
 	{
 		// Load the source code from file and compile it
 		ID3DXBuffer* compiledShader;
@@ -461,7 +487,7 @@ namespace
 		}
 	}
 
-	eae6320::Effect::VertexShader LoadVertexShader(eae6320::Effect::Device device, ID3DXBuffer * compiledShader)
+	eae6320::Effect::VertexShader LoadVertexShader(eae6320::Effect::Parent device, ID3DXBuffer * compiledShader)
 	{
 		IDirect3DVertexShader9 * shader;
 		// Create the vertex shader object
@@ -480,7 +506,7 @@ namespace
 		return shader;
 	}
 
-	eae6320::Effect::FragmentShader LoadFragmentShader(eae6320::Effect::Device device, ID3DXBuffer * compiledShader)
+	eae6320::Effect::FragmentShader LoadFragmentShader(eae6320::Effect::Parent device, ID3DXBuffer * compiledShader)
 	{
 		IDirect3DPixelShader9 * shader;
 		// Create the vertex shader object

@@ -22,7 +22,7 @@ namespace eae6320
 #elif defined ( EAE6320_PLATFORM_D3D )
 			IDirect3DDevice9 *
 #endif
-			Device;
+			Parent;
 
 		typedef
 #if defined( EAE6320_PLATFORM_GL )
@@ -42,7 +42,7 @@ namespace eae6320
 
 		typedef
 #if defined( EAE6320_PLATFORM_GL )
-			GLint
+			GLuint
 #elif defined ( EAE6320_PLATFORM_D3D )
 
 			ID3DXBuffer *
@@ -50,10 +50,19 @@ namespace eae6320
 			CompiledShader;
 
 
-		Device device;
+		// for OpenGL, parent is the program (GLuint for program ID),
+		//   composing both of the compiled shaders together.
+		// for Direct3d, parent is the device (IDirect3DDevice9 *),
+		//   which is necessary for most API functions.
+		Parent parent;
+
+		// for OpenGL, the shader IDs are only stored temporarily,
+		//   then loaded into the program (parent) and zeroed out.
+		// for Direct3D, these hold the actual pointers
+		//   to the compiled and loaded shaders.
 		VertexShader vertex_shader;
 		FragmentShader fragment_shader;
 
-		static Effect * FromFiles(const char * vertexShaderPath, const char * fragmentShaderPath, Device device = 0);
+		static Effect * FromFiles(const char * vertexShaderPath, const char * fragmentShaderPath, Parent parent = 0);
 	};
 }
