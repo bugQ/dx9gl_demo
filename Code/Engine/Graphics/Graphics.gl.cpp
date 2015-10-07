@@ -203,19 +203,8 @@ bool eae6320::Graphics::ShutDown()
 
 	if ( s_openGlRenderingContext != NULL )
 	{
-		if ( s_effect->parent != 0 )
-		{
-			glDeleteProgram( s_effect->parent );
-			const GLenum errorCode = glGetError();
-			if ( errorCode != GL_NO_ERROR )
-			{
-				std::stringstream errorMessage;
-				errorMessage << "OpenGL failed to delete the program: " <<
-					reinterpret_cast<const char*>( gluErrorString( errorCode ) );
-				UserOutput::Print( errorMessage.str() );
-			}
-			s_effect->parent = 0;
-		}
+		delete s_effect;
+		s_effect = NULL;
 
 		for (unsigned int i = 0; i < s_num_meshes; ++i)
 		{
@@ -277,89 +266,7 @@ namespace
 	{
 		// Load and attach the shaders, creating a program for them
 		s_effect = Effect::FromFiles("data/vertex.shd", "data/fragment.shd");
-		if (!s_effect)
-		{
-			return false;
-		}
-
-		// Link the program
-		{
-			glLinkProgram( s_effect->parent );
-			GLenum errorCode = glGetError();
-			if ( errorCode == GL_NO_ERROR )
-			{
-				// Get link info
-				// (this won't be used unless linking fails
-				// but it can be useful to look at when debugging)
-				std::string linkInfo;
-				{
-					GLint infoSize;
-					glGetProgramiv( s_effect->parent, GL_INFO_LOG_LENGTH, &infoSize );
-					errorCode = glGetError();
-					if ( errorCode == GL_NO_ERROR )
-					{
-						sLogInfo info( static_cast<size_t>( infoSize ) );
-						GLsizei* dontReturnLength = NULL;
-						glGetProgramInfoLog( s_effect->parent, static_cast<GLsizei>( infoSize ), dontReturnLength, info.memory );
-						errorCode = glGetError();
-						if ( errorCode == GL_NO_ERROR )
-						{
-							linkInfo = info.memory;
-						}
-						else
-						{
-							std::stringstream errorMessage;
-							errorMessage << "OpenGL failed to get link info of the program: " <<
-								reinterpret_cast<const char*>( gluErrorString( errorCode ) );
-							eae6320::UserOutput::Print( errorMessage.str() );
-							return false;
-						}
-					}
-					else
-					{
-						std::stringstream errorMessage;
-						errorMessage << "OpenGL failed to get the length of the program link info: " <<
-							reinterpret_cast<const char*>( gluErrorString( errorCode ) );
-						eae6320::UserOutput::Print( errorMessage.str() );
-						return false;
-					}
-				}
-				// Check to see if there were link errors
-				GLint didLinkingSucceed;
-				{
-					glGetProgramiv(s_effect->parent, GL_LINK_STATUS, &didLinkingSucceed );
-					errorCode = glGetError();
-					if ( errorCode == GL_NO_ERROR )
-					{
-						if ( didLinkingSucceed == GL_FALSE )
-						{
-							std::stringstream errorMessage;
-							errorMessage << "The program failed to link:\n" << linkInfo;
-							eae6320::UserOutput::Print( errorMessage.str() );
-							return false;
-						}
-					}
-					else
-					{
-						std::stringstream errorMessage;
-						errorMessage << "OpenGL failed to find out if linking of the program succeeded: " <<
-							reinterpret_cast<const char*>( gluErrorString( errorCode ) );
-						eae6320::UserOutput::Print( errorMessage.str() );
-						return false;
-					}
-				}
-			}
-			else
-			{
-				std::stringstream errorMessage;
-				errorMessage << "OpenGL failed to link the program: " <<
-					reinterpret_cast<const char*>( gluErrorString( errorCode ) );
-				eae6320::UserOutput::Print( errorMessage.str() );
-				return false;
-			}
-		}
-
-		return true;
+		return s_effect != NULL;
 	}
 
 	bool CreateRenderingContext()

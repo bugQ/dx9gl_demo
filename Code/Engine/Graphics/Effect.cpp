@@ -21,7 +21,7 @@ namespace
 	eae6320::Effect::CompiledShader CompileShader(eae6320::Effect::Parent parent, const char * shaderStr, size_t size, eae6320::Effect::ShaderType type, const char *filename);
 	eae6320::Effect::VertexShader LoadVertexShader(eae6320::Effect::Parent parent, eae6320::Effect::CompiledShader compiledShader);
 	eae6320::Effect::FragmentShader LoadFragmentShader(eae6320::Effect::Parent parent, eae6320::Effect::CompiledShader compiledShader);
-
+	bool FinishUp(eae6320::Effect * effect);
 
 #if defined ( EAE6320_PLATFORM_GL )
 	// This helper struct exists to be able to dynamically allocate memory to get "log info"
@@ -64,8 +64,41 @@ namespace eae6320
 		effect->fragment_shader = LoadFragmentShader(effect->parent, CompileShader(effect->parent,
 			fragment_shader_str, fragment_shader_size, eae6320::Effect::ShaderType::Fragment, fragmentShaderPath));
 
+		if (!FinishUp(effect))
+		{
+			delete effect;
+			return NULL;
+		}
+
 		return effect;
 	}
+
+#if defined ( EAE6320_PLATFORM_GL )
+	Effect::~Effect()
+	{
+		if (parent != 0)
+		{
+			glDeleteProgram(parent);
+			const GLenum errorCode = glGetError();
+			if (errorCode != GL_NO_ERROR)
+			{
+				std::stringstream errorMessage;
+				errorMessage << "OpenGL failed to delete the program: " <<
+					reinterpret_cast<const char*>(gluErrorString(errorCode));
+				UserOutput::Print(errorMessage.str());
+			}
+			parent = 0;
+		}
+	}
+#elif defined ( EAE6320_PLATFORM_D3D )
+	Effect::~Effect()
+	{
+		if (vertex_shader)
+			vertex_shader->Release();
+		if (fragment_shader)
+			fragment_shader->Release();
+	}
+#endif
 }
 
 namespace
@@ -422,6 +455,83 @@ namespace
 		return compiledShader;
 	}
 
+	bool FinishUp(eae6320::Effect * effect)
+	{
+		glLinkProgram(effect->parent);
+		GLenum errorCode = glGetError();
+		if (errorCode == GL_NO_ERROR)
+		{
+			// Get link info
+			// (this won't be used unless linking fails
+			// but it can be useful to look at when debugging)
+			std::string linkInfo;
+			{
+				GLint infoSize;
+				glGetProgramiv(effect->parent, GL_INFO_LOG_LENGTH, &infoSize);
+				errorCode = glGetError();
+				if (errorCode == GL_NO_ERROR)
+				{
+					sLogInfo info(static_cast<size_t>(infoSize));
+					GLsizei* dontReturnLength = NULL;
+					glGetProgramInfoLog(effect->parent, static_cast<GLsizei>(infoSize), dontReturnLength, info.memory);
+					errorCode = glGetError();
+					if (errorCode == GL_NO_ERROR)
+					{
+						linkInfo = info.memory;
+					}
+					else
+					{
+						std::stringstream errorMessage;
+						errorMessage << "OpenGL failed to get link info of the program: " <<
+							reinterpret_cast<const char*>(gluErrorString(errorCode));
+						eae6320::UserOutput::Print(errorMessage.str());
+						return false;
+					}
+				}
+				else
+				{
+					std::stringstream errorMessage;
+					errorMessage << "OpenGL failed to get the length of the program link info: " <<
+						reinterpret_cast<const char*>(gluErrorString(errorCode));
+					eae6320::UserOutput::Print(errorMessage.str());
+					return false;
+				}
+			}
+			// Check to see if there were link errors
+			GLint didLinkingSucceed;
+			{
+				glGetProgramiv(effect->parent, GL_LINK_STATUS, &didLinkingSucceed);
+				errorCode = glGetError();
+				if (errorCode == GL_NO_ERROR)
+				{
+					if (didLinkingSucceed == GL_FALSE)
+					{
+						std::stringstream errorMessage;
+						errorMessage << "The program failed to link:\n" << linkInfo;
+						eae6320::UserOutput::Print(errorMessage.str());
+						return false;
+					}
+				}
+				else
+				{
+					std::stringstream errorMessage;
+					errorMessage << "OpenGL failed to find out if linking of the program succeeded: " <<
+						reinterpret_cast<const char*>(gluErrorString(errorCode));
+					eae6320::UserOutput::Print(errorMessage.str());
+					return false;
+				}
+			}
+		}
+		else
+		{
+			std::stringstream errorMessage;
+			errorMessage << "OpenGL failed to link the program: " <<
+				reinterpret_cast<const char*>(gluErrorString(errorCode));
+			eae6320::UserOutput::Print(errorMessage.str());
+			return false;
+		}
+	}
+
 #elif defined ( EAE6320_PLATFORM_D3D )
 
 	eae6320::Effect::Parent CreateParent()
@@ -516,5 +626,9 @@ namespace
 		return shader;
 	}
 
+	bool FinishUp(eae6320::Effect * effect)
+	{
+		return true;
+	}
 #endif
 }

@@ -225,16 +225,8 @@ bool eae6320::Graphics::ShutDown()
 	{
 		if ( s_direct3dDevice )
 		{
-			if ( s_effect->vertex_shader )
-			{
-				s_effect->vertex_shader->Release();
-				s_effect->vertex_shader = NULL;
-			}
-			if ( s_effect->fragment_shader )
-			{
-				s_effect->fragment_shader->Release();
-				s_effect->fragment_shader = NULL;
-			}
+			delete s_effect;
+			s_effect = NULL;
 
 			for (unsigned int i = 0; i < s_num_meshes; ++i)
 			{

@@ -69,5 +69,7 @@ namespace eae6320
 		FragmentShader fragment_shader;
 
 		static Effect * FromFiles(const char * vertexShaderPath, const char * fragmentShaderPath, Parent parent = 0);
+
+		~Effect();
 	};
 }
