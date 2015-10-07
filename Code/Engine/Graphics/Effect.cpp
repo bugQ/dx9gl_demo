@@ -10,7 +10,6 @@
 #include <gl/GLU.h>
 #include "OpenGlExtensions/OpenGlExtensions.h"
 #elif defined ( EAE6320_PLATFORM_D3D )
-#include <d3dx9shader.h>
 #else
 #error "one of EAE6320_PLATFORM_GL or EAE6320_PLATFORM_D3D must be defined."
 #endif
@@ -19,7 +18,7 @@ namespace
 {
 	eae6320::Effect::Parent CreateParent();
 	char * LoadAndAllocateShaderProgram(const char* i_path, size_t& o_size, std::string& o_errorMessage);
-	eae6320::Effect::CompiledShader CompileShader(eae6320::Effect::Parent parent, const char * shaderStr, size_t size, const char *filename);
+	eae6320::Effect::CompiledShader CompileShader(eae6320::Effect::Parent parent, const char * shaderStr, size_t size, eae6320::Effect::ShaderType type, const char *filename);
 	eae6320::Effect::VertexShader LoadVertexShader(eae6320::Effect::Parent parent, eae6320::Effect::CompiledShader compiledShader);
 	eae6320::Effect::FragmentShader LoadFragmentShader(eae6320::Effect::Parent parent, eae6320::Effect::CompiledShader compiledShader);
 
@@ -52,18 +51,18 @@ namespace eae6320
 			delete effect;
 			return NULL;
 		}
-		effect->vertex_shader = LoadVertexShader(effect->parent, CompileShader(
-			effect->parent, vertex_shader_str, vertex_shader_size, vertexShaderPath));
+		effect->vertex_shader = LoadVertexShader(effect->parent, CompileShader(effect->parent,
+			vertex_shader_str, vertex_shader_size, eae6320::Effect::ShaderType::Vertex, vertexShaderPath));
 
 		const char * fragment_shader_str = LoadAndAllocateShaderProgram(
-			vertexShaderPath, fragment_shader_size, error_str);
+			fragmentShaderPath, fragment_shader_size, error_str);
 		if (!fragment_shader_str && !error_str.empty()) {
 			eae6320::UserOutput::Print(error_str, __FILE__);
 			delete effect;
 			return NULL;
 		}
-		effect->fragment_shader = LoadFragmentShader(effect->parent, CompileShader(
-			effect->parent, vertex_shader_str, vertex_shader_size, fragmentShaderPath));
+		effect->fragment_shader = LoadFragmentShader(effect->parent, CompileShader(effect->parent,
+			fragment_shader_str, fragment_shader_size, eae6320::Effect::ShaderType::Fragment, fragmentShaderPath));
 
 		return effect;
 	}
@@ -200,7 +199,7 @@ namespace
 		return program;
 	}
 
-	eae6320::Effect::CompiledShader CompileShader(eae6320::Effect::Parent program, const char * shaderStr, size_t size, const char *filename)
+	eae6320::Effect::CompiledShader CompileShader(eae6320::Effect::Parent program, const char * shaderStr, size_t size, eae6320::Effect::ShaderType type, const char *filename)
 	{
 		// Verify that compiling shaders at run-time is supported
 		{
@@ -213,18 +212,16 @@ namespace
 			}
 		}
 
-		bool wereThereErrors = false;
-
 		// Load the source code from file and set it into a shader
 		GLuint shaderId = 0;
 		{
 			// Generate a shader
-			shaderId = glCreateShader(GL_FRAGMENT_SHADER);
+			GLenum shaderType = type == eae6320::Effect::ShaderType::Vertex ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER;
+			shaderId = glCreateShader(shaderType);
 			{
 				const GLenum errorCode = glGetError();
 				if (errorCode != GL_NO_ERROR)
 				{
-					wereThereErrors = true;
 					std::stringstream errorMessage;
 					errorMessage << "OpenGL failed to get an unused fragment shader ID: " <<
 						reinterpret_cast<const char*>(gluErrorString(errorCode));
@@ -233,7 +230,6 @@ namespace
 				}
 				else if (shaderId == 0)
 				{
-					wereThereErrors = true;
 					eae6320::UserOutput::Print("OpenGL failed to get an unused fragment shader ID");
 					goto OnExit;
 				}
@@ -256,7 +252,6 @@ namespace
 				const GLenum errorCode = glGetError();
 				if (errorCode != GL_NO_ERROR)
 				{
-					wereThereErrors = true;
 					std::stringstream errorMessage;
 					errorMessage << "OpenGL failed to set the fragment shader source code: " <<
 						reinterpret_cast<const char*>(gluErrorString(errorCode));
@@ -291,7 +286,6 @@ namespace
 						}
 						else
 						{
-							wereThereErrors = true;
 							std::stringstream errorMessage;
 							errorMessage << "OpenGL failed to get compilation info of the fragment shader source code: " <<
 								reinterpret_cast<const char*>(gluErrorString(errorCode));
@@ -301,7 +295,6 @@ namespace
 					}
 					else
 					{
-						wereThereErrors = true;
 						std::stringstream errorMessage;
 						errorMessage << "OpenGL failed to get the length of the fragment shader compilation info: " <<
 							reinterpret_cast<const char*>(gluErrorString(errorCode));
@@ -318,7 +311,6 @@ namespace
 					{
 						if (didCompilationSucceed == GL_FALSE)
 						{
-							wereThereErrors = true;
 							std::stringstream errorMessage;
 							errorMessage << "The fragment shader failed to compile:\n" << compilationInfo;
 							eae6320::UserOutput::Print(errorMessage.str());
@@ -327,7 +319,6 @@ namespace
 					}
 					else
 					{
-						wereThereErrors = true;
 						std::stringstream errorMessage;
 						errorMessage << "OpenGL failed to find out if compilation of the fragment shader source code succeeded: " <<
 							reinterpret_cast<const char*>(gluErrorString(errorCode));
@@ -338,7 +329,6 @@ namespace
 			}
 			else
 			{
-				wereThereErrors = true;
 				std::stringstream errorMessage;
 				errorMessage << "OpenGL failed to compile the fragment shader source code: " <<
 					reinterpret_cast<const char*>(gluErrorString(errorCode));
@@ -350,12 +340,13 @@ namespace
 	OnExit:
 		if (shaderStr != NULL)
 		{
-			// free not providing a const argument form is a bug.  this cast is necessary.
+			// free not providing a const argument is a problem with the API.
+			// therefore this hard-cast is necessary.  sorry.  -bug
 			free((char *)shaderStr);
 			shaderStr = NULL;
 		}
 
-		return !wereThereErrors;
+		return shaderId;
 	}
 
 	eae6320::Effect::VertexShader LoadVertexShader(eae6320::Effect::Parent program, eae6320::Effect::CompiledShader compiledShader)
@@ -439,7 +430,7 @@ namespace
 		return NULL;
 	}
 
-	ID3DXBuffer * CompileShader(eae6320::Effect::Parent device, const char * shaderStr, size_t size, const char *filename)
+	ID3DXBuffer * CompileShader(eae6320::Effect::Parent device, const char * shaderStr, size_t size, eae6320::Effect::ShaderType type, const char *filename)
 	{
 		// Load the source code from file and compile it
 		ID3DXBuffer* compiledShader;
@@ -451,7 +442,7 @@ namespace
 			};
 			ID3DXInclude* includes = NULL;
 			const char* entryPoint = "main";
-			const char* profile = "vs_3_0";
+			const char* profile = type == eae6320::Effect::ShaderType::Vertex ? "vs_3_0" : "ps_3_0";
 			const DWORD noFlags = 0;
 			ID3DXBuffer* errorMessages = NULL;
 			ID3DXConstantTable** noConstants = NULL;

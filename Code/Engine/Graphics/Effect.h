@@ -8,6 +8,7 @@
 #include <gl/GL.h>
 #elif defined ( EAE6320_PLATFORM_D3D )
 #include <d3d9.h>
+#include <d3dx9shader.h>
 #else
 #error "one of EAE6320_PLATFORM_GL or EAE6320_PLATFORM_D3D must be defined."
 #endif
@@ -20,7 +21,7 @@ namespace eae6320
 #if defined( EAE6320_PLATFORM_GL )
 			GLuint
 #elif defined ( EAE6320_PLATFORM_D3D )
-			IDirect3DDevice9 *
+			LPDIRECT3DDEVICE9
 #endif
 			Parent;
 
@@ -28,7 +29,7 @@ namespace eae6320
 #if defined( EAE6320_PLATFORM_GL )
 			GLint
 #elif defined ( EAE6320_PLATFORM_D3D )
-			IDirect3DVertexShader9 *
+			LPDIRECT3DVERTEXSHADER9
 #endif
 			VertexShader;
 
@@ -36,7 +37,7 @@ namespace eae6320
 #if defined( EAE6320_PLATFORM_GL )
 			GLint
 #elif defined ( EAE6320_PLATFORM_D3D )
-			IDirect3DPixelShader9 *
+			LPDIRECT3DPIXELSHADER9
 #endif
 			FragmentShader;
 
@@ -44,11 +45,15 @@ namespace eae6320
 #if defined( EAE6320_PLATFORM_GL )
 			GLuint
 #elif defined ( EAE6320_PLATFORM_D3D )
-
-			ID3DXBuffer *
+			LPD3DXBUFFER
 #endif
 			CompiledShader;
 
+		enum ShaderType
+		{
+			Vertex,
+			Fragment
+		};
 
 		// for OpenGL, parent is the program (GLuint for program ID),
 		//   composing both of the compiled shaders together.
