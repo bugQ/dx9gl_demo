@@ -195,11 +195,13 @@
     <Image Include="Resources\small.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Actor.h" />
     <ClInclude Include="Resources\Resource.h" />
     <ClInclude Include="Resources\targetver.h" />
     <ClInclude Include="WindowsProgram.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Actor.cpp" />
     <ClCompile Include="EntryPoint.cpp" />
     <ClCompile Include="WindowsProgram.cpp" />
   </ItemGroup>

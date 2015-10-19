@@ -26,9 +26,11 @@
       <Filter>Resources</Filter>
     </ClInclude>
     <ClInclude Include="WindowsProgram.h" />
+    <ClInclude Include="Actor.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EntryPoint.cpp" />
     <ClCompile Include="WindowsProgram.cpp" />
+    <ClCompile Include="Actor.cpp" />
   </ItemGroup>
 </Project>
