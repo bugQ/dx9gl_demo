@@ -433,14 +433,14 @@ bool CleanupMainWindow()
 			return false;
 		}
 
-		for (size_t i = countof(model_specs) - 1; i >= 0; --i)
-			delete models[i];
+		for (size_t i = countof(model_specs); i > 0; --i)
+			delete models[i-1];
 		delete[] models;
-		for (size_t i = countof(shader_files) - 1; i >= 0; --i)
-			delete effects[i];
+		for (size_t i = countof(shader_files); i > 0; --i)
+			delete effects[i-1];
 		delete[] effects;
-		for (size_t i = countof(mesh_files) - 1; i >= 0; --i)
-			delete meshes[i];
+		for (size_t i = countof(mesh_files); i > 0; --i)
+			delete meshes[i-1];
 		delete[] meshes;
 	}
 	return true;
