@@ -21,12 +21,24 @@ namespace eae6320
 {
 	namespace Graphics
 	{
+#ifdef EAE6320_PLATFORM_D3D
+		Effect::Parent GetDevice(); // used within Effect
+#endif
+
+		// must be called at startup
 		bool Initialize( const HWND i_renderingWindow );
+
+		/* used internally */
 		void SetEffect( Effect & effect, Vector3 position );
 		void DrawMesh( Mesh & mesh );
-		Mesh LoadMesh( Mesh::Data & data );
-		void DrawModel( Model & model );
-		void Render();
+		bool LoadMesh( Mesh & output, Mesh::Data & input );
+
+		/* main graphics loop functions */
+		void BeginFrame();
+		void DrawModel(Model & model);
+		void EndFrame();
+
+		// must be called before quit
 		bool ShutDown();
 	}
 }

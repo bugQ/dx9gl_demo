@@ -63,6 +63,17 @@ namespace
 // Interface
 //==========
 
+Effect::Parent eae6320::Graphics::GetDevice()
+{
+	return s_direct3dDevice;
+}
+
+bool eae6320::Graphics::LoadMesh(Mesh & output, Mesh::Data & input)
+{
+	return CreateVertexBuffer(output, input)
+		&& CreateIndexBuffer(output, input);
+}
+
 bool eae6320::Graphics::Initialize( const HWND i_renderingWindow )
 {
 	s_renderingWindow = i_renderingWindow;
@@ -93,12 +104,7 @@ bool eae6320::Graphics::Initialize( const HWND i_renderingWindow )
 		{
 			goto OnError;
 		}
-		if (!CreateVertexBuffer(sa_meshes[i], *data))
-		{
-			delete data;
-			goto OnError;
-		}
-		if (!CreateIndexBuffer(sa_meshes[i], *data))
+		if (!LoadMesh(sa_meshes[i], *data))
 		{
 			delete data;
 			goto OnError;
@@ -172,7 +178,7 @@ void eae6320::Graphics::SetEffect(Effect & effect, Vector3 position)
 	assert(SUCCEEDED(result));
 }
 
-void eae6320::Graphics::Render()
+void eae6320::Graphics::BeginFrame()
 {
 	// Every frame an entirely new image will be created.
 	// Before drawing anything, then, the previous image will be erased
@@ -184,31 +190,23 @@ void eae6320::Graphics::Render()
 		D3DCOLOR clearColor;
 		{
 			// Black is usually used:
-			clearColor = D3DCOLOR_XRGB( 0, 0, 0 );
+			clearColor = D3DCOLOR_XRGB(0, 0, 0);
 		}
 		const float noZBuffer = 0.0f;
 		const DWORD noStencilBuffer = 0;
-		HRESULT result = s_direct3dDevice->Clear( subRectangleCount, subRectanglesToClear,
-			clearTheRenderTarget, clearColor, noZBuffer, noStencilBuffer );
-		assert( SUCCEEDED( result ) );
+		HRESULT result = s_direct3dDevice->Clear(subRectangleCount, subRectanglesToClear,
+			clearTheRenderTarget, clearColor, noZBuffer, noStencilBuffer);
+		assert(SUCCEEDED(result));
 	}
 
-	// The actual function calls that draw geometry must be made between paired calls to
-	// BeginScene() and EndScene()
-	{
-		HRESULT result = s_direct3dDevice->BeginScene();
-		assert( SUCCEEDED( result ) );
-		{
-			SetEffect( *s_effect, Vector3(-0.4f, 0.4f, 0.0f) );
+	HRESULT result = s_direct3dDevice->BeginScene();
+	assert(SUCCEEDED(result));
+}
 
-			for (unsigned int i = 0; i < s_num_meshes; ++i)
-			{
-				DrawMesh( sa_meshes[i] );
-			}
-		}
-		result = s_direct3dDevice->EndScene();
-		assert( SUCCEEDED( result ) );
-	}
+void eae6320::Graphics::EndFrame()
+{
+	HRESULT result = s_direct3dDevice->EndScene();
+	assert(SUCCEEDED(result));
 
 	// Everything has been drawn to the "back buffer", which is just an image in memory.
 	// In order to display it, the contents of the back buffer must be "presented"
@@ -218,8 +216,8 @@ void eae6320::Graphics::Render()
 		const RECT* noDestinationRectangle = NULL;
 		const HWND useDefaultWindow = NULL;
 		const RGNDATA* noDirtyRegion = NULL;
-		HRESULT result = s_direct3dDevice->Present( noSourceRectangle, noDestinationRectangle, useDefaultWindow, noDirtyRegion );
-		assert( SUCCEEDED( result ) );
+		HRESULT result = s_direct3dDevice->Present(noSourceRectangle, noDestinationRectangle, useDefaultWindow, noDirtyRegion);
+		assert(SUCCEEDED(result));
 	}
 }
 

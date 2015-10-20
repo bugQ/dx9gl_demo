@@ -21,6 +21,8 @@
 // Static Data Initialization
 //===========================
 
+using namespace eae6320::Graphics;
+
 namespace
 {
 	// Instead of a pointer Windows provides a "handle"
@@ -31,6 +33,37 @@ namespace
 	// and so a typical Windows program will have many different windows.
 	// In our class, however, we will only have a single main window.
 	HWND s_mainWindow = NULL;
+
+
+	/* begin hardcoded asset list.  whoops !!
+	   this will all be replaced with actual asset files, later. */
+
+	// effect_spec = vertex + fragment filenames
+	typedef std::pair<const char *, const char *> effect_spec;
+	// model_spec = mesh + effect indices
+	typedef std::pair<size_t, size_t> model_spec;
+
+	const char * mesh_files[] = {
+		"data/square.vib",
+		"data/triangle.vib"
+	};
+	effect_spec shader_files[] = {
+		effect_spec("data/vertex.shd", "data/fragment.shd")
+	};
+	model_spec model_specs[] = {
+		// one square
+		model_spec(0, 0),
+		// two triangles
+		model_spec(1, 0),
+		model_spec(1, 0)
+	};
+
+	/* end hardcoded asset list. */
+
+	Mesh ** meshes;
+	Effect ** effects;
+	Model ** models;
+	size_t num_models;
 
 	// Window classes are almost always identified by name;
 	// there is also a unique ATOM associated with them,
@@ -63,6 +96,44 @@ int CreateMainWindowAndReturnExitCodeWhenItCloses( const HINSTANCE i_thisInstanc
 // Helper Functions
 //=================
 
+template <typename T, size_t N> constexpr size_t countof(T(&)[N])
+{
+	return N;
+}
+
+template <size_t N> Mesh ** LoadMeshes(const char * (&spec)[N])
+{
+	Mesh ** out = new Mesh *[N];
+	for (size_t i = 0; i < N; ++i) {
+		Mesh::Data * data = Mesh::Data::FromBinFile(spec[i]);
+		out[i] = new Mesh();
+		if (!LoadMesh(*out[i], *data)) {
+			delete out[i];
+			out[i] = NULL;
+		}
+		delete data;
+	}
+	return out;
+}
+
+template <size_t N> Effect ** LoadEffects(effect_spec (&spec)[N])
+{
+	Effect ** out = new Effect *[N];
+	for (size_t i = 0; i < N; ++i)
+		out[i] = Effect::FromFiles(spec[i].first, spec[i].second);
+	return out;
+}
+
+template <size_t N> Model ** BuildModels(model_spec (&spec)[N],
+	Mesh ** meshes, Effect ** effects, size_t &num_models)
+{
+	Model ** out = new Model *[N];
+	for (size_t i = 0; i < N; ++i)
+		out[i] = new Model(*meshes[spec[i].first], *effects[spec[i].second]);
+	num_models = N;
+	return out;
+}
+
 bool CreateMainWindow( const HINSTANCE i_thisInstanceOfTheProgram, const int i_initialWindowDisplayState )
 {
 	// Every window that Windows creates must belong to a "class".
@@ -85,6 +156,10 @@ bool CreateMainWindow( const HINSTANCE i_thisInstanceOfTheProgram, const int i_i
 		{
 			goto OnError;
 		}
+
+		meshes = LoadMeshes(mesh_files);
+		effects = LoadEffects(shader_files);
+		models = BuildModels(model_specs, meshes, effects, num_models);
 
 		return true;
 
@@ -340,6 +415,16 @@ bool CleanupMainWindow()
 			MessageBox( NULL, errorMessage.c_str(), errorCaption, MB_OK | MB_ICONERROR );
 			return false;
 		}
+
+		for (size_t i = countof(model_specs); i >= 0; --i)
+			delete models[i];
+		delete[] models;
+		for (size_t i = countof(shader_files); i >= 0; --i)
+			delete effects[i];
+		delete[] effects;
+		for (size_t i = countof(mesh_files); i >= 0; --i)
+			delete meshes[i];
+		delete[] meshes;
 	}
 	return true;
 }
@@ -461,6 +546,16 @@ bool UnregisterMainWindowClass( const HINSTANCE i_thisInstanceOfTheProgram )
 	}
 }
 
+void Render()
+{
+	BeginFrame();
+	models[1]->position = eae6320::Vector3(-0.6f, -0.4f, 0.0f);
+	models[2]->position = eae6320::Vector3(0.6f, -0.4f, 0.0f);
+	for (size_t i = 0; i < num_models; ++i)
+		DrawModel(*models[i]);
+	EndFrame();
+}
+
 bool WaitForMainWindowToClose( int& o_exitCode )
 {
 	// Any time something happens that Windows cares about, it will send the main window a message.
@@ -494,7 +589,7 @@ bool WaitForMainWindowToClose( int& o_exitCode )
 		{
 			// Usually there will be no messages in the queue, and the game can run
 
-			eae6320::Graphics::Render();
+			Render();
 		}
 		else
 		{

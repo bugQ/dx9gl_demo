@@ -25,31 +25,6 @@ namespace
 	HWND s_renderingWindow = NULL;
 	HDC s_deviceContext = NULL;
 	HGLRC s_openGlRenderingContext = NULL;
-
-	eae6320::Mesh * sa_meshes;
-	unsigned int s_num_meshes;
-
-	// OpenGL encapsulates a matching vertex shader and fragment shader into what it calls a "program".
-
-	// A vertex shader is a program that operates on vertices.
-	// Its input comes from a C/C++ "draw call" and is:
-	//	* Position
-	//	* Any other data we want
-	// Its output is:
-	//	* Position
-	//		(So that the graphics hardware knows which pixels to fill in for the triangle)
-	//	* Any other data we want
-
-	// The fragment shader is a program that operates on fragments
-	// (or potential pixels).
-	// Its input is:
-	//	* The data that was output from the vertex shader,
-	//		interpolated based on how close the fragment is
-	//		to each vertex in the triangle.
-	// Its output is:
-	//	* The final color that the pixel should be
-	
-	eae6320::Effect * s_effect;
 }
 
 // Helper Function Declarations
@@ -57,9 +32,8 @@ namespace
 
 namespace
 {
-	using namespace eae6320;
+	using namespace eae6320::Graphics;
 
-	bool CreateProgram();
 	bool CreateRenderingContext();
 	bool CreateVertexArray( Mesh & mesh, Mesh::Data & data );
 
@@ -75,6 +49,11 @@ namespace
 
 // Interface
 //==========
+
+bool eae6320::Graphics::LoadMesh(Mesh & output, Mesh::Data & input)
+{
+	return CreateVertexArray(output, input);
+}
 
 bool eae6320::Graphics::Initialize( const HWND i_renderingWindow )
 {
@@ -94,34 +73,6 @@ bool eae6320::Graphics::Initialize( const HWND i_renderingWindow )
 			UserOutput::Print( errorMessage );
 			goto OnError;
 		}
-	}
-
-	// Initialize meshes
-	const unsigned int num_meshes = 2;
-	sa_meshes = new Mesh[num_meshes];
-	s_num_meshes = num_meshes;
-	const char * const meshfilenames[num_meshes] = {
-		"data/square.vib",
-		"data/triangle.vib"
-	};
-	for (unsigned int i = 0; i < s_num_meshes; ++i)
-	{
-		Mesh::Data * data = Mesh::Data::FromBinFile(meshfilenames[i]);
-		if (!data)
-		{
-			goto OnError;
-		}
-		if (!CreateVertexArray(sa_meshes[i], *data))
-		{
-			delete data;
-			goto OnError;
-		}
-		delete data;
-	}
-
-	if ( !CreateProgram() )
-	{
-		goto OnError;
 	}
 
 	return true;
@@ -168,35 +119,22 @@ void eae6320::Graphics::SetEffect( Effect & effect, Vector3 position )
 	assert(glGetError() == GL_NO_ERROR);
 }
 
-void eae6320::Graphics::Render()
+void eae6320::Graphics::BeginFrame()
 {
-	// Every frame an entirely new image will be created.
-	// Before drawing anything, then, the previous image will be erased
-	// by "clearing" the image buffer (filling it with a solid color)
-	{
-		// Black is usually used
-		glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
-		assert( glGetError() == GL_NO_ERROR );
-		// In addition to the color, "depth" and "stencil" can also be cleared,
-		// but for now we only care about color
-		const GLbitfield clearColor = GL_COLOR_BUFFER_BIT;
-		glClear( clearColor );
-		assert( glGetError() == GL_NO_ERROR );
-	}
+	// Black is usually used
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	assert(glGetError() == GL_NO_ERROR);
+	// In addition to the color, "depth" and "stencil" can also be cleared,
+	// but for now we only care about color
+	const GLbitfield clearColor = GL_COLOR_BUFFER_BIT;
+	glClear(clearColor);
+	assert(glGetError() == GL_NO_ERROR);
+}
 
-	// The actual function calls that draw geometry
-	{
-		for (unsigned int i = 0; i < s_num_meshes; ++i)
-			DrawMesh( sa_meshes[i] );
-	}
-
-	// Everything has been drawn to the "back buffer", which is just an image in memory.
-	// In order to display it, the contents of the back buffer must be swapped with the "front buffer"
-	// (which is what the user sees)
-	{
-		BOOL result = SwapBuffers( s_deviceContext );
-		assert( result != FALSE );
-	}
+void eae6320::Graphics::EndFrame()
+{
+	BOOL result = SwapBuffers(s_deviceContext);
+	assert(result != FALSE);
 }
 
 bool eae6320::Graphics::ShutDown()
@@ -205,28 +143,6 @@ bool eae6320::Graphics::ShutDown()
 
 	if ( s_openGlRenderingContext != NULL )
 	{
-		delete s_effect;
-		s_effect = NULL;
-
-		for (unsigned int i = 0; i < s_num_meshes; ++i)
-		{
-			if (sa_meshes[i].gl_id != 0)
-			{
-				const GLsizei arrayCount = 1;
-				glDeleteVertexArrays(arrayCount, &sa_meshes[i].gl_id);
-				const GLenum errorCode = glGetError();
-				if (errorCode != GL_NO_ERROR)
-				{
-					std::stringstream errorMessage;
-					errorMessage << "OpenGL failed to delete the vertex array: " <<
-						reinterpret_cast<const char*>(gluErrorString(errorCode));
-					UserOutput::Print(errorMessage.str());
-				}
-				sa_meshes[i].gl_id = 0;
-			}
-		}
-		delete[] sa_meshes;
-
 		if ( wglMakeCurrent( s_deviceContext, NULL ) != FALSE )
 		{
 			if ( wglDeleteContext( s_openGlRenderingContext ) == FALSE )
@@ -264,13 +180,6 @@ bool eae6320::Graphics::ShutDown()
 
 namespace
 {
-	bool CreateProgram()
-	{
-		// Load and attach the shaders, creating a program for them
-		s_effect = Effect::FromFiles("data/vertex.shd", "data/fragment.shd");
-		return s_effect != NULL;
-	}
-
 	bool CreateRenderingContext()
 	{
 		// A "device context" can be thought of an abstraction that Windows uses

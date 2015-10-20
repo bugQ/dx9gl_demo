@@ -397,5 +397,34 @@ namespace Graphics
 
 		return meshData;
 	}
+
+#if defined ( EAE6320_PLATFORM_D3D )
+	Mesh::~Mesh()
+	{
+		if (vertex_buffer)
+			vertex_buffer->Release();
+		if (index_buffer)
+			index_buffer->Release();
+		if (vertex_declaration)
+			vertex_declaration->Release();
+	}
+#elif defined ( EAE6320_PLATFORM_GL )
+	Mesh::~Mesh()
+	{
+		if (gl_id != 0)
+		{
+			const GLsizei arrayCount = 1;
+			glDeleteVertexArrays(arrayCount, &gl_id);
+			const GLenum errorCode = glGetError();
+			if (errorCode != GL_NO_ERROR)
+			{
+				std::stringstream errorMessage;
+				errorMessage << "OpenGL failed to delete the vertex array: " <<
+					reinterpret_cast<const char*>(gluErrorString(errorCode));
+				UserOutput::Print(errorMessage.str());
+			}
+		}
+	}
+#endif
 }
 }

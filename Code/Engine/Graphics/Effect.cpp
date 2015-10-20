@@ -5,6 +5,7 @@
 #include <cassert>
 #include "../Windows/WindowsFunctions.h"
 #include "../Debug_Runtime/UserOutput.h"
+#include "Graphics.h"
 
 #if defined ( EAE6320_PLATFORM_GL )
 #include <gl/GLU.h>
@@ -223,7 +224,7 @@ namespace
 
 #if defined ( EAE6320_PLATFORM_GL )
 
-	eae6320::Effect::Parent CreateParent()
+	eae6320::Graphics::Effect::Parent CreateParent()
 	{
 		// Create a program
 		GLuint program = glCreateProgram();
@@ -576,14 +577,15 @@ namespace
 			eae6320::UserOutput::Print(errorMessage.str());
 			return false;
 		}
+		
+		return true;
 	}
 
 #elif defined ( EAE6320_PLATFORM_D3D )
 
 	eae6320::Graphics::Effect::Parent CreateParent()
 	{
-		assert(0);
-		return NULL;
+		return eae6320::Graphics::GetDevice();
 	}
 
 	std::pair<ID3DXBuffer *, ID3DXConstantTable *> CompileShader(

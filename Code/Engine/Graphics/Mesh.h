@@ -6,6 +6,8 @@
 #include "../Windows/WindowsIncludes.h"
 #endif
 #include <gl/GL.h>
+#include <gl/GLU.h>
+#include "OpenGLExtensions\OpenGlExtensions.h"
 #elif defined ( EAE6320_PLATFORM_D3D )
 #include <d3d9.h>
 #else
@@ -64,6 +66,8 @@ namespace Graphics
 		IDirect3DIndexBuffer9 * index_buffer;
 		IDirect3DVertexDeclaration9 * vertex_declaration;
 #endif
+
+		~Mesh();
 	};
 }
 }
