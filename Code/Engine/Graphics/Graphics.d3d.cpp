@@ -193,7 +193,7 @@ void eae6320::Graphics::Render()
 				assert( SUCCEEDED( result ) );
 				result = s_direct3dDevice->SetPixelShader( s_effect->fragment_shader.first );
 				assert( SUCCEEDED( result ) );
-				const float pos[2] = { -0.4, 0.4 };
+				const float pos[2] = { -0.4f, 0.4f };
 				result = s_effect->vertex_shader.second->SetFloatArray( s_direct3dDevice, s_effect->position_handle, pos, 2 );
 				assert( SUCCEEDED( result ) );
 			}

@@ -181,6 +181,8 @@ void eae6320::Graphics::Render()
 		// Set the vertex and fragment shaders
 		{
 			glUseProgram( s_effect->parent );
+			const float pos[2] = { -0.4f, 0.4f };
+			glUniform2fv( s_effect->position_handle, 1, pos );
 			assert( glGetError() == GL_NO_ERROR );
 		}
 
