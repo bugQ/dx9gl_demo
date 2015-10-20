@@ -14,6 +14,7 @@
 
 // Build
 //------
+using namespace eae6320::Graphics;
 
 bool eae6320::cMeshBuilder::Build( const std::vector<std::string>& )
 {

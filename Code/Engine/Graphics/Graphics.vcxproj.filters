@@ -45,6 +45,9 @@
     <ClInclude Include="Effect.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -65,5 +68,13 @@
     <ClCompile Include="Effect.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Graphics.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Model.inl">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

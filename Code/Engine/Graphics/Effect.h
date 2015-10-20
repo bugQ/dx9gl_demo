@@ -16,6 +16,8 @@
 
 namespace eae6320
 {
+namespace Graphics
+{
 	struct Effect
 	{
 		typedef
@@ -85,4 +87,5 @@ namespace eae6320
 
 		~Effect();
 	};
+}
 }

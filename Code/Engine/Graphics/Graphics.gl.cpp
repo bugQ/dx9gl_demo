@@ -160,6 +160,14 @@ void eae6320::Graphics::DrawMesh( Mesh & mesh )
 	}
 }
 
+void eae6320::Graphics::SetEffect( Effect & effect, Vector3 position )
+{
+	glUseProgram(effect.parent);
+	const float pos[2] = { position.x, position.y };
+	glUniform2fv(effect.position_handle, 1, pos);
+	assert(glGetError() == GL_NO_ERROR);
+}
+
 void eae6320::Graphics::Render()
 {
 	// Every frame an entirely new image will be created.
@@ -178,14 +186,6 @@ void eae6320::Graphics::Render()
 
 	// The actual function calls that draw geometry
 	{
-		// Set the vertex and fragment shaders
-		{
-			glUseProgram( s_effect->parent );
-			const float pos[2] = { -0.4f, 0.4f };
-			glUniform2fv( s_effect->position_handle, 1, pos );
-			assert( glGetError() == GL_NO_ERROR );
-		}
-
 		for (unsigned int i = 0; i < s_num_meshes; ++i)
 			DrawMesh( sa_meshes[i] );
 	}

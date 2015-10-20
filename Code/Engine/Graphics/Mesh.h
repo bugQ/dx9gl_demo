@@ -15,6 +15,8 @@
 
 namespace eae6320
 {
+namespace Graphics
+{
 	struct Mesh
 	{
 		struct Vertex
@@ -63,4 +65,5 @@ namespace eae6320
 		IDirect3DVertexDeclaration9 * vertex_declaration;
 #endif
 	};
+}
 }

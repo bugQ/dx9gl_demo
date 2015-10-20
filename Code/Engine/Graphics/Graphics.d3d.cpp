@@ -22,7 +22,7 @@ namespace
 	IDirect3D9* s_direct3dInterface = NULL;
 	IDirect3DDevice9* s_direct3dDevice = NULL;
 
-	eae6320::Mesh * sa_meshes;
+	eae6320::Graphics::Mesh * sa_meshes;
 	unsigned int s_num_meshes;
 
 	// The vertex shader is a program that operates on vertices.
@@ -41,7 +41,7 @@ namespace
 	//		to each vertex in the triangle.
 	// Its output is:
 	//	* The final color that the pixel should be
-	eae6320::Effect * s_effect;
+	eae6320::Graphics::Effect * s_effect;
 }
 
 // Helper Function Declarations
@@ -49,7 +49,7 @@ namespace
 
 namespace
 {
-	using namespace eae6320;
+	using namespace eae6320::Graphics;
 
 	bool CreateDevice();
 	bool CreateIndexBuffer( Mesh & mesh, Mesh::Data & data );
@@ -160,6 +160,18 @@ void eae6320::Graphics::DrawMesh( Mesh & mesh )
 	}
 }
 
+void eae6320::Graphics::SetEffect(Effect & effect, Vector3 position)
+{
+	HRESULT result;
+	result = s_direct3dDevice->SetVertexShader(effect.vertex_shader.first);
+	assert(SUCCEEDED(result));
+	result = s_direct3dDevice->SetPixelShader(effect.fragment_shader.first);
+	assert(SUCCEEDED(result));
+	const float pos[2] = { position.x, position.y };
+	result = effect.vertex_shader.second->SetFloatArray(s_direct3dDevice, effect.position_handle, pos, 2);
+	assert(SUCCEEDED(result));
+}
+
 void eae6320::Graphics::Render()
 {
 	// Every frame an entirely new image will be created.
@@ -187,16 +199,7 @@ void eae6320::Graphics::Render()
 		HRESULT result = s_direct3dDevice->BeginScene();
 		assert( SUCCEEDED( result ) );
 		{
-			// Set the shaders
-			{
-				result = s_direct3dDevice->SetVertexShader( s_effect->vertex_shader.first );
-				assert( SUCCEEDED( result ) );
-				result = s_direct3dDevice->SetPixelShader( s_effect->fragment_shader.first );
-				assert( SUCCEEDED( result ) );
-				const float pos[2] = { -0.4f, 0.4f };
-				result = s_effect->vertex_shader.second->SetFloatArray( s_direct3dDevice, s_effect->position_handle, pos, 2 );
-				assert( SUCCEEDED( result ) );
-			}
+			SetEffect( *s_effect, Vector3(-0.4f, 0.4f, 0.0f) );
 
 			for (unsigned int i = 0; i < s_num_meshes; ++i)
 			{

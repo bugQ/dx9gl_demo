@@ -9,6 +9,7 @@
 
 namespace {
 	using namespace eae6320;
+	using namespace eae6320::Graphics;
 
 	const int numVerticesPerPolygon = 3;
 
@@ -252,6 +253,8 @@ namespace {
 }
 namespace eae6320
 {
+namespace Graphics
+{
 	Mesh::Data::Data()
 		: vertices(NULL), indices(NULL), num_vertices(-1), num_triangles(-1)
 	{
@@ -394,4 +397,5 @@ namespace eae6320
 
 		return meshData;
 	}
+}
 }

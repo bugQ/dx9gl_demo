@@ -162,6 +162,7 @@
     <ClInclude Include="Effect.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Model.h" />
     <ClInclude Include="OpenGLExtensions\glext.h" />
     <ClInclude Include="OpenGLExtensions\OpenGlExtensions.h" />
     <ClInclude Include="OpenGLExtensions\wglext.h" />
@@ -170,6 +171,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Effect.cpp" />
+    <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="Graphics.d3d.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -186,6 +188,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Model.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

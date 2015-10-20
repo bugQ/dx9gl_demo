@@ -16,12 +16,12 @@
 
 namespace
 {
-	eae6320::Effect::Parent CreateParent();
+	eae6320::Graphics::Effect::Parent CreateParent();
 	char * LoadAndAllocateShaderProgram(const char* i_path, size_t& o_size, std::string& o_errorMessage);
-	eae6320::Effect::CompiledShader CompileShader(eae6320::Effect::Parent parent, const char * shaderStr, size_t size, eae6320::Effect::ShaderType type, const char *filename);
-	eae6320::Effect::VertexShader LoadVertexShader(eae6320::Effect::Parent parent, eae6320::Effect::CompiledShader compiledShader);
-	eae6320::Effect::FragmentShader LoadFragmentShader(eae6320::Effect::Parent parent, eae6320::Effect::CompiledShader compiledShader);
-	bool FinishUp(eae6320::Effect * effect);
+	eae6320::Graphics::Effect::CompiledShader CompileShader(eae6320::Graphics::Effect::Parent parent, const char * shaderStr, size_t size, eae6320::Graphics::Effect::ShaderType type, const char *filename);
+	eae6320::Graphics::Effect::VertexShader LoadVertexShader(eae6320::Graphics::Effect::Parent parent, eae6320::Graphics::Effect::CompiledShader compiledShader);
+	eae6320::Graphics::Effect::FragmentShader LoadFragmentShader(eae6320::Graphics::Effect::Parent parent, eae6320::Graphics::Effect::CompiledShader compiledShader);
+	bool FinishUp(eae6320::Graphics::Effect * effect);
 
 #if defined ( EAE6320_PLATFORM_GL )
 	// This helper struct exists to be able to dynamically allocate memory to get "log info"
@@ -36,6 +36,8 @@ namespace
 }
 
 namespace eae6320
+{
+namespace Graphics
 {
 	Effect * Effect::FromFiles(
 		const char * vertexShaderPath,
@@ -55,7 +57,7 @@ namespace eae6320
 			return NULL;
 		}
 		effect->vertex_shader = LoadVertexShader(effect->parent, CompileShader(effect->parent,
-			vertex_shader_str, vertex_shader_size, eae6320::Effect::ShaderType::Vertex, vertexShaderPath));
+			vertex_shader_str, vertex_shader_size, eae6320::Graphics::Effect::ShaderType::Vertex, vertexShaderPath));
 
 		const char * fragment_shader_str = LoadAndAllocateShaderProgram(
 			fragmentShaderPath, fragment_shader_size, error_str);
@@ -65,7 +67,7 @@ namespace eae6320
 			return NULL;
 		}
 		effect->fragment_shader = LoadFragmentShader(effect->parent, CompileShader(effect->parent,
-			fragment_shader_str, fragment_shader_size, eae6320::Effect::ShaderType::Fragment, fragmentShaderPath));
+			fragment_shader_str, fragment_shader_size, eae6320::Graphics::Effect::ShaderType::Fragment, fragmentShaderPath));
 
 		if (!FinishUp(effect))
 		{
@@ -106,6 +108,7 @@ namespace eae6320
 			fragment_shader.first->Release();
 	}
 #endif
+}
 }
 
 namespace
@@ -238,15 +241,15 @@ namespace
 			eae6320::UserOutput::Print("OpenGL failed to create a program");
 			return false;
 		}
-		
+
 		return program;
 	}
 
-	eae6320::Effect::CompiledShader CompileShader(
-		eae6320::Effect::Parent program,
+	eae6320::Graphics::Effect::CompiledShader CompileShader(
+		eae6320::Graphics::Effect::Parent program,
 		const char * shaderStr,
 		size_t size,
-		eae6320::Effect::ShaderType type,
+		eae6320::Graphics::Effect::ShaderType type,
 		const char *filename)
 	{
 		// Verify that compiling shaders at run-time is supported
@@ -267,10 +270,10 @@ namespace
 			GLenum shaderType;
 			switch (type)
 			{
-			case eae6320::Effect::ShaderType::Vertex:
+			case eae6320::Graphics::Effect::ShaderType::Vertex:
 				shaderType = GL_VERTEX_SHADER;
 				break;
-			case eae6320::Effect::ShaderType::Fragment:
+			case eae6320::Graphics::Effect::ShaderType::Fragment:
 				shaderType = GL_FRAGMENT_SHADER;
 				break;
 			default:
@@ -411,7 +414,9 @@ namespace
 		return shaderId;
 	}
 
-	eae6320::Effect::VertexShader LoadVertexShader(eae6320::Effect::Parent program, eae6320::Effect::CompiledShader compiledShader)
+	eae6320::Graphics::Effect::VertexShader LoadVertexShader(
+		eae6320::Graphics::Effect::Parent program,
+		eae6320::Graphics::Effect::CompiledShader compiledShader)
 	{
 		// Attach the shader to the program
 		{
@@ -448,7 +453,9 @@ namespace
 	}
 
 
-	eae6320::Effect::FragmentShader LoadFragmentShader(eae6320::Effect::Parent program, eae6320::Effect::CompiledShader compiledShader)
+	eae6320::Graphics::Effect::FragmentShader LoadFragmentShader(
+		eae6320::Graphics::Effect::Parent program,
+		eae6320::Graphics::Effect::CompiledShader compiledShader)
 	{
 		// Attach the shader to the program
 		{
@@ -484,7 +491,7 @@ namespace
 		return compiledShader;
 	}
 
-	bool FinishUp(eae6320::Effect * effect)
+	bool FinishUp(eae6320::Graphics::Effect * effect)
 	{
 		glLinkProgram(effect->parent);
 		GLenum errorCode = glGetError();
@@ -573,17 +580,17 @@ namespace
 
 #elif defined ( EAE6320_PLATFORM_D3D )
 
-	eae6320::Effect::Parent CreateParent()
+	eae6320::Graphics::Effect::Parent CreateParent()
 	{
 		assert(0);
 		return NULL;
 	}
 
 	std::pair<ID3DXBuffer *, ID3DXConstantTable *> CompileShader(
-		eae6320::Effect::Parent device,
+		eae6320::Graphics::Effect::Parent device,
 		const char * shaderStr,
 		size_t size,
-		eae6320::Effect::ShaderType type,
+		eae6320::Graphics::Effect::ShaderType type,
 		const char *filename)
 	{
 		// Load the source code from file and compile it
@@ -600,10 +607,10 @@ namespace
 			const char* profile;
 			switch (type)
 			{
-			case eae6320::Effect::ShaderType::Vertex:
+			case eae6320::Graphics::Effect::ShaderType::Vertex:
 				profile = "vs_3_0";
 				break;
-			case eae6320::Effect::ShaderType::Fragment:
+			case eae6320::Graphics::Effect::ShaderType::Fragment:
 				profile = "ps_3_0";
 				break;
 			default:
@@ -651,7 +658,7 @@ namespace
 	}
 
 	std::pair<IDirect3DVertexShader9 *, ID3DXConstantTable *> LoadVertexShader(
-		eae6320::Effect::Parent device,
+		eae6320::Graphics::Effect::Parent device,
 		std::pair<ID3DXBuffer *, ID3DXConstantTable *> compiledShader)
 	{
 		IDirect3DVertexShader9 * shader;
@@ -674,7 +681,7 @@ namespace
 	}
 
 	std::pair<IDirect3DPixelShader9 *, ID3DXConstantTable *> LoadFragmentShader(
-		eae6320::Effect::Parent device,
+		eae6320::Graphics::Effect::Parent device,
 		std::pair<ID3DXBuffer *, ID3DXConstantTable *> compiledShader)
 	{
 		IDirect3DPixelShader9 * shader;
@@ -696,7 +703,7 @@ namespace
 		return std::pair<IDirect3DPixelShader9 *, ID3DXConstantTable *>(shader, constants);
 	}
 
-	bool FinishUp(eae6320::Effect * effect)
+	bool FinishUp(eae6320::Graphics::Effect * effect)
 	{
 		D3DXHANDLE uniform_handle = NULL;
 		ID3DXConstantTable * constants = effect->vertex_shader.second;
