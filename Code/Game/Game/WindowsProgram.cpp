@@ -18,9 +18,13 @@
 // graphics API calls during gameplay
 #include "../../Engine/Graphics/Graphics.h"
 
+#include "../../Engine/Time/Time.h"
+#include "../../Engine/UserInput/UserInput.h"
+
 // Static Data Initialization
 //===========================
 
+using namespace eae6320;
 using namespace eae6320::Graphics;
 
 namespace
@@ -160,6 +164,9 @@ bool CreateMainWindow( const HINSTANCE i_thisInstanceOfTheProgram, const int i_i
 		meshes = LoadMeshes(mesh_files);
 		effects = LoadEffects(shader_files);
 		models = BuildModels(model_specs, meshes, effects, num_models);
+		models[0]->position = eae6320::Vector3(0.0f, 0.2f, 0.0f);
+		models[1]->position = eae6320::Vector3(-0.6f, -0.4f, 0.0f);
+		models[2]->position = eae6320::Vector3(0.6f, -0.4f, 0.0f);
 
 		return true;
 
@@ -327,8 +334,18 @@ HWND CreateMainWindowHandle( const HINSTANCE i_thisInstanceOfTheProgram, const i
 		}
 	}
 
+
 	// Display the window in the initial state that Windows requested
 	ShowWindow( mainWindow, i_initialWindowDisplayState );
+
+	{
+		std::string errorMessage;
+		Time::Initialize(&errorMessage);
+		if (!errorMessage.empty()) {
+			MessageBox(NULL, errorMessage.c_str(), NULL, MB_OK | MB_ICONERROR);
+			goto OnError;
+		}
+	}
 
 	return mainWindow;
 
@@ -549,8 +566,6 @@ bool UnregisterMainWindowClass( const HINSTANCE i_thisInstanceOfTheProgram )
 void Render()
 {
 	BeginFrame();
-	models[1]->position = eae6320::Vector3(-0.6f, -0.4f, 0.0f);
-	models[2]->position = eae6320::Vector3(0.6f, -0.4f, 0.0f);
 	for (size_t i = 0; i < num_models; ++i)
 		DrawModel(*models[i]);
 	EndFrame();
@@ -588,6 +603,14 @@ bool WaitForMainWindowToClose( int& o_exitCode )
 		if ( !hasWindowsSentAMessage )
 		{
 			// Usually there will be no messages in the queue, and the game can run
+			Time::OnNewFrame();
+			float dt = Time::GetSecondsElapsedThisFrame();
+			Vector3 dir = Vector3::Zero;
+			dir += UserInput::IsKeyPressed(VK_UP) ? Vector3::J : Vector3::Zero;
+			dir += UserInput::IsKeyPressed(VK_DOWN) ? -Vector3::J : Vector3::Zero;
+			dir += UserInput::IsKeyPressed(VK_RIGHT) ? Vector3::I : Vector3::Zero;
+			dir += UserInput::IsKeyPressed(VK_LEFT) ? -Vector3::I : Vector3::Zero;
+			models[0]->position += dir * dt;
 
 			Render();
 		}
