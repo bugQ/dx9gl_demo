@@ -17,6 +17,7 @@
 layout( location = 0 ) in vec2 i_point;
 layout( location = 1 ) in vec4 i_color;
 
+// this value comes from the game engine
 uniform vec2 g_position;
 
 // Output
@@ -55,6 +56,9 @@ void main()
 
 #elif defined( EAE6320_PLATFORM_D3D )
 
+// this value comes from the game engine
+uniform float2 g_position;
+
 // Entry Point
 //============
 
@@ -69,7 +73,7 @@ void main(
 	// These values come from one of the sVertex that we filled the vertex buffer with in C code
 	in const float2 i_point : POSITION,
 	in const float4 i_color : COLOR,
-
+	
 	// Output
 	//=======
 

@@ -193,6 +193,9 @@ void eae6320::Graphics::Render()
 				assert( SUCCEEDED( result ) );
 				result = s_direct3dDevice->SetPixelShader( s_effect->fragment_shader.first );
 				assert( SUCCEEDED( result ) );
+				const float pos[2] = { -0.4, 0.4 };
+				result = s_effect->vertex_shader.second->SetFloatArray( s_direct3dDevice, s_effect->position_handle, pos, 2 );
+				assert( SUCCEEDED( result ) );
 			}
 
 			for (unsigned int i = 0; i < s_num_meshes; ++i)

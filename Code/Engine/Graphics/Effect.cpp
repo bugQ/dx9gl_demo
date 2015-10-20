@@ -242,7 +242,12 @@ namespace
 		return program;
 	}
 
-	eae6320::Effect::CompiledShader CompileShader(eae6320::Effect::Parent program, const char * shaderStr, size_t size, eae6320::Effect::ShaderType type, const char *filename)
+	eae6320::Effect::CompiledShader CompileShader(
+		eae6320::Effect::Parent program,
+		const char * shaderStr,
+		size_t size,
+		eae6320::Effect::ShaderType type,
+		const char *filename)
 	{
 		// Verify that compiling shaders at run-time is supported
 		{
@@ -251,7 +256,7 @@ namespace
 			if (!isShaderCompilingSupported)
 			{
 				eae6320::UserOutput::Print("Compiling shaders at run-time isn't supported on this implementation (this should never happen)");
-				return false;
+				return 0;
 			}
 		}
 
@@ -259,7 +264,21 @@ namespace
 		GLuint shaderId = 0;
 		{
 			// Generate a shader
-			GLenum shaderType = type == eae6320::Effect::ShaderType::Vertex ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER;
+			GLenum shaderType;
+			switch (type)
+			{
+			case eae6320::Effect::ShaderType::Vertex:
+				shaderType = GL_VERTEX_SHADER;
+				break;
+			case eae6320::Effect::ShaderType::Fragment:
+				shaderType = GL_FRAGMENT_SHADER;
+				break;
+			default:
+				std::stringstream errorMessage;
+				errorMessage << "Invalid ShaderType " << static_cast<int>(type);
+				eae6320::UserOutput::Print(errorMessage.str());
+				return 0;
+			}
 			shaderId = glCreateShader(shaderType);
 			{
 				const GLenum errorCode = glGetError();
@@ -583,8 +602,10 @@ namespace
 			{
 			case eae6320::Effect::ShaderType::Vertex:
 				profile = "vs_3_0";
+				break;
 			case eae6320::Effect::ShaderType::Fragment:
 				profile = "ps_3_0";
+				break;
 			default:
 				std::stringstream errorMessage;
 				errorMessage << "Invalid ShaderType " << static_cast<int>(type);
@@ -679,12 +700,13 @@ namespace
 	{
 		D3DXHANDLE uniform_handle = NULL;
 		ID3DXConstantTable * constants = effect->vertex_shader.second;
-		uniform_handle = constants->GetConstantByName(NULL, "g_position_offset");
+		uniform_handle = constants->GetConstantByName(NULL, "g_position");
 		if (!uniform_handle)
 		{
 			eae6320::UserOutput::Print("No g_position uniform found");
 			return false;
 		}
+		effect->position_handle = uniform_handle;
 		return true;
 	}
 #endif
