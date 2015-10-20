@@ -75,6 +75,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Debug_Buildtime", "Code\Tools\Debug_Buildtime\Debug_Buildtime.vcxproj", "{A51FBEE3-2C1B-4DBD-8C31-828672CBF95A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Manager", "Code\Engine\Manager\Manager.vcxproj", "{F91DEA98-889A-4241-9A9D-1DAA555E5B78}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1DBC6E80-4EB5-4390-8821-6C56520AD603} = {1DBC6E80-4EB5-4390-8821-6C56520AD603}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

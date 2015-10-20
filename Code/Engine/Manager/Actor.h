@@ -12,9 +12,9 @@ namespace eae6320
 		Mesh * mesh;
 		Effect * effect;
 
-		public Vector3 position;
-
 	public:
-		Actor(Mesh & mesh, Effect & effect, Vector3 position = Vector3::ZERO);
+		Vector3 position;
+
+		Actor(Mesh & mesh, Effect & effect, Vector3 position = Vector3::Zero);
 	};
 }

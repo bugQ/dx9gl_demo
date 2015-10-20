@@ -189,9 +189,9 @@ void eae6320::Graphics::Render()
 		{
 			// Set the shaders
 			{
-				result = s_direct3dDevice->SetVertexShader( s_effect->vertex_shader );
+				result = s_direct3dDevice->SetVertexShader( s_effect->vertex_shader.first );
 				assert( SUCCEEDED( result ) );
-				result = s_direct3dDevice->SetPixelShader( s_effect->fragment_shader );
+				result = s_direct3dDevice->SetPixelShader( s_effect->fragment_shader.first );
 				assert( SUCCEEDED( result ) );
 			}
 

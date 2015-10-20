@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-namespace Monster
+namespace eae6320
 {
 	struct Vector3
 	{

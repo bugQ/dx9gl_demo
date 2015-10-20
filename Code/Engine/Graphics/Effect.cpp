@@ -37,7 +37,10 @@ namespace
 
 namespace eae6320
 {
-	Effect * Effect::FromFiles(const char * vertexShaderPath, const char * fragmentShaderPath, Parent parent)
+	Effect * Effect::FromFiles(
+		const char * vertexShaderPath,
+		const char * fragmentShaderPath,
+		Parent parent)
 	{
 		Effect * effect = new Effect();
 		effect->parent = parent ? parent : CreateParent();
@@ -93,17 +96,24 @@ namespace eae6320
 #elif defined ( EAE6320_PLATFORM_D3D )
 	Effect::~Effect()
 	{
-		if (vertex_shader)
-			vertex_shader->Release();
-		if (fragment_shader)
-			fragment_shader->Release();
+		if (vertex_shader.second) // constant table
+			vertex_shader.second->Release();
+		if (vertex_shader.first) // shader
+			vertex_shader.first->Release();
+		if (fragment_shader.second) // constant table
+			fragment_shader.second->Release();
+		if (fragment_shader.first) // shader
+			fragment_shader.first->Release();
 	}
 #endif
 }
 
 namespace
 {
-	char * LoadAndAllocateShaderProgram(const char* i_path, size_t& o_size, std::string& o_errorMessage)
+	char * LoadAndAllocateShaderProgram(
+		const char* i_path,
+		size_t& o_size,
+		std::string& o_errorMessage)
 	{
 		bool wereThereErrors = false;
 		char * o_shader;
@@ -521,6 +531,16 @@ namespace
 					return false;
 				}
 			}
+
+			GLint uniform_handle = -1;
+			{
+				uniform_handle = glGetUniformLocation(effect->parent, "g_position");
+				if (uniform_handle == -1)
+				{
+					eae6320::UserOutput::Print("No g_position uniform found");
+					return false;
+				}
+			}
 		}
 		else
 		{
@@ -540,10 +560,16 @@ namespace
 		return NULL;
 	}
 
-	ID3DXBuffer * CompileShader(eae6320::Effect::Parent device, const char * shaderStr, size_t size, eae6320::Effect::ShaderType type, const char *filename)
+	std::pair<ID3DXBuffer *, ID3DXConstantTable *> CompileShader(
+		eae6320::Effect::Parent device,
+		const char * shaderStr,
+		size_t size,
+		eae6320::Effect::ShaderType type,
+		const char *filename)
 	{
 		// Load the source code from file and compile it
 		ID3DXBuffer* compiledShader;
+		ID3DXConstantTable* constants = NULL;
 		{
 			const D3DXMACRO macros[] =
 			{
@@ -552,13 +578,24 @@ namespace
 			};
 			ID3DXInclude* includes = NULL;
 			const char* entryPoint = "main";
-			const char* profile = type == eae6320::Effect::ShaderType::Vertex ? "vs_3_0" : "ps_3_0";
+			const char* profile;
+			switch (type)
+			{
+			case eae6320::Effect::ShaderType::Vertex:
+				profile = "vs_3_0";
+			case eae6320::Effect::ShaderType::Fragment:
+				profile = "ps_3_0";
+			default:
+				std::stringstream errorMessage;
+				errorMessage << "Invalid ShaderType " << static_cast<int>(type);
+				eae6320::UserOutput::Print(errorMessage.str());
+				return std::pair<ID3DXBuffer *, ID3DXConstantTable *>(NULL, NULL);
+			}
 			const DWORD noFlags = 0;
 			ID3DXBuffer* errorMessages = NULL;
-			ID3DXConstantTable** noConstants = NULL;
 			HRESULT result = D3DXCompileShader(shaderStr, static_cast<UINT>(size),
 				macros, includes, entryPoint, profile, noFlags,
-				&compiledShader, &errorMessages, noConstants);
+				&compiledShader, &errorMessages, &constants);
 			if (SUCCEEDED(result))
 			{
 				if (errorMessages)
@@ -582,52 +619,72 @@ namespace
 					errorMessage << "Direct3D failed to compile the shader from the file " << filename;
 					eae6320::UserOutput::Print(errorMessage.str());
 				}
-				return NULL;
+				if (constants)
+				{
+					constants->Release();
+				}
+				return std::pair<ID3DXBuffer *, ID3DXConstantTable *>(NULL, NULL);
 			}
-			return compiledShader;
+			return std::pair<ID3DXBuffer *, ID3DXConstantTable *>(compiledShader, constants);
 		}
 	}
 
-	eae6320::Effect::VertexShader LoadVertexShader(eae6320::Effect::Parent device, ID3DXBuffer * compiledShader)
+	std::pair<IDirect3DVertexShader9 *, ID3DXConstantTable *> LoadVertexShader(
+		eae6320::Effect::Parent device,
+		std::pair<ID3DXBuffer *, ID3DXConstantTable *> compiledShader)
 	{
 		IDirect3DVertexShader9 * shader;
+		ID3DXBuffer * buffer = compiledShader.first;
+		ID3DXConstantTable * constants = compiledShader.second;
 		// Create the vertex shader object
 		bool wereThereErrors = false;
 		{
 			const HRESULT result = device->CreateVertexShader(
-				reinterpret_cast<DWORD*>(compiledShader->GetBufferPointer()),
+				reinterpret_cast<DWORD*>(buffer->GetBufferPointer()),
 				&shader);
 			if (FAILED(result))
 			{
 				eae6320::UserOutput::Print("Direct3D failed to create the vertex shader");
 				wereThereErrors = true;
 			}
-			compiledShader->Release();
+			buffer->Release();
 		}
-		return shader;
+		return std::pair<IDirect3DVertexShader9 *, ID3DXConstantTable *>(shader, constants);
 	}
 
-	eae6320::Effect::FragmentShader LoadFragmentShader(eae6320::Effect::Parent device, ID3DXBuffer * compiledShader)
+	std::pair<IDirect3DPixelShader9 *, ID3DXConstantTable *> LoadFragmentShader(
+		eae6320::Effect::Parent device,
+		std::pair<ID3DXBuffer *, ID3DXConstantTable *> compiledShader)
 	{
 		IDirect3DPixelShader9 * shader;
+		ID3DXBuffer * buffer = compiledShader.first;
+		ID3DXConstantTable * constants = compiledShader.second;
 		// Create the vertex shader object
 		bool wereThereErrors = false;
 		{
 			const HRESULT result = device->CreatePixelShader(
-				reinterpret_cast<DWORD*>(compiledShader->GetBufferPointer()),
+				reinterpret_cast<DWORD*>(buffer->GetBufferPointer()),
 				&shader);
 			if (FAILED(result))
 			{
 				eae6320::UserOutput::Print("Direct3D failed to create the fragment shader");
 				wereThereErrors = true;
 			}
-			compiledShader->Release();
+			buffer->Release();
 		}
-		return shader;
+		return std::pair<IDirect3DPixelShader9 *, ID3DXConstantTable *>(shader, constants);
 	}
 
 	bool FinishUp(eae6320::Effect * effect)
 	{
+		D3DXHANDLE uniform_handle = NULL;
+		ID3DXConstantTable * constants = effect->vertex_shader.second;
+		uniform_handle = constants->GetConstantByName(NULL, "g_position_offset");
+		if (!uniform_handle)
+		{
+			eae6320::UserOutput::Print("No g_position uniform found");
+			return false;
+		}
 		return true;
 	}
 #endif
