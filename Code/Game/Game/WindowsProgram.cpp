@@ -45,7 +45,7 @@ namespace
 	// effect_spec = vertex + fragment filenames
 	typedef std::pair<const char *, const char *> effect_spec;
 	// model_spec = mesh + effect indices
-	typedef std::pair<size_t, size_t> model_spec;
+	typedef struct { size_t mesh_idx, effect_idx; Vector3 position; } model_spec;
 
 	const char * mesh_files[] = {
 		"data/square.vib",
@@ -56,10 +56,10 @@ namespace
 	};
 	model_spec model_specs[] = {
 		// one square
-		model_spec(0, 0),
+		{0, 0, Vector3(0.0f, 0.0f, 0.0f)},
 		// two triangles
-		model_spec(1, 0),
-		model_spec(1, 0)
+		{1, 0, Vector3(-0.06f, 0.0f, 0.0f)},
+		{1, 0, Vector3(0.09f, 0.0f, 0.0f)}
 	};
 
 	/* end hardcoded asset list. */
@@ -133,7 +133,10 @@ template <size_t N> Model ** BuildModels(model_spec (&spec)[N],
 {
 	Model ** out = new Model *[N];
 	for (size_t i = 0; i < N; ++i)
-		out[i] = new Model(*meshes[spec[i].first], *effects[spec[i].second]);
+		out[i] = new Model(
+			*meshes[spec[i].mesh_idx],
+			*effects[spec[i].effect_idx],
+			spec[i].position);
 	num_models = N;
 	return out;
 }
@@ -164,9 +167,6 @@ bool CreateMainWindow( const HINSTANCE i_thisInstanceOfTheProgram, const int i_i
 		meshes = LoadMeshes(mesh_files);
 		effects = LoadEffects(shader_files);
 		models = BuildModels(model_specs, meshes, effects, num_models);
-		models[0]->position = eae6320::Vector3(0.0f, 0.2f, 0.0f);
-		models[1]->position = eae6320::Vector3(-0.6f, -0.4f, 0.0f);
-		models[2]->position = eae6320::Vector3(0.6f, -0.4f, 0.0f);
 
 		return true;
 
