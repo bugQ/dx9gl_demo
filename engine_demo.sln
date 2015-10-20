@@ -74,6 +74,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Debug_Runtime", "Code\Engin
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Debug_Buildtime", "Code\Tools\Debug_Buildtime\Debug_Buildtime.vcxproj", "{A51FBEE3-2C1B-4DBD-8C31-828672CBF95A}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Manager", "Code\Engine\Manager\Manager.vcxproj", "{F91DEA98-889A-4241-9A9D-1DAA555E5B78}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Direct3D_64 = Debug|Direct3D_64
@@ -186,6 +188,14 @@ Global
 		{A51FBEE3-2C1B-4DBD-8C31-828672CBF95A}.Release|Direct3D_64.Build.0 = Release|x64
 		{A51FBEE3-2C1B-4DBD-8C31-828672CBF95A}.Release|OpenGL_32.ActiveCfg = Release|Win32
 		{A51FBEE3-2C1B-4DBD-8C31-828672CBF95A}.Release|OpenGL_32.Build.0 = Release|Win32
+		{F91DEA98-889A-4241-9A9D-1DAA555E5B78}.Debug|Direct3D_64.ActiveCfg = Debug|x64
+		{F91DEA98-889A-4241-9A9D-1DAA555E5B78}.Debug|Direct3D_64.Build.0 = Debug|x64
+		{F91DEA98-889A-4241-9A9D-1DAA555E5B78}.Debug|OpenGL_32.ActiveCfg = Debug|Win32
+		{F91DEA98-889A-4241-9A9D-1DAA555E5B78}.Debug|OpenGL_32.Build.0 = Debug|Win32
+		{F91DEA98-889A-4241-9A9D-1DAA555E5B78}.Release|Direct3D_64.ActiveCfg = Release|x64
+		{F91DEA98-889A-4241-9A9D-1DAA555E5B78}.Release|Direct3D_64.Build.0 = Release|x64
+		{F91DEA98-889A-4241-9A9D-1DAA555E5B78}.Release|OpenGL_32.ActiveCfg = Release|Win32
+		{F91DEA98-889A-4241-9A9D-1DAA555E5B78}.Release|OpenGL_32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -204,5 +214,6 @@ Global
 		{2D2C4F1C-7078-4512-85B8-C2A82962DFE5} = {706B430C-5DB4-48F4-A81B-4B0B51D59217}
 		{9D4BFE8D-8818-4386-A112-B8674E51E067} = {1AE00594-D85F-4A0B-ADE8-D241FDE887BB}
 		{A51FBEE3-2C1B-4DBD-8C31-828672CBF95A} = {706B430C-5DB4-48F4-A81B-4B0B51D59217}
+		{F91DEA98-889A-4241-9A9D-1DAA555E5B78} = {1AE00594-D85F-4A0B-ADE8-D241FDE887BB}
 	EndGlobalSection
 EndGlobal
