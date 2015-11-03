@@ -52,7 +52,7 @@ namespace
 		"data/triangle.vib"
 	};
 	effect_spec shader_files[] = {
-		effect_spec("data/vertex.shd", "data/fragment.shd")
+		effect_spec("data/vertex.shb", "data/fragment.shb")
 	};
 	model_spec model_specs[] = {
 		// one square

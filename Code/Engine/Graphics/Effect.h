@@ -58,7 +58,7 @@ namespace Graphics
 #if defined( EAE6320_PLATFORM_GL )
 			GLuint
 #elif defined ( EAE6320_PLATFORM_D3D )
-			std::pair<LPD3DXBUFFER, LPD3DXCONSTANTTABLE>
+			std::pair<const DWORD *, LPD3DXCONSTANTTABLE>
 #endif
 			CompiledShader;
 

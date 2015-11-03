@@ -24,24 +24,6 @@ namespace
 
 	eae6320::Graphics::Mesh * sa_meshes;
 	unsigned int s_num_meshes;
-
-	// The vertex shader is a program that operates on vertices.
-	// Its input comes from a C/C++ "draw call" and is:
-	//	* Position
-	//	* Any other data we want
-	// Its output is:
-	//	* Position
-	//		(So that the graphics hardware knows which pixels to fill in for the triangle)
-	//	* Any other data we want
-	// The fragment shader is a program that operates on fragments
-	// (or potential pixels).
-	// Its input is:
-	//	* The data that was output from the vertex shader,
-	//		interpolated based on how close the fragment is
-	//		to each vertex in the triangle.
-	// Its output is:
-	//	* The final color that the pixel should be
-	eae6320::Graphics::Effect * s_effect;
 }
 
 // Helper Function Declarations
@@ -112,11 +94,6 @@ bool eae6320::Graphics::Initialize( const HWND i_renderingWindow )
 		delete data;
 	}
 
-	s_effect = Effect::FromFiles("data/vertex.shd", "data/fragment.shd", s_direct3dDevice);
-	if (!s_effect)
-	{
-		goto OnError;
-	}
 	return true;
 
 OnError:
@@ -229,9 +206,6 @@ bool eae6320::Graphics::ShutDown()
 	{
 		if ( s_direct3dDevice )
 		{
-			delete s_effect;
-			s_effect = NULL;
-
 			for (unsigned int i = 0; i < s_num_meshes; ++i)
 			{
 				if (sa_meshes[i].vertex_buffer)

@@ -588,7 +588,7 @@ namespace
 		return eae6320::Graphics::GetDevice();
 	}
 
-	std::pair<ID3DXBuffer *, ID3DXConstantTable *> CompileShader(
+	std::pair<const DWORD *, ID3DXConstantTable *> CompileShader(
 		eae6320::Graphics::Effect::Parent device,
 		const char * shaderStr,
 		size_t size,
@@ -596,111 +596,48 @@ namespace
 		const char *filename)
 	{
 		// Load the source code from file and compile it
-		ID3DXBuffer* compiledShader;
+		const DWORD * compiledShader = reinterpret_cast<const DWORD*>(shaderStr);
 		ID3DXConstantTable* constants = NULL;
-		{
-			const D3DXMACRO macros[] =
-			{
-				{ "EAE6320_PLATFORM_D3D", "1" },
-				{ NULL, NULL }
-			};
-			ID3DXInclude* includes = NULL;
-			const char* entryPoint = "main";
-			const char* profile;
-			switch (type)
-			{
-			case eae6320::Graphics::Effect::ShaderType::Vertex:
-				profile = "vs_3_0";
-				break;
-			case eae6320::Graphics::Effect::ShaderType::Fragment:
-				profile = "ps_3_0";
-				break;
-			default:
-				std::stringstream errorMessage;
-				errorMessage << "Invalid ShaderType " << static_cast<int>(type);
-				eae6320::UserOutput::Print(errorMessage.str());
-				return std::pair<ID3DXBuffer *, ID3DXConstantTable *>(NULL, NULL);
-			}
-			const DWORD noFlags = 0;
-			ID3DXBuffer* errorMessages = NULL;
-			HRESULT result = D3DXCompileShader(shaderStr, static_cast<UINT>(size),
-				macros, includes, entryPoint, profile, noFlags,
-				&compiledShader, &errorMessages, &constants);
-			if (SUCCEEDED(result))
-			{
-				if (errorMessages)
-				{
-					errorMessages->Release();
-				}
-			}
-			else
-			{
-				if (errorMessages)
-				{
-					std::stringstream errorMessage;
-					errorMessage << "Direct3D failed to compile the shader from the file " << filename
-						<< ":\n" << reinterpret_cast<char*>(errorMessages->GetBufferPointer());
-					eae6320::UserOutput::Print(errorMessage.str());
-					errorMessages->Release();
-				}
-				else
-				{
-					std::stringstream errorMessage;
-					errorMessage << "Direct3D failed to compile the shader from the file " << filename;
-					eae6320::UserOutput::Print(errorMessage.str());
-				}
-				if (constants)
-				{
-					constants->Release();
-				}
-				return std::pair<ID3DXBuffer *, ID3DXConstantTable *>(NULL, NULL);
-			}
-			return std::pair<ID3DXBuffer *, ID3DXConstantTable *>(compiledShader, constants);
-		}
+		D3DXGetShaderConstantTable(reinterpret_cast<const DWORD*>(shaderStr), &constants);
+		return std::pair<const DWORD *, ID3DXConstantTable *>(compiledShader, constants);
 	}
 
 	std::pair<IDirect3DVertexShader9 *, ID3DXConstantTable *> LoadVertexShader(
 		eae6320::Graphics::Effect::Parent device,
-		std::pair<ID3DXBuffer *, ID3DXConstantTable *> compiledShader)
+		std::pair<const DWORD *, ID3DXConstantTable *> compiledShader)
 	{
 		IDirect3DVertexShader9 * shader;
-		ID3DXBuffer * buffer = compiledShader.first;
+		const DWORD * buffer = compiledShader.first;
 		ID3DXConstantTable * constants = compiledShader.second;
 		// Create the vertex shader object
 		bool wereThereErrors = false;
 		{
-			const HRESULT result = device->CreateVertexShader(
-				reinterpret_cast<DWORD*>(buffer->GetBufferPointer()),
-				&shader);
+			const HRESULT result = device->CreateVertexShader(buffer, &shader);
 			if (FAILED(result))
 			{
 				eae6320::UserOutput::Print("Direct3D failed to create the vertex shader");
 				wereThereErrors = true;
 			}
-			buffer->Release();
 		}
 		return std::pair<IDirect3DVertexShader9 *, ID3DXConstantTable *>(shader, constants);
 	}
 
 	std::pair<IDirect3DPixelShader9 *, ID3DXConstantTable *> LoadFragmentShader(
 		eae6320::Graphics::Effect::Parent device,
-		std::pair<ID3DXBuffer *, ID3DXConstantTable *> compiledShader)
+		std::pair<const DWORD *, ID3DXConstantTable *> compiledShader)
 	{
 		IDirect3DPixelShader9 * shader;
-		ID3DXBuffer * buffer = compiledShader.first;
+		const DWORD * buffer = compiledShader.first;
 		ID3DXConstantTable * constants = compiledShader.second;
 		// Create the vertex shader object
 		bool wereThereErrors = false;
 		{
-			const HRESULT result = device->CreatePixelShader(
-				reinterpret_cast<DWORD*>(buffer->GetBufferPointer()),
-				&shader);
+			const HRESULT result = device->CreatePixelShader(buffer, &shader);
 			if (FAILED(result))
 			{
 				eae6320::UserOutput::Print("Direct3D failed to create the fragment shader");
 				wereThereErrors = true;
 			}
-			buffer->Release();
 		}
 		return std::pair<IDirect3DPixelShader9 *, ID3DXConstantTable *>(shader, constants);
 	}
