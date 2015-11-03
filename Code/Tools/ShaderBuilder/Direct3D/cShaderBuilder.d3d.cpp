@@ -4,8 +4,9 @@
 #include "../cShaderBuilder.h"
 
 #include <sstream>
-#include "../../../Engine/Graphics/Includes.h"
-#include "../../../Engine/Windows/Functions.h"
+#include "../../../Engine/Graphics/Effect.h"
+#include "../../../Engine/Windows/WindowsFunctions.h"
+#include "../../Debug_Buildtime/UserOutput.h"
 
 // Interface
 //==========
@@ -21,11 +22,11 @@ bool eae6320::cShaderBuilder::Build( const std::vector<std::string>& i_arguments
 		if ( i_arguments.size() >= 1 )
 		{
 			const std::string& argument = i_arguments[0];
-			if ( argument == "vertex" )
+			if ( argument.at(0) == 'v' )
 			{
 				shaderType = Graphics::ShaderTypes::Vertex;
 			}
-			else if ( argument == "fragment" )
+			else if ( argument.at(0) == 'f' )
 			{
 				shaderType = Graphics::ShaderTypes::Fragment;
 			}
@@ -33,13 +34,13 @@ bool eae6320::cShaderBuilder::Build( const std::vector<std::string>& i_arguments
 			{
 				std::stringstream errorMessage;
 				errorMessage << "\"" << argument << "\" is not a valid shader program type";
-				OutputErrorMessage( errorMessage.str().c_str(), m_path_source );
+				eae6320::UserOutput::Print( errorMessage.str().c_str(), m_path_source );
 				return false;
 			}
 		}
 		else
 		{
-			OutputErrorMessage(
+			eae6320::UserOutput::Print(
 				"A Shader must be built with an argument defining which type of shader program (e.g. \"vertex\" or \"fragment\") to compile",
 				m_path_source );
 			return false;
@@ -56,7 +57,7 @@ bool eae6320::cShaderBuilder::Build( const std::vector<std::string>& i_arguments
 			{
 				std::stringstream decoratedErrorMessage;
 				decoratedErrorMessage << "Windows failed to get the path to the DirectX SDK: " << errorMessage;
-				OutputErrorMessage( decoratedErrorMessage.str().c_str(), __FILE__ );
+				eae6320::UserOutput::Print( decoratedErrorMessage.str().c_str(), __FILE__ );
 				return false;
 			}
 		}
@@ -87,7 +88,7 @@ bool eae6320::cShaderBuilder::Build( const std::vector<std::string>& i_arguments
 		commandToBuild << " /Emain"
 			// #define the platform
 			<< " /DEAE6320_PLATFORM_D3D"
-#ifdef EAE6320_GRAPHICS_AREDEBUGSHADERSENABLED
+#ifdef EAE6320_SHADER_DEBUG
 			// Disable optimizations so that debugging is easier
 			<< " /Od"
 			// Enable debugging
@@ -112,7 +113,7 @@ bool eae6320::cShaderBuilder::Build( const std::vector<std::string>& i_arguments
 		}
 		else
 		{
-			OutputErrorMessage( errorMessage.c_str(), m_path_source );
+			eae6320::UserOutput::Print( errorMessage.c_str(), m_path_source );
 			return false;
 		}
 	}

@@ -60,7 +60,7 @@ namespace
 			"mcpp",
 			// The platform #define
 			"-DEAE6320_PLATFORM_GL",
-#ifdef EAE6320_GRAPHICS_AREDEBUGSHADERSENABLED
+#ifdef EAE6320_SHADER_DEBUG
 			// Keep comments
 			"-C",
 #endif

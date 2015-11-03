@@ -18,6 +18,16 @@ namespace eae6320
 {
 namespace Graphics
 {
+	namespace ShaderTypes
+	{
+		enum eShaderType
+		{
+			Unknown,
+			Vertex,
+			Fragment
+		};
+	}
+
 	struct Effect
 	{
 		typedef
