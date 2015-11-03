@@ -19,30 +19,26 @@ bool eae6320::cShaderBuilder::Build( const std::vector<std::string>& i_arguments
 	// Decide which kind of shader program to compile
 	Graphics::ShaderTypes::eShaderType shaderType = Graphics::ShaderTypes::Unknown;
 	{
-		if ( i_arguments.size() >= 1 )
+		std::string src = m_path_source;
+		size_t slash = src.find_last_of("\\/") + 1;
+		src = src.substr(slash);
+
+		if ( src[0] == 'v' || src[0] == 'V' )
 		{
-			const std::string& argument = i_arguments[0];
-			if ( argument.at(0) == 'v' )
-			{
-				shaderType = Graphics::ShaderTypes::Vertex;
-			}
-			else if ( argument.at(0) == 'f' )
-			{
-				shaderType = Graphics::ShaderTypes::Fragment;
-			}
-			else
-			{
-				std::stringstream errorMessage;
-				errorMessage << "\"" << argument << "\" is not a valid shader program type";
-				eae6320::UserOutput::Print( errorMessage.str().c_str(), m_path_source );
-				return false;
-			}
+			shaderType = Graphics::ShaderTypes::Vertex;
+		}
+		else if ( src[0] == 'f' || src[0] == 'F' )
+		{
+			shaderType = Graphics::ShaderTypes::Fragment;
 		}
 		else
 		{
+			std::stringstream decoratedErrorMessage;
+			decoratedErrorMessage
+				<< "each shader must start with v or f to denote shader type, not "
+				<< src;
 			eae6320::UserOutput::Print(
-				"A Shader must be built with an argument defining which type of shader program (e.g. \"vertex\" or \"fragment\") to compile",
-				m_path_source );
+				decoratedErrorMessage.str().c_str(), m_path_source );
 			return false;
 		}
 	}
