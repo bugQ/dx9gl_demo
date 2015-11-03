@@ -345,16 +345,13 @@ namespace
 			}
 			// Set the source code into the shader
 			{
-				const GLsizei shaderSourceCount = 2;
+				const GLsizei shaderSourceCount = 1;
 				const GLchar* shaderSources[shaderSourceCount] =
 				{
-					"#version 330 // first line, as required by GLSL\n"
-					"#define EAE6320_PLATFORM_GL\n",
 					reinterpret_cast<const GLchar *>(shaderStr)
 				};
 				const GLint shaderSourceLengths[shaderSourceCount] =
 				{
-					static_cast<GLint>(strlen(shaderSources[0])),
 					static_cast<GLint>(size)
 				};
 				glShaderSource(shaderId, shaderSourceCount, shaderSources, NULL);
