@@ -82,6 +82,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Math", "Code\Engine\Math\Math.vcxproj", "{2FD26C29-C8F2-4769-9DDE-B9EA549E2821}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Time", "Code\Engine\Time\Time.vcxproj", "{136761E4-C684-4AFF-BF27-E946FCF006A1}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6A910CEF-5FF8-43AB-BE9F-380D42C0C4C7} = {6A910CEF-5FF8-43AB-BE9F-380D42C0C4C7}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UserInput", "Code\Engine\UserInput\UserInput.vcxproj", "{552B2876-037A-4A14-8E5B-D73907DF5322}"
 EndProject
