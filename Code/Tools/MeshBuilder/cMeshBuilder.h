@@ -3,8 +3,8 @@
 	(as opposed to actually "building" it in some way so that the target is different than the source)
 */
 
-#ifndef EAE6320_CGENERICBUILDER_H
-#define EAE6320_CGENERICBUILDER_H
+#ifndef EAE6320_CMESHBUILDER_H
+#define EAE6320_CMESHBUILDER_H
 
 // Header Files
 //=============
@@ -30,4 +30,4 @@ namespace eae6320
 	};
 }
 
-#endif	// EAE6320_CGENERICBUILDER_H
+#endif	// EAE6320_CMESHBUILDER_H
