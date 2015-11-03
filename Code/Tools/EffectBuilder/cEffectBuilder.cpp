@@ -139,6 +139,7 @@ bool SaveFXB(const char * out_path,
 	outfile.write(reinterpret_cast<char *>(&fragment_path_len), sizeof(uint16_t));
 	outfile.write(vertex_shd_path.c_str(), vertex_path_len);
 	outfile.write(fragment_shd_path.c_str(), fragment_path_len);
+	outfile.close();
 
 	if (outfile.fail())
 	{

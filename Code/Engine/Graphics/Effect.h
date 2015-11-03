@@ -92,7 +92,7 @@ namespace Graphics
 		// this is a handle on the vertex shader's "g_position" uniform
 		PositionHandle position_handle;
 
-
+		static Effect * FromFile(const char * effectPath, Parent parent = 0);
 		static Effect * FromFiles(const char * vertexShaderPath, const char * fragmentShaderPath, Parent parent = 0);
 
 		~Effect();

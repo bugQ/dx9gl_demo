@@ -2,6 +2,7 @@
 #include "Effect.h"
 
 #include <sstream>
+#include <fstream>
 #include <cassert>
 #include "../Windows/WindowsFunctions.h"
 #include "../Debug_Runtime/UserOutput.h"
@@ -40,6 +41,48 @@ namespace eae6320
 {
 namespace Graphics
 {
+	Effect * Effect::FromFile(
+		const char * effectPath,
+		Parent parent)
+	{
+		std::ifstream infile(effectPath, std::ifstream::binary);
+
+		if (infile.fail())
+		{
+			std::stringstream errstr;
+			errstr << "Could not open path " << effectPath << "\n";
+			UserOutput::Print(errstr.str(), __FILE__);
+			return NULL;
+		}
+
+		uint16_t vertex_path_len, fragment_path_len;
+		char * vertex_shader_path, * fragment_shader_path;
+
+		infile.read(reinterpret_cast<char *>(&vertex_path_len), sizeof(uint16_t));
+		infile.read(reinterpret_cast<char *>(&fragment_path_len), sizeof(uint16_t));
+
+		vertex_shader_path = new char[vertex_path_len];
+		fragment_shader_path = new char[fragment_path_len];
+
+		infile.read(vertex_shader_path, vertex_path_len);
+		infile.read(fragment_shader_path, fragment_path_len);
+
+		infile.close();
+
+		if (infile.fail())
+		{
+			std::stringstream errstr;
+			errstr << "Read error from path " << effectPath << "\n";
+			UserOutput::Print(errstr.str(), __FILE__);
+			return NULL;
+		}
+
+		Effect * effect = Effect::FromFiles(vertex_shader_path, fragment_shader_path);
+		delete[] vertex_shader_path;
+		delete[] fragment_shader_path;
+		return effect;
+	}
+
 	Effect * Effect::FromFiles(
 		const char * vertexShaderPath,
 		const char * fragmentShaderPath,

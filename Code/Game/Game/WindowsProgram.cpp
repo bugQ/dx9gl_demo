@@ -42,8 +42,6 @@ namespace
 	/* begin hardcoded asset list.  whoops !!
 	   this will all be replaced with actual asset files, later. */
 
-	// effect_spec = vertex + fragment filenames
-	typedef std::pair<const char *, const char *> effect_spec;
 	// model_spec = mesh + effect indices
 	typedef struct { size_t mesh_idx, effect_idx; Vector3 position; } model_spec;
 
@@ -51,8 +49,8 @@ namespace
 		"data/square.vib",
 		"data/triangle.vib"
 	};
-	effect_spec shader_files[] = {
-		effect_spec("data/vertex.shb", "data/fragment.shb")
+	const char * effect_files[] = {
+		"data/sprite.fxb",
 	};
 	model_spec model_specs[] = {
 		// one square
@@ -120,11 +118,11 @@ template <size_t N> Mesh ** LoadMeshes(const char * (&spec)[N])
 	return out;
 }
 
-template <size_t N> Effect ** LoadEffects(effect_spec (&spec)[N])
+template <size_t N> Effect ** LoadEffects(const char * (&spec)[N])
 {
 	Effect ** out = new Effect *[N];
 	for (size_t i = 0; i < N; ++i)
-		out[i] = Effect::FromFiles(spec[i].first, spec[i].second);
+		out[i] = Effect::FromFile(spec[i]);
 	return out;
 }
 
@@ -165,7 +163,7 @@ bool CreateMainWindow( const HINSTANCE i_thisInstanceOfTheProgram, const int i_i
 		}
 
 		meshes = LoadMeshes(mesh_files);
-		effects = LoadEffects(shader_files);
+		effects = LoadEffects(effect_files);
 		models = BuildModels(model_specs, meshes, effects, num_models);
 
 		return true;
@@ -436,11 +434,7 @@ bool CleanupMainWindow()
 		for (size_t i = countof(model_specs); i > 0; --i)
 			delete models[i-1];
 		delete[] models;
-		for (size_t i = countof(shader_files); i > 0; --i)
-			delete effects[i-1];
 		delete[] effects;
-		for (size_t i = countof(mesh_files); i > 0; --i)
-			delete meshes[i-1];
 		delete[] meshes;
 	}
 	return true;

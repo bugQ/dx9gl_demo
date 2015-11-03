@@ -1,5 +1,5 @@
 return
 {
-  vertex = "vertex.shd",
-  fragment = "fragment.shd",
+  vertex = "data/vertex.shb",
+  fragment = "data/fragment.shb",
 }
