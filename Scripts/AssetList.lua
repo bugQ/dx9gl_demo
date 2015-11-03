@@ -13,5 +13,11 @@ return
 		-- shader list proper
 		"vertex",
 		"fragment",
-	}
+	},
+	effects = {
+		srcext = 'fxt', dstext = 'fxb',
+		tool = 'EffectBuilder.exe',
+		-- effect list proper
+		"sprite",
+	},
 }
