@@ -119,7 +119,7 @@ void eae6320::Graphics::SetEffect( Effect & effect, Vector3 position )
 	assert(glGetError() == GL_NO_ERROR);
 }
 
-void eae6320::Graphics::BeginFrame()
+void eae6320::Graphics::Clear()
 {
 	// Black is usually used
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -129,6 +129,10 @@ void eae6320::Graphics::BeginFrame()
 	const GLbitfield clearColor = GL_COLOR_BUFFER_BIT;
 	glClear(clearColor);
 	assert(glGetError() == GL_NO_ERROR);
+}
+
+void eae6320::Graphics::BeginFrame()
+{
 }
 
 void eae6320::Graphics::EndFrame()

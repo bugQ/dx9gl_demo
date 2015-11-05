@@ -559,6 +559,7 @@ bool UnregisterMainWindowClass( const HINSTANCE i_thisInstanceOfTheProgram )
 
 void Render()
 {
+	Clear();
 	BeginFrame();
 	for (size_t i = 0; i < num_models; ++i)
 		DrawModel(*models[i]);

@@ -34,6 +34,7 @@ namespace eae6320
 		bool LoadMesh( Mesh & output, Mesh::Data & input );
 
 		/* main graphics loop functions */
+		void Clear();
 		void BeginFrame();
 		void DrawModel(Model & model);
 		void EndFrame();
