@@ -40,7 +40,7 @@ end
 -- Function Definitions
 --=====================
 
-local function BuildAsset( i_relativeSrcPath, i_relativeDstPath, i_builderFileName )
+local function BuildAsset( i_relativeSrcPath, i_relativeDstPath, i_dependencies, i_builderFileName )
 	-- Get the absolute paths to the source and target
 	local path_source = s_AuthoredAssetDir .. i_relativeSrcPath
 	local path_target = s_BuiltAssetDir .. i_relativeDstPath
@@ -69,26 +69,32 @@ local function BuildAsset( i_relativeSrcPath, i_relativeDstPath, i_builderFileNa
 	end
 
 	-- Decide if the target needs to be built
-	local shouldTargetBeBuilt
-	do
-		-- The simplest reason a target should be built is if it doesn't exist
-		local doesTargetExist = DoesFileExist( path_target )
-		if doesTargetExist then
-			-- Even if the target exists it may be out-of-date.
-			-- If the source has been modified more recently than the target
-			-- then the target should be re-built.
-			local lastWriteTime_source = GetLastWriteTime( path_source )
-			local lastWriteTime_target = GetLastWriteTime( path_target )
-			shouldTargetBeBuilt = lastWriteTime_source > lastWriteTime_target
-			if not shouldTargetBeBuilt then
-				-- Even if the target was built from the current source
-				-- the builder may have changed which could cause different output
-				local lastWriteTime_builder = GetLastWriteTime( path_builder )
-				shouldTargetBeBuilt = lastWriteTime_builder > lastWriteTime_target
+	local shouldTargetBeBuilt = not DoesFileExist( path_target )
+	local lastWriteTime_target
+	if not shouldTargetBeBuilt then
+		-- Even if the target exists it may be out-of-date.
+		-- If the source has been modified more recently than the target
+		-- then the target should be re-built.
+		local lastWriteTime_source = GetLastWriteTime( path_source )
+		lastWriteTime_target = GetLastWriteTime( path_target )
+		shouldTargetBeBuilt = lastWriteTime_source > lastWriteTime_target
+	end
+	if not shouldTargetBeBuilt and type( i_dependencies ) == 'table' then
+		-- Even if the source file didn't change, one of its dependencies
+		-- might have changed, which will require a rebuild
+		for i, path_dep in ipairs( i_dependencies ) do
+			local lastWriteTime_dep = GetLastWriteTime( s_AuthoredAssetDir .. path_dep )
+			if lastWriteTime_dep > lastWriteTime_target then
+				shouldTargetBeBuilt = true
+				break
 			end
-		else
-			shouldTargetBeBuilt = true;
 		end
+	end
+	if not shouldTargetBeBuilt then
+		-- Even if the target was built from the current source
+		-- the builder may have changed which could cause different output
+		local lastWriteTime_builder = GetLastWriteTime( path_builder )
+		shouldTargetBeBuilt = lastWriteTime_builder > lastWriteTime_target
 	end
 
 	-- Build the target if necessary
@@ -167,9 +173,11 @@ local function BuildAssets( i_assetsToBuild )
 		if string.sub(dstext,1,1) ~= '.' then
 			dstext = '.' .. dstext
 		end
+
+		local deps = assets.deps
 		
 		for i, name in ipairs( assets ) do
-			if not BuildAsset( name .. srcext , name .. dstext, tool ) then
+			if not BuildAsset( name .. srcext , name .. dstext, deps, tool ) then
 				-- If there's an error then the asset build should fail,
 				-- but we can still try to build any remaining assets
 				wereThereErrors = true

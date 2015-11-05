@@ -20,10 +20,4 @@
 #extension GL_ARB_separate_shader_objects : require
 
 #define o_position gl_Position
-
-// Translate GLSL variable types to HLSL
-#define float2 vec2
-#define float3 vec3
-#define float4 vec4
-
 #endif
