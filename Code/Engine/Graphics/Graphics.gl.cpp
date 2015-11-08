@@ -75,6 +75,29 @@ bool eae6320::Graphics::Initialize( const HWND i_renderingWindow )
 		}
 	}
 
+	// don't draw tris that aren't facing camera
+	{
+		glEnable(GL_CULL_FACE);
+
+		const GLenum errorCode = glGetError();
+		switch (errorCode)
+		{
+		case GL_NO_ERROR:
+			break;
+		case GL_INVALID_ENUM:
+			UserOutput::Print("GL_CULL_FACE is not supported by this driver ! :(");
+			goto OnError;
+		case GL_INVALID_OPERATION:
+			UserOutput::Print("Someone called Initialize after BeginFrame ! WHy !!?");
+			goto OnError;
+		default:
+			std::stringstream ss;
+			ss << "OpenGL error code " << errorCode << " when trying to set GL_CULL_FACE.";
+			UserOutput::Print(ss.str().c_str());
+			goto OnError;
+		}
+	}
+
 	return true;
 
 OnError:
