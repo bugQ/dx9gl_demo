@@ -608,6 +608,7 @@ namespace
 					return false;
 				}
 			}
+			effect->position_handle = uniform_handle;
 		}
 		else
 		{

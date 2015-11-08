@@ -28,7 +28,7 @@ namespace {
 		{
 			std::stringstream errstr;
 			errstr << "The value at \"" << key << "\" must be a table "
-				"(instead of a " << luaL_typename(&luaState, -1) << ")\n";
+				"(instead of a " << luaL_typename(&luaState, -1) << ")";
 			UserOutput::Print(errstr.str());
 			goto OnExit;
 		}
@@ -46,7 +46,7 @@ namespace {
 			{
 				std::stringstream errstr;
 				errstr << "each element of " << key << " should be a table, not a "
-					<< luaL_typename(&luaState, -1) << "\n";
+					<< luaL_typename(&luaState, -1);
 				UserOutput::Print(errstr.str());
 				goto OnExit;
 			}
@@ -55,12 +55,11 @@ namespace {
 			lua_getfield(&luaState, -1, poskey); // position array now at -1
 			++depth;
 
-			if (!lua_istable(&luaState, -1) || luaL_len(&luaState, -1) != 2)
+			if (!lua_istable(&luaState, -1) || luaL_len(&luaState, -1) != 3)
 			{
 		OnBadPos:
 				std::stringstream errstr;
-				errstr << key << " must have " << poskey << " as a pair of numbers"
-					<< luaL_typename(&luaState, -1) << "\n";
+				errstr << poskey << " of " << key << " must come in triples!";
 				UserOutput::Print(errstr.str());
 				numVertices = -1;
 				goto OnExit;
@@ -85,7 +84,18 @@ namespace {
 
 			vertices[i].y = (float)lua_tonumber(&luaState, -1);
 
-			lua_pop(&luaState, 2); // pop y and position, leave vertex table
+			lua_pop(&luaState, 1); // pop y, leave position array
+			--depth;
+
+			lua_rawgeti(&luaState, -1, 3); // z coordinate now at -1
+			++depth;
+
+			if (!lua_isnumber(&luaState, -1))
+				goto OnBadPos;
+
+			vertices[i].z = (float)lua_tonumber(&luaState, -1);
+
+			lua_pop(&luaState, 2); // pop z and position, leave vertex table
 			depth -= 2;
 
 			const char * const colorkey = "color";
@@ -97,7 +107,7 @@ namespace {
 		OnBadColor:
 				std::stringstream errstr;
 				errstr << key << " must have " << colorkey
-					<< " as an RGBA quadruplet of [0.0, 1.0] numbers\n";
+					<< " as an RGBA quadruplet of [0.0, 1.0] numbers";
 				UserOutput::Print(errstr.str());
 				numVertices = -1;
 				goto OnExit;
@@ -160,7 +170,7 @@ namespace {
 		{
 			std::stringstream errstr;
 			errstr << "The value at \"" << key << "\" must be a table "
-				"(instead of a " << luaL_typename(&luaState, -1) << ")\n";
+				"(instead of a " << luaL_typename(&luaState, -1) << ")";
 			UserOutput::Print(errstr.str());
 			goto OnExit;
 		}
@@ -176,7 +186,7 @@ namespace {
 
 			if (!lua_istable(&luaState, -1) || luaL_len(&luaState, -1) != numVerticesPerPolygon)
 			{
-				UserOutput::Print("Mesh indices must come in triples\n");
+				UserOutput::Print("Mesh indices must come in triples");
 				numIndices = -1;
 				goto OnExit;
 			}
@@ -191,7 +201,7 @@ namespace {
 				OnBadIndex:
 					std::stringstream errstr;
 					errstr << "Indices must be natural numbers, not "
-						<< luaL_typename(&luaState, -1) << "\n";
+						<< luaL_typename(&luaState, -1);
 					UserOutput::Print(errstr.str());
 					numIndices = -1;
 					goto OnExit;
@@ -276,7 +286,7 @@ namespace Graphics
 		if (infile.fail())
 		{
 			std::stringstream errstr;
-			errstr << "Could not open path " << path << "\n";
+			errstr << "Could not open path " << path;
 			UserOutput::Print(errstr.str(), __FILE__);
 			delete meshData;
 			return NULL;
@@ -299,7 +309,7 @@ namespace Graphics
 		if (infile.fail())
 		{
 			std::stringstream errstr;
-			errstr << "Read error from path " << path << "\n";
+			errstr << "Read error from path " << path;
 			UserOutput::Print(errstr.str(), __FILE__);
 			delete meshData;
 			return NULL;
@@ -318,7 +328,7 @@ namespace Graphics
 			luaState = luaL_newstate();
 			if (!luaState)
 			{
-				UserOutput::Print("Failed to create a new Lua state\n");
+				UserOutput::Print("Failed to create a new Lua state");
 				goto OnExit;
 			}
 		}
@@ -358,7 +368,7 @@ namespace Graphics
 					{
 						std::stringstream errstr;
 						errstr << "Asset files must return a table (instead of a " <<
-							luaL_typename(luaState, -1) << ")\n";
+							luaL_typename(luaState, -1) << ")";
 						UserOutput::Print(errstr.str());
 						goto OnExit;
 					}
@@ -367,8 +377,7 @@ namespace Graphics
 				{
 					std::stringstream errstr;
 					errstr << "Asset files must return a single table (instead of " <<
-						returnedValueCount << " values)"
-						"\n";
+						returnedValueCount << " values";
 					UserOutput::Print(errstr.str());
 					goto OnExit;
 				}

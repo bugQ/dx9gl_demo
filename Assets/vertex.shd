@@ -1,5 +1,8 @@
 #include "monsters.inc"
 
+// this value comes from the game engine
+uniform vec3 g_position;
+
 #if defined( EAE6320_PLATFORM_GL )
 
 // Input
@@ -9,13 +12,10 @@
 // but must match the C calls to glVertexAttribPointer()
 
 // These values come from one of the sVertex that we filled the vertex buffer with in C code
-layout( location = 0 ) in vec2 i_point;
+layout( location = 0 ) in vec3 i_point;
 layout( location = 1 ) in vec4 i_color;
 
-// this value comes from the game engine
-uniform vec2 g_position;
-
-// Output
+//  Output
 //=======
 
 // The vertex shader must always output a position value,
@@ -38,9 +38,6 @@ void main()
 
 #elif defined( EAE6320_PLATFORM_D3D )
 
-// this value comes from the game engine
-uniform float2 g_position;
-
 // Entry Point
 //============
 
@@ -53,7 +50,7 @@ void main(
 	// but must match the C call to CreateVertexDeclaration()
 
 	// These values come from one of the sVertex that we filled the vertex buffer with in C code
-	in const float2 i_point : POSITION,
+	in const float3 i_point : POSITION,
 	in const float4 i_color : COLOR,
 
 	// Output
@@ -77,15 +74,6 @@ void main(
 #endif
 
 {
-	// Calculate the position of this vertex on screen
-	{
-		o_position = vec4( i_point.xy + g_position.xy, 0.0, 1.0 );
-		// Or, equivalently:
-		// o_position = vec4( i_point.x + g_position.x, i_point.y + g_position.y, 0.0, 1.0 );
-		// o_position = vec4( i_point + g_position, 0.0, 1.0 );
-	}
-	// Pass the input color to the fragment shader unchanged:
-	{
-		o_color = i_color;
-	}
+	o_position = vec4( i_point.xy + g_position.xy, 0.0, 1.0 );
+	o_color = i_color;
 }

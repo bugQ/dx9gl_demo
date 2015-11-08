@@ -24,12 +24,12 @@ namespace Graphics
 		struct Vertex
 		{
 			// POSITION
-			// 2 floats == 8 bytes
+			// 3 floats == 12 bytes
 			// Offset = 0
-			float x, y;
+			float x, y, z;
 			// COLOR0
 			// 4 uint8_ts == 4 bytes
-			// Offset = 8
+			// Offset = 12
 #if defined ( EAE6320_PLATFORM_GL )
 			uint8_t r, g, b, a; // OpenGL expects the byte layout of a color to be pretty much what you'd expect
 #elif defined ( EAE6320_PLATFORM_D3D )

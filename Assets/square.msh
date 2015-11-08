@@ -3,10 +3,10 @@ return
 	-- despite being 1-indexed in Lua, this will be 0-indexed elsewhere.
 	vertices =
 	{
-		{position = {-0.3, -0.3}, color = {0.9, 0.6, 0.3, 1.0}}, --0 
-		{position = {-0.3, 0.3}, color = {0.6, 0.3, 0.9, 1.0}}, --1
-		{position = {0.3, 0.3}, color = {0.6, 0.9, 0.3, 1.0}}, --2
-		{position = {0.3, -0.3}, color = {0.3, 0.9, 0.6, 1.0}}, --3
+		{position = {-0.3, -0.3, 0.0}, color = {0.9, 0.6, 0.3, 1.0}}, --0 
+		{position = {-0.3, 0.3, 0.0}, color = {0.6, 0.3, 0.9, 1.0}}, --1
+		{position = {0.3, 0.3, 0.0}, color = {0.6, 0.9, 0.3, 1.0}}, --2
+		{position = {0.3, -0.3, 0.0}, color = {0.3, 0.9, 0.6, 1.0}}, --3
 	},
 	-- therefore, the exporter should use 0-indexing as well.
 	indices =

@@ -150,8 +150,8 @@ void eae6320::Graphics::SetEffect(Effect & effect, Vector3 position)
 	assert(SUCCEEDED(result));
 	result = s_direct3dDevice->SetPixelShader(effect.fragment_shader.first);
 	assert(SUCCEEDED(result));
-	const float pos[2] = { position.x, position.y };
-	result = effect.vertex_shader.second->SetFloatArray(s_direct3dDevice, effect.position_handle, pos, 2);
+	const float pos[3] = { position.x, position.y, position.z };
+	result = effect.vertex_shader.second->SetFloatArray(s_direct3dDevice, effect.position_handle, pos, 3);
 	assert(SUCCEEDED(result));
 }
 
@@ -380,7 +380,7 @@ namespace
 
 		// Initialize the vertex format
 		{
-			// These elements must match the VertexFormat::sVertex layout struct exactly.
+			// These elements must match the Vertex layout struct exactly.
 			// They instruct Direct3D how to match the binary data in the vertex buffer
 			// to the input elements in a vertex shader
 			// (by using D3DDECLUSAGE enums here and semantics in the shader,
@@ -393,7 +393,7 @@ namespace
 				// POSITION
 				// 2 floats == 8 bytes
 				// Offset = 0
-				{ 0, 0, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
+				{ 0, 0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
 
 				// COLOR0
 				// D3DCOLOR == 4 bytes
