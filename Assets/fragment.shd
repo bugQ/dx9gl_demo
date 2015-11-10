@@ -2,7 +2,7 @@
 
 mainh_f_BEGIN
 mainh_i_COLOR(0, i_color)
-// includes the required fragment color output, o_color
+// mainh_f_END includes the required fragment color output, o_color
 mainh_f_END
 {
 	// Set the fragment to the interpolated color that originated as per-vertex data

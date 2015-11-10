@@ -12,7 +12,7 @@
 #include "Mesh.h"
 #include "Effect.h"
 #include "Model.h"
-#include "../Math/Vector3.h"
+#include "../Math/Matrix4.h"
 
 // Interface
 //==========
@@ -29,7 +29,7 @@ namespace eae6320
 		bool Initialize( const HWND i_renderingWindow );
 
 		/* used internally */
-		void SetEffect( Effect & effect, Vector3 position );
+		void SetEffect(Effect & effect, const Matrix4 local2world);
 		void DrawMesh( Mesh & mesh );
 		bool LoadMesh( Mesh & output, Mesh::Data & input );
 

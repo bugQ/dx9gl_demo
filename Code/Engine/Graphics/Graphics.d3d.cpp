@@ -33,6 +33,9 @@ namespace
 {
 	using namespace eae6320::Graphics;
 
+	eae6320::Matrix4 ScreenTransform(
+		const float i_fieldOfView_y, const float i_aspectRatio,
+		const float i_z_nearPlane, const float i_z_farPlane);
 	bool CreateDevice();
 	bool CreateIndexBuffer( Mesh & mesh, Mesh::Data & data );
 	bool CreateInterface();
@@ -44,7 +47,6 @@ namespace
 
 // Interface
 //==========
-
 Effect::Parent eae6320::Graphics::GetDevice()
 {
 	return s_direct3dDevice;
@@ -143,15 +145,21 @@ void eae6320::Graphics::DrawMesh( Mesh & mesh )
 	}
 }
 
-void eae6320::Graphics::SetEffect(Effect & effect, Vector3 position)
+void eae6320::Graphics::SetEffect( Effect & effect, const Matrix4 local2world )
 {
 	HRESULT result;
 	result = s_direct3dDevice->SetVertexShader(effect.vertex_shader.first);
 	assert(SUCCEEDED(result));
 	result = s_direct3dDevice->SetPixelShader(effect.fragment_shader.first);
 	assert(SUCCEEDED(result));
-	const float pos[3] = { position.x, position.y, position.z };
-	result = effect.vertex_shader.second->SetFloatArray(s_direct3dDevice, effect.position_handle, pos, 3);
+	const D3DXMATRIX * mat1 = reinterpret_cast<const D3DXMATRIX *>(&local2world);
+	const D3DXMATRIX * mat2 = reinterpret_cast<const D3DXMATRIX *>(&Matrix4::Identity);
+	LPD3DXCONSTANTTABLE table = effect.vertex_shader.second;
+	result = table->SetMatrixTranspose(s_direct3dDevice, effect.uni_local2world, mat1);
+	assert(SUCCEEDED(result));
+	result = table->SetMatrixTranspose(s_direct3dDevice, effect.uni_world2view, mat2);
+	assert(SUCCEEDED(result));
+	result = table->SetMatrixTranspose(s_direct3dDevice, effect.uni_view2screen, mat2);
 	assert(SUCCEEDED(result));
 }
 
@@ -242,6 +250,20 @@ bool eae6320::Graphics::ShutDown()
 
 namespace
 {
+	eae6320::Matrix4 ScreenTransform(
+		const float i_fieldOfView_y, const float i_aspectRatio,
+		const float i_z_nearPlane, const float i_z_farPlane)
+	{
+		const float yScale = 1.0f / std::tan(i_fieldOfView_y * 0.5f);
+		const float xScale = yScale / i_aspectRatio;
+		const float zDistanceScale = i_z_farPlane / (i_z_nearPlane - i_z_farPlane);
+		return eae6320::Matrix4(
+			xScale, 0.0f, 0.0f, 0.0f,
+			0.0f, yScale, 0.0f, 0.0f,
+			0.0f, 0.0f, zDistanceScale, -1.0f,
+			0.0f, 0.0f, i_z_nearPlane * zDistanceScale, 0.0f);
+	}
+
 	bool CreateDevice()
 	{
 		const UINT useDefaultDevice = D3DADAPTER_DEFAULT;
@@ -393,7 +415,7 @@ namespace
 				// POSITION
 				// 3 floats == 12 bytes
 				// Offset = 0
-				{ 0, 0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
+				{ 0, 0, D3DDECLTYPE_FLOAT4, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
 
 				// COLOR0
 				// D3DCOLOR == 4 bytes

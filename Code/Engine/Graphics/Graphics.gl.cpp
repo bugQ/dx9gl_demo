@@ -34,6 +34,10 @@ namespace
 {
 	using namespace eae6320::Graphics;
 
+	eae6320::Matrix4 ScreenTransform(
+		const float i_fieldOfView_y, const float i_aspectRatio,
+		const float i_z_nearPlane, const float i_z_farPlane);
+
 	bool CreateRenderingContext();
 	bool CreateVertexArray( Mesh & mesh, Mesh::Data & data );
 
@@ -134,13 +138,17 @@ void eae6320::Graphics::DrawMesh( Mesh & mesh )
 	}
 }
 
-void eae6320::Graphics::SetEffect( Effect & effect, const Vector3 position )
+void eae6320::Graphics::SetEffect( Effect & effect, const Matrix4 local2world )
 {
 	glUseProgram(effect.parent);
-	const float * pos = reinterpret_cast<const float *>(&position);
-	glUniform3fv(effect.position_handle, 1, pos);
-	const GLenum errorCode = glGetError();
-	assert(errorCode == GL_NO_ERROR);
+	const GLfloat * mat1 = reinterpret_cast<const GLfloat *>(&local2world);
+	const GLfloat * mat2 = reinterpret_cast<const GLfloat *>(&Matrix4::Identity);
+	glUniformMatrix4fv(effect.uni_local2world, 1, false, mat1);
+	assert(glGetError() == GL_NO_ERROR);
+	glUniformMatrix4fv(effect.uni_world2view, 1, false, mat2);
+	assert(glGetError() == GL_NO_ERROR);
+	glUniformMatrix4fv(effect.uni_view2screen, 1, false, mat2);
+	assert(glGetError() == GL_NO_ERROR);
 }
 
 void eae6320::Graphics::Clear()
@@ -208,6 +216,20 @@ bool eae6320::Graphics::ShutDown()
 
 namespace
 {
+	eae6320::Matrix4 ScreenTransform(
+		const float i_fieldOfView_y, const float i_aspectRatio,
+		const float i_z_nearPlane, const float i_z_farPlane)
+	{
+		const float yScale = 1.0f / std::tan(i_fieldOfView_y * 0.5f);
+		const float xScale = yScale / i_aspectRatio;
+		const float zDistanceScale = 1.0f / (i_z_nearPlane - i_z_farPlane);
+		return eae6320::Matrix4(
+			xScale, 0.0f, 0.0f, 0.0f,
+			0.0f, yScale, 0.0f, 0.0f,
+			0.0f, 0.0f, (i_z_nearPlane + i_z_farPlane) * zDistanceScale, -1.0f,
+			0.0f, 0.0f, (2.0f * i_z_nearPlane * i_z_farPlane) * zDistanceScale, 0.0f);
+	}
+
 	bool CreateRenderingContext()
 	{
 		// A "device context" can be thought of an abstraction that Windows uses

@@ -1,4 +1,4 @@
-inline Versor::Versor() : Vector4(0, 0, 0, 0) {}
+inline Versor::Versor() : Vector4(0, 0, 0, 1) {}
 inline Versor::Versor(float x, float y, float z, float w) : Vector4(x, y, z, w) {}
 inline Versor::Versor(Vector4 const & v) : Vector4(v) {}
 

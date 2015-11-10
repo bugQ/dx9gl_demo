@@ -90,7 +90,7 @@ namespace Graphics
 		FragmentShader fragment_shader;
 
 		// this is a handle on the vertex shader's "g_position" uniform
-		PositionHandle position_handle;
+		PositionHandle uni_local2world, uni_world2view, uni_view2screen;
 
 		static Effect * FromFile(const char * effectPath, Parent parent = 0);
 		static Effect * FromFiles(const char * vertexShaderPath, const char * fragmentShaderPath, Parent parent = 0);

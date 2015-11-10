@@ -1,15 +1,18 @@
 #include "monsters.inc"
 
-// this value comes from the game engine
-uniform vec3 g_position;
+uniform mat4 g_local2world;
+uniform mat4 g_world2view;
+uniform mat4 g_view2screen;
 
 mainh_v_BEGIN
 mainh_i_POSITION(0, i_point)
 mainh_i_COLOR(1, i_color)
 mainh_o_COLOR(0, o_color)
-// includes the required o_position output
+// mainh_v_END includes the required vertex position output, o_position
 mainh_v_END
 {
-	o_position = vec4( i_point.xy + g_position.xy, 0.0, 1.0 );
+	float4 world_point = mul(g_local2world, float4(i_point, 1.0));
+	float4 view_point = mul(g_world2view, world_point);
+	o_position = mul(g_view2screen, view_point);
 	o_color = i_color;
 }

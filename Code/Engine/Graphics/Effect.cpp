@@ -599,16 +599,31 @@ namespace
 				}
 			}
 
-			GLint uniform_handle = -1;
+			GLint uniform_handle_1, uniform_handle_2, uniform_handle_3;
 			{
-				uniform_handle = glGetUniformLocation(effect->parent, "g_position");
-				if (uniform_handle == -1)
+				uniform_handle_1 = glGetUniformLocation(effect->parent, "g_local2world");
+				if (uniform_handle_1 == -1)
 				{
-					eae6320::UserOutput::Print("No g_position uniform found");
+					eae6320::UserOutput::Print("No g_local2world uniform found");
 					return false;
 				}
+				uniform_handle_2 = glGetUniformLocation(effect->parent, "g_world2view");
+				if (uniform_handle_2 == -1)
+				{
+					eae6320::UserOutput::Print("No g_world2view uniform found");
+					return false;
+				}uniform_handle_3 = glGetUniformLocation(effect->parent, "g_view2screen");
+				if (uniform_handle_3 == -1)
+				{
+					eae6320::UserOutput::Print("No g_view2screen uniform found");
+					return false;
+				}
+
+
 			}
-			effect->position_handle = uniform_handle;
+			effect->uni_local2world = uniform_handle_1;
+			effect->uni_world2view = uniform_handle_2;
+			effect->uni_view2screen = uniform_handle_3;
 		}
 		else
 		{
@@ -685,15 +700,29 @@ namespace
 
 	bool FinishUp(eae6320::Graphics::Effect * effect)
 	{
-		D3DXHANDLE uniform_handle = NULL;
+		D3DXHANDLE uniform_handle_1, uniform_handle_2, uniform_handle_3;
 		ID3DXConstantTable * constants = effect->vertex_shader.second;
-		uniform_handle = constants->GetConstantByName(NULL, "g_position");
-		if (!uniform_handle)
+		uniform_handle_1 = constants->GetConstantByName(NULL, "g_local2world");
+		if (!uniform_handle_1)
 		{
-			eae6320::UserOutput::Print("No g_position uniform found");
+			eae6320::UserOutput::Print("No g_local2world uniform found");
 			return false;
 		}
-		effect->position_handle = uniform_handle;
+		effect->uni_local2world = uniform_handle_1;
+		uniform_handle_2 = constants->GetConstantByName(NULL, "g_world2view");
+		if (!uniform_handle_2)
+		{
+			eae6320::UserOutput::Print("No g_world2view uniform found");
+			return false;
+		}
+		effect->uni_world2view = uniform_handle_2;
+		uniform_handle_3 = constants->GetConstantByName(NULL, "g_view2screen");
+		if (!uniform_handle_3)
+		{
+			eae6320::UserOutput::Print("No g_view2screen uniform found");
+			return false;
+		}
+		effect->uni_view2screen = uniform_handle_3;
 		return true;
 	}
 #endif
