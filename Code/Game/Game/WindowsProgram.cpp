@@ -46,21 +46,17 @@ namespace
 	typedef struct { size_t mesh_idx, effect_idx; Vector3 position; } model_spec;
 
 	const char * mesh_files[] = {
-		"data/square.vib",
-		"data/triangle.vib",
 		"data/box.vib",
+		"data/floor.vib"
 	};
 	const char * effect_files[] = {
 		"data/sprite.fxb",
 	};
 	model_spec model_specs[] = {
 		// one box
-		{2, 0, Vector3(0.0f, 0.0f, 0.0f)},
-		// one square
 		{0, 0, Vector3(0.0f, 0.0f, 0.0f)},
-		// two triangles
-		{1, 0, Vector3(-0.06f, 0.0f, 0.0f)},
-		{1, 0, Vector3(0.09f, 0.0f, 0.0f)}
+		// one floor
+		{1, 0, Vector3(0.0f, -1.0f, 0.0f)}
 	};
 
 	/* end hardcoded asset list. */
@@ -608,7 +604,7 @@ bool WaitForMainWindowToClose( int& o_exitCode )
 			dir += UserInput::IsKeyPressed(VK_DOWN) ? -Vector3::J : Vector3::Zero;
 			dir += UserInput::IsKeyPressed(VK_RIGHT) ? Vector3::I : Vector3::Zero;
 			dir += UserInput::IsKeyPressed(VK_LEFT) ? -Vector3::I : Vector3::Zero;
-			models[1]->position += dir * dt;
+			models[0]->position += dir * dt;
 
 			Render();
 		}
