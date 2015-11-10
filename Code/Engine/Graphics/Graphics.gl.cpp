@@ -142,12 +142,22 @@ void eae6320::Graphics::SetEffect( Effect & effect, const Matrix4 local2world )
 {
 	glUseProgram(effect.parent);
 	const GLfloat * mat1 = reinterpret_cast<const GLfloat *>(&local2world);
-	const GLfloat * mat2 = reinterpret_cast<const GLfloat *>(&Matrix4::Identity);
 	glUniformMatrix4fv(effect.uni_local2world, 1, false, mat1);
 	assert(glGetError() == GL_NO_ERROR);
+
+	Matrix4 viewmat = Matrix4::Identity;
+	viewmat.vec3(3).z = -10;
+	const GLfloat * mat2 = reinterpret_cast<const GLfloat *>(&viewmat);
 	glUniformMatrix4fv(effect.uni_world2view, 1, false, mat2);
 	assert(glGetError() == GL_NO_ERROR);
-	glUniformMatrix4fv(effect.uni_view2screen, 1, false, mat2);
+
+	int viewport[4];
+	glGetIntegerv(GL_VIEWPORT, viewport);
+	float aspect = static_cast<float>(viewport[2]) / static_cast<float>(viewport[3]);
+	float fov = std::atan(1) * 4 / 3;
+	Matrix4 screenmat = ScreenTransform(fov, aspect, 0.1f, 100.0f);
+	const GLfloat * mat3 = reinterpret_cast<const GLfloat *>(&screenmat);
+	glUniformMatrix4fv(effect.uni_view2screen, 1, false, mat3);
 	assert(glGetError() == GL_NO_ERROR);
 }
 
