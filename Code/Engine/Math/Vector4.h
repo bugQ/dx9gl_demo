@@ -1,5 +1,5 @@
-#ifndef _VECTOR4_H
-#define _VECTOR4_H
+#pragma once
+
 #include <cmath>
 
 #include "Vector3.h"
@@ -44,5 +44,3 @@ namespace eae6320
 
 #include "Vector4.inl"
 }
-
-#endif // !_VECTOR3_H

@@ -64,6 +64,33 @@ inline Matrix4 Matrix4::rotation_z(float radians)
 	return Matrix4(c,s,0,0, n,c,0,0, 0,0,1,0, 0,0,0,1);
 }
 
+inline Matrix4 Matrix4::rotation_q(Versor const & q)
+{
+	return Matrix4(
+		q.w, q.z, -q.y, q.x,
+		-q.z, q.w, q.x, q.y,
+		q.y, -q.x, q.w, q.z,
+		-q.x, -q.y, -q.z, q.w).dot(Matrix4(
+			q.w, q.z, -q.y, -q.x,
+			-q.z, q.w, q.x, q.y,
+			q.y, -q.x, q.w, -q.z,
+			q.x, q.y, q.z, q.w));
+}
+
+inline Matrix4 Matrix4::create_RT(Versor const & q, Vector3 const & p)
+{
+	Matrix4 rt = rotation_q(q);
+	rt.vec3(3) = p;
+	return rt;
+}
+
+inline Matrix4 Matrix4::inverse_RT(Versor const & q, Vector3 const & p)
+{
+	Matrix4 irt = rotation_q(q).transpose();
+	irt.vec(3) = irt.predot1(p);
+	return irt;
+}
+
 inline Matrix4 Matrix4::transpose()
 {
 	return Matrix4(

@@ -1,7 +1,8 @@
-#ifndef _MATRIX4_H
-#define _MATRIX4_H
+#pragma once
+
 #include "Vector3.h"
 #include "Vector4.h"
+#include "Versor.h"
 
 namespace eae6320
 {
@@ -32,6 +33,10 @@ namespace eae6320
 		static Matrix4 rotation_z(float radians);
 		static Matrix4 rotation_zyx(Vector3 const & r);
 		static Matrix4 rotation_xyz(Vector3 const & r);
+		static Matrix4 rotation_q(Versor const & q);
+
+		static Matrix4 create_RT(Versor const & q, Vector3 const & p);
+		static Matrix4 inverse_RT(Versor const & q, Vector3 const & p);
 
 		Matrix4 & operator=(Matrix4 const & rhs);
 
@@ -66,4 +71,3 @@ namespace eae6320
 
 #include "Matrix4.inl"
 }
-#endif // !_MATRIX4_H

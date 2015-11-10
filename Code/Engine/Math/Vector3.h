@@ -33,7 +33,7 @@ namespace eae6320
 	inline Vector3 & operator+=(Vector3 & lhs, Vector3 const & rhs);
 	inline Vector3 operator-(Vector3 const & lhs, Vector3 const & rhs);
 	inline Vector3 & operator-=(Vector3 & lhs, Vector3 const & rhs);
-	inline float operator$(Vector3 const & lhs, Vector3 const & rhs);
+	inline float operator*(Vector3 const & lhs, Vector3 const & rhs);
 	inline Vector3 operator*(Vector3 const & lhs, float const rhs);
 	inline Vector3 operator*(float lhs, Vector3 const & rhs);
 	inline Vector3 & operator*=(Vector3 & lhs, float rhs);

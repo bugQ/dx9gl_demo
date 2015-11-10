@@ -27,6 +27,9 @@
     <ClInclude Include="Vector4.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Versor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Vector3.inl">
@@ -36,6 +39,9 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="Vector4.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Versor.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
