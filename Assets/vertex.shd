@@ -11,8 +11,8 @@ mainh_o_COLOR(0, o_color)
 // mainh_v_END includes the required vertex position output, o_position
 mainh_v_END
 {
-	float4 world_point = mul(g_local2world, float4(i_point, 1.0));
-	float4 view_point = mul(g_world2view, world_point);
+	vec4 world_point = mul(g_local2world, vec4(i_point, 1.0));
+	vec4 view_point = mul(g_world2view, world_point);
 	o_position = mul(g_view2screen, view_point);
 	o_color = i_color;
 }
