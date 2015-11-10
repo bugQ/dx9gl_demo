@@ -96,6 +96,16 @@ bool eae6320::Graphics::Initialize( const HWND i_renderingWindow )
 		delete data;
 	}
 
+	// enable depth testing
+	{
+		HRESULT result = s_direct3dDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
+		assert(SUCCEEDED(result));
+		result = s_direct3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+		assert(SUCCEEDED(result));
+		result = s_direct3dDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
+		assert(SUCCEEDED(result));
+	}
+
 	return true;
 
 OnError:
@@ -178,18 +188,8 @@ void eae6320::Graphics::SetEffect( Effect & effect, const Matrix4 local2world )
 
 void eae6320::Graphics::Clear()
 {
-	const D3DRECT* subRectanglesToClear = NULL;
-	const DWORD subRectangleCount = 0;
-	const DWORD clearTheRenderTarget = D3DCLEAR_TARGET;
-	D3DCOLOR clearColor;
-	{
-		// Black is usually used:
-		clearColor = D3DCOLOR_XRGB(0, 0, 0);
-	}
-	const float noZBuffer = 0.0f;
-	const DWORD noStencilBuffer = 0;
-	HRESULT result = s_direct3dDevice->Clear(subRectangleCount, subRectanglesToClear,
-		clearTheRenderTarget, clearColor, noZBuffer, noStencilBuffer);
+	const DWORD flags = D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER;
+	HRESULT result = s_direct3dDevice->Clear(0, NULL, flags, D3DCOLOR_XRGB(0, 0, 0), 1.0, 0);
 	assert(SUCCEEDED(result));
 }
 
@@ -295,7 +295,8 @@ namespace
 			presentationParameters.SwapEffect = D3DSWAPEFFECT_DISCARD;
 			presentationParameters.hDeviceWindow = s_renderingWindow;
 			presentationParameters.Windowed = TRUE;
-			presentationParameters.EnableAutoDepthStencil = FALSE;
+			presentationParameters.EnableAutoDepthStencil = TRUE;
+			presentationParameters.AutoDepthStencilFormat = D3DFMT_D16;
 			presentationParameters.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
 		}
 		HRESULT result = s_direct3dInterface->CreateDevice( useDefaultDevice, useHardwareRendering,
