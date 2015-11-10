@@ -152,14 +152,27 @@ void eae6320::Graphics::SetEffect( Effect & effect, const Matrix4 local2world )
 	assert(SUCCEEDED(result));
 	result = s_direct3dDevice->SetPixelShader(effect.fragment_shader.first);
 	assert(SUCCEEDED(result));
-	const D3DXMATRIX * mat1 = reinterpret_cast<const D3DXMATRIX *>(&local2world);
-	const D3DXMATRIX * mat2 = reinterpret_cast<const D3DXMATRIX *>(&Matrix4::Identity);
+
 	LPD3DXCONSTANTTABLE table = effect.vertex_shader.second;
+
+	const D3DXMATRIX * mat1 = reinterpret_cast<const D3DXMATRIX *>(&local2world);
 	result = table->SetMatrixTranspose(s_direct3dDevice, effect.uni_local2world, mat1);
 	assert(SUCCEEDED(result));
+
+	Matrix4 viewmat = Matrix4::Identity;
+	viewmat.vec3(3).z = -10;
+	const D3DXMATRIX * mat2 = reinterpret_cast<const D3DXMATRIX *>(&viewmat);
 	result = table->SetMatrixTranspose(s_direct3dDevice, effect.uni_world2view, mat2);
 	assert(SUCCEEDED(result));
-	result = table->SetMatrixTranspose(s_direct3dDevice, effect.uni_view2screen, mat2);
+
+	D3DVIEWPORT9 viewport;
+	result = effect.parent->GetViewport(&viewport);
+	assert(SUCCEEDED(result));
+	float fov = std::atan(1) * 4 / 3;
+	float aspect = static_cast<float>(viewport.Width) / static_cast<float>(viewport.Height);
+	Matrix4 screenmat = ScreenTransform(fov, aspect, 0.1f, 100.0f);
+	const D3DXMATRIX * mat3 = reinterpret_cast<const D3DXMATRIX *>(&screenmat);
+	result = table->SetMatrixTranspose(s_direct3dDevice, effect.uni_view2screen, mat3);
 	assert(SUCCEEDED(result));
 }
 
