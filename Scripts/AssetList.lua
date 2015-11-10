@@ -6,6 +6,7 @@ return
 
 		"square",
 		"triangle",
+		"box",
 	},
 	shaders = {
 		srcext = 'shd', dstext = 'shb',
