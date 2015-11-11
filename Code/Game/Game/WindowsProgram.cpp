@@ -66,6 +66,8 @@ namespace
 	Model ** models;
 	size_t num_models;
 
+	Camera camera;
+
 	// Window classes are almost always identified by name;
 	// there is also a unique ATOM associated with them,
 	// but in practice Windows expects to use the class name as an identifier.
@@ -164,6 +166,7 @@ bool CreateMainWindow( const HINSTANCE i_thisInstanceOfTheProgram, const int i_i
 		meshes = LoadMeshes(mesh_files);
 		effects = LoadEffects(effect_files);
 		models = BuildModels(model_specs, meshes, effects, num_models);
+		camera.position.z = -10;
 
 		return true;
 
@@ -561,7 +564,7 @@ void Render()
 	Clear();
 	BeginFrame();
 	for (size_t i = 0; i < num_models; ++i)
-		DrawModel(*models[i]);
+		DrawModel(*models[i], camera);
 	EndFrame();
 }
 
@@ -605,6 +608,13 @@ bool WaitForMainWindowToClose( int& o_exitCode )
 			dir += UserInput::IsKeyPressed(VK_RIGHT) ? Vector3::I : Vector3::Zero;
 			dir += UserInput::IsKeyPressed(VK_LEFT) ? -Vector3::I : Vector3::Zero;
 			models[0]->position += dir * dt;
+			
+			dir = Vector3::Zero;
+			dir += UserInput::IsKeyPressed('W') ? Vector3::K : Vector3::Zero;
+			dir += UserInput::IsKeyPressed('S') ? -Vector3::K : Vector3::Zero;
+			dir += UserInput::IsKeyPressed('D') ? Vector3::I : Vector3::Zero;
+			dir += UserInput::IsKeyPressed('A') ? -Vector3::I : Vector3::Zero;
+			camera.position += dir * dt;
 
 			Render();
 		}

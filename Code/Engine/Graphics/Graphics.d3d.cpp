@@ -21,9 +21,6 @@ namespace
 	HWND s_renderingWindow = NULL;
 	IDirect3D9* s_direct3dInterface = NULL;
 	IDirect3DDevice9* s_direct3dDevice = NULL;
-
-	eae6320::Graphics::Mesh * sa_meshes;
-	unsigned int s_num_meshes;
 }
 
 // Helper Function Declarations
@@ -71,29 +68,6 @@ bool eae6320::Graphics::Initialize( const HWND i_renderingWindow )
 	if ( !CreateDevice() )
 	{
 		goto OnError;
-	}
-
-	// Initialize meshes
-	const unsigned int num_meshes = 2;
-	sa_meshes = new Mesh[num_meshes];
-	s_num_meshes = num_meshes;
-	const char * const meshfilenames[num_meshes] = {
-		"data/square.vib",
-		"data/triangle.vib"
-	};
-	for (unsigned int i = 0; i < s_num_meshes; ++i)
-	{
-		Mesh::Data * data = Mesh::Data::FromBinFile(meshfilenames[i]);
-		if (!data)
-		{
-			goto OnError;
-		}
-		if (!LoadMesh(sa_meshes[i], *data))
-		{
-			delete data;
-			goto OnError;
-		}
-		delete data;
 	}
 
 	// enable depth testing
@@ -155,6 +129,17 @@ void eae6320::Graphics::DrawMesh( Mesh & mesh )
 	}
 }
 
+void eae6320::Graphics::SetCamera( Effect & effect, Camera & camera )
+{
+	HRESULT result;
+	Matrix4 viewmat = Matrix4::rotation_q(camera.rotation);
+	viewmat.vec3(3) = camera.position;
+	const D3DXMATRIX * mat2 = reinterpret_cast<const D3DXMATRIX *>(&viewmat);
+	LPD3DXCONSTANTTABLE table = effect.vertex_shader.second;
+	result = table->SetMatrixTranspose(s_direct3dDevice, effect.uni_world2view, mat2);
+	assert(SUCCEEDED(result));
+}
+
 void eae6320::Graphics::SetEffect( Effect & effect, const Matrix4 local2world )
 {
 	HRESULT result;
@@ -167,12 +152,6 @@ void eae6320::Graphics::SetEffect( Effect & effect, const Matrix4 local2world )
 
 	const D3DXMATRIX * mat1 = reinterpret_cast<const D3DXMATRIX *>(&local2world);
 	result = table->SetMatrixTranspose(s_direct3dDevice, effect.uni_local2world, mat1);
-	assert(SUCCEEDED(result));
-
-	Matrix4 viewmat = Matrix4::Identity;
-	viewmat.vec3(3).z = -10;
-	const D3DXMATRIX * mat2 = reinterpret_cast<const D3DXMATRIX *>(&viewmat);
-	result = table->SetMatrixTranspose(s_direct3dDevice, effect.uni_world2view, mat2);
 	assert(SUCCEEDED(result));
 
 	D3DVIEWPORT9 viewport;
@@ -225,27 +204,6 @@ bool eae6320::Graphics::ShutDown()
 	{
 		if ( s_direct3dDevice )
 		{
-			for (unsigned int i = 0; i < s_num_meshes; ++i)
-			{
-				if (sa_meshes[i].vertex_buffer)
-				{
-					sa_meshes[i].vertex_buffer->Release();
-					sa_meshes[i].vertex_buffer = NULL;
-				}
-				if (sa_meshes[i].index_buffer)
-				{
-					sa_meshes[i].index_buffer->Release();
-					sa_meshes[i].index_buffer = NULL;
-				}
-				if (sa_meshes[i].vertex_declaration)
-				{
-					s_direct3dDevice->SetVertexDeclaration(NULL);
-					sa_meshes[i].vertex_declaration->Release();
-					sa_meshes[i].vertex_declaration = NULL;
-				}
-			}
-			delete[] sa_meshes;
-
 			s_direct3dDevice->Release();
 			s_direct3dDevice = NULL;
 		}

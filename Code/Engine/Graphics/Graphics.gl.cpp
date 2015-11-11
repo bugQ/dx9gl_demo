@@ -146,17 +146,22 @@ void eae6320::Graphics::DrawMesh( Mesh & mesh )
 	}
 }
 
+
+void eae6320::Graphics::SetCamera( Effect & effect, Camera & camera )
+{
+	Matrix4 viewmat = Matrix4::rotation_q(camera.rotation);
+	viewmat.vec3(3) = camera.position;
+	const GLfloat * mat2 = reinterpret_cast<const GLfloat *>(&viewmat);
+	glUniformMatrix4fv(effect.uni_world2view, 1, false, mat2);
+	GLenum error = glGetError();
+	assert(error == GL_NO_ERROR);
+}
+
 void eae6320::Graphics::SetEffect( Effect & effect, const Matrix4 local2world )
 {
 	glUseProgram(effect.parent);
 	const GLfloat * mat1 = reinterpret_cast<const GLfloat *>(&local2world);
 	glUniformMatrix4fv(effect.uni_local2world, 1, false, mat1);
-	assert(glGetError() == GL_NO_ERROR);
-
-	Matrix4 viewmat = Matrix4::Identity;
-	viewmat.vec3(3).z = -10;
-	const GLfloat * mat2 = reinterpret_cast<const GLfloat *>(&viewmat);
-	glUniformMatrix4fv(effect.uni_world2view, 1, false, mat2);
 	assert(glGetError() == GL_NO_ERROR);
 
 	int viewport[4];

@@ -12,6 +12,7 @@
 #include "Mesh.h"
 #include "Effect.h"
 #include "Model.h"
+#include "Camera.h"
 #include "../Math/Matrix4.h"
 
 // Interface
@@ -29,6 +30,7 @@ namespace eae6320
 		bool Initialize( const HWND i_renderingWindow );
 
 		/* used internally */
+		void SetCamera(Effect & effect, Camera & camera);
 		void SetEffect(Effect & effect, const Matrix4 local2world);
 		void DrawMesh( Mesh & mesh );
 		bool LoadMesh( Mesh & output, Mesh::Data & input );
@@ -36,7 +38,7 @@ namespace eae6320
 		/* main graphics loop functions */
 		void Clear();
 		void BeginFrame();
-		void DrawModel(Model & model);
+		void DrawModel(Model & model, Camera & camera);
 		void EndFrame();
 
 		// must be called before quit
