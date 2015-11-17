@@ -46,14 +46,14 @@ namespace
 	typedef struct { size_t mesh_idx, effect_idx; Vector3 position; } model_spec;
 
 	const char * mesh_files[] = {
-		"data/box.vib",
-		"data/floor.vib"
+		"data/ball.vib",
+		"data/plane.vib"
 	};
 	const char * effect_files[] = {
 		"data/sprite.fxb",
 	};
 	model_spec model_specs[] = {
-		// one box
+		// one ball
 		{0, 0, Vector3(0.0f, 0.0f, 0.0f)},
 		// one floor
 		{1, 0, Vector3(0.0f, -1.0f, 0.0f)}

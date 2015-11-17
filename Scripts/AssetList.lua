@@ -4,8 +4,8 @@ return
 		srcext = 'msh', dstext = 'vib',
 		tool = 'MeshBuilder.exe',
 
-		"box",
-		"floor",
+		"ball",
+		"plane",
 	},
 	shaders = {
 		srcext = 'shd', dstext = 'shb',

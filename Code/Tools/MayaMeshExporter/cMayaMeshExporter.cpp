@@ -741,7 +741,7 @@ namespace
 					"\t\t},\n";
 				}
 				fout << "\t},\n"
-					"\t-- therefore, indices are exported based on 0-indexing of the above vertices.\n"
+					"\t-- therefore, indices are exported with 0-indexing of the above vertices.\n"
 					"\tindices =\n"
 					"\t{\n";
 				for (size_t i = 0; i < i_indexBuffer.size(); i += 3)
