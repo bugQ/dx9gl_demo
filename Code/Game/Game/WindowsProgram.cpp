@@ -51,10 +51,13 @@ namespace
 	};
 	const char * effect_files[] = {
 		"data/sprite.fxb",
+		"data/xlucent.fxb",
 	};
 	model_spec model_specs[] = {
-		// one ball
+		// one solid ball
 		{0, 0, Vector3(0.0f, 0.0f, 0.0f)},
+		// one translucent ball
+		{0, 1, Vector3(0.0f, -1.0f, 3.0f)},
 		// one floor
 		{1, 0, Vector3(0.0f, -1.0f, 0.0f)}
 	};

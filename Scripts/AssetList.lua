@@ -16,11 +16,13 @@ return
 		-- recommend prefices 'v_' for vertex and 'f_' for fragment/pixel
 		"vertex",
 		"fragment",
+		"fragment_thirdalpha",
 	},
 	effects = {
 		srcext = 'fxt', dstext = 'fxb',
 		tool = 'EffectBuilder.exe',
 
 		"sprite",
+		"xlucent",
 	},
 }

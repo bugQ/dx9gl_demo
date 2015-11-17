@@ -1,0 +1,12 @@
+return
+{
+	vertex = "data/vertex.shb",
+	fragment = "data/fragment_thirdalpha.shb",
+	flags =
+	{
+		alpha = true,
+		z_test = true,
+		z_write = false,
+		cull_back = true,
+	}
+}
