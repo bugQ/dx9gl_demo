@@ -140,9 +140,67 @@ void eae6320::Graphics::SetCamera( Effect & effect, Camera & camera )
 	assert(SUCCEEDED(result));
 }
 
+void eae6320::Graphics::SetRenderState( Effect::RenderState render_state )
+{
+	HRESULT result;
+
+	if (render_state.alpha)
+	{
+		result = s_direct3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+		assert(SUCCEEDED(result));
+		result = s_direct3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+		assert(SUCCEEDED(result));
+		result = s_direct3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+		assert(SUCCEEDED(result));
+	}
+	else
+	{
+		result = s_direct3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+		assert(SUCCEEDED(result));
+	}
+
+	if (render_state.z_test)
+	{
+		result = s_direct3dDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
+		assert(SUCCEEDED(result));
+		result = s_direct3dDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
+		assert(SUCCEEDED(result));
+	}
+	else
+	{
+		result = s_direct3dDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
+		assert(SUCCEEDED(result));
+	}
+
+	if (render_state.z_write)
+	{
+		result = s_direct3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+		assert(SUCCEEDED(result));
+	}
+	else
+	{
+		result = s_direct3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
+		assert(SUCCEEDED(result));
+	}
+
+	if (render_state.cull_back)
+	{
+		result = s_direct3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
+		assert(SUCCEEDED(result));
+	}
+	else
+	{
+		result = s_direct3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+		assert(SUCCEEDED(result));
+	}
+}
+
 void eae6320::Graphics::SetEffect( Effect & effect, const Matrix4 local2world )
 {
 	HRESULT result;
+
+	SetRenderState(effect.render_state);
+
 	result = s_direct3dDevice->SetVertexShader(effect.vertex_shader.first);
 	assert(SUCCEEDED(result));
 	result = s_direct3dDevice->SetPixelShader(effect.fragment_shader.first);

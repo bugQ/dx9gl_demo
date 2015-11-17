@@ -56,16 +56,27 @@ namespace Graphics
 		}
 
 		uint16_t vertex_path_len, fragment_path_len;
-		char * vertex_shader_path, * fragment_shader_path;
+		Effect::Spec spec;
+		char * buf;
+
+		union { RenderState flags; char data[sizeof(RenderState)]; } converter;
+		buf = converter.data;
+		infile.read(buf, sizeof(RenderState));
+		spec.flags = converter.flags;
+		buf = NULL;
 
 		infile.read(reinterpret_cast<char *>(&vertex_path_len), sizeof(uint16_t));
 		infile.read(reinterpret_cast<char *>(&fragment_path_len), sizeof(uint16_t));
 
-		vertex_shader_path = new char[vertex_path_len];
-		fragment_shader_path = new char[fragment_path_len];
+		buf = new char[vertex_path_len];
+		infile.read(buf, vertex_path_len);
+		spec.vertex_shd_path = buf;
+		delete[] buf;
 
-		infile.read(vertex_shader_path, vertex_path_len);
-		infile.read(fragment_shader_path, fragment_path_len);
+		buf = new char[fragment_path_len];
+		infile.read(buf, fragment_path_len);
+		spec.fragment_shd_path = buf;
+		delete[] buf;
 
 		infile.close();
 
@@ -77,15 +88,12 @@ namespace Graphics
 			return NULL;
 		}
 
-		Effect * effect = Effect::FromFiles(vertex_shader_path, fragment_shader_path);
-		delete[] vertex_shader_path;
-		delete[] fragment_shader_path;
+		Effect * effect = Effect::FromSpec(spec);
 		return effect;
 	}
 
-	Effect * Effect::FromFiles(
-		const char * vertexShaderPath,
-		const char * fragmentShaderPath,
+	Effect * Effect::FromSpec(
+		const Effect::Spec & spec,
 		Parent parent)
 	{
 		Effect * effect = new Effect();
@@ -94,30 +102,34 @@ namespace Graphics
 
 		std::string error_str;
 		const char * vertex_shader_str = LoadAndAllocateShaderProgram(
-			vertexShaderPath, vertex_shader_size, error_str);
+			spec.vertex_shd_path.c_str(), vertex_shader_size, error_str);
 		if (!vertex_shader_str && !error_str.empty()) {
 			eae6320::UserOutput::Print(error_str, __FILE__);
 			delete effect;
 			return NULL;
 		}
-		effect->vertex_shader = LoadVertexShader(effect->parent, CompileShader(effect->parent,
-			vertex_shader_str, vertex_shader_size, eae6320::Graphics::Effect::ShaderType::Vertex, vertexShaderPath));
+		effect->vertex_shader = LoadVertexShader(effect->parent,
+			CompileShader(effect->parent, vertex_shader_str, vertex_shader_size,
+				eae6320::Graphics::Effect::ShaderType::Vertex, spec.vertex_shd_path.c_str()));
 
 		const char * fragment_shader_str = LoadAndAllocateShaderProgram(
-			fragmentShaderPath, fragment_shader_size, error_str);
+			spec.fragment_shd_path.c_str(), fragment_shader_size, error_str);
 		if (!fragment_shader_str && !error_str.empty()) {
 			eae6320::UserOutput::Print(error_str, __FILE__);
 			delete effect;
 			return NULL;
 		}
-		effect->fragment_shader = LoadFragmentShader(effect->parent, CompileShader(effect->parent,
-			fragment_shader_str, fragment_shader_size, eae6320::Graphics::Effect::ShaderType::Fragment, fragmentShaderPath));
+		effect->fragment_shader = LoadFragmentShader(effect->parent,
+			CompileShader(effect->parent, fragment_shader_str, fragment_shader_size,
+				eae6320::Graphics::Effect::ShaderType::Fragment, spec.fragment_shd_path.c_str()));
 
 		if (!FinishUp(effect))
 		{
 			delete effect;
 			return NULL;
 		}
+
+		effect->render_state = spec.flags;
 
 		return effect;
 	}

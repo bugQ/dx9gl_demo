@@ -14,6 +14,8 @@
 #error "one of EAE6320_PLATFORM_GL or EAE6320_PLATFORM_D3D must be defined."
 #endif
 
+#include <string>
+
 namespace eae6320
 {
 namespace Graphics
@@ -76,6 +78,22 @@ namespace Graphics
 			Fragment
 		};
 
+		struct RenderState
+		{
+			bool
+				alpha : 1,
+				z_test : 1,
+				z_write : 1,
+				cull_back : 1;
+		};
+
+		struct Spec
+		{
+			std::string vertex_shd_path;
+			std::string fragment_shd_path;
+			RenderState flags;
+		};
+
 		// for OpenGL, parent is the program (GLuint for program ID),
 		//   composing both of the compiled shaders together.
 		// for Direct3d, parent is the device (IDirect3DDevice9 *),
@@ -89,11 +107,13 @@ namespace Graphics
 		VertexShader vertex_shader;
 		FragmentShader fragment_shader;
 
+		RenderState render_state;
+
 		// this is a handle on the vertex shader's "g_position" uniform
 		PositionHandle uni_local2world, uni_world2view, uni_view2screen;
 
 		static Effect * FromFile(const char * effectPath, Parent parent = 0);
-		static Effect * FromFiles(const char * vertexShaderPath, const char * fragmentShaderPath, Parent parent = 0);
+		static Effect * FromSpec(const Effect::Spec & spec, Parent parent = 0);
 
 		~Effect();
 	};

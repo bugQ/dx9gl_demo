@@ -17,8 +17,7 @@
 //------
 using namespace eae6320::Graphics;
 
-bool LoadFXT(const char * in_path,
-	std::string &vertex_shd_path, std::string &fragment_shd_path)
+bool LoadFXT(const char * in_path, Effect::Spec &spec)
 {
 	// Create a new Lua state
 	lua_State* luaState = NULL;
@@ -100,7 +99,7 @@ bool LoadFXT(const char * in_path,
 			return false;
 		}
 
-		vertex_shd_path = lua_tostring(luaState, -1);
+		spec.vertex_shd_path = lua_tostring(luaState, -1);
 
 		lua_pop(luaState, 1); // pop vertex shader path
 
@@ -113,14 +112,46 @@ bool LoadFXT(const char * in_path,
 			return false;
 		}
 
-		fragment_shd_path = lua_tostring(luaState, -1);
-		lua_pop(luaState, 2);
+		spec.fragment_shd_path = lua_tostring(luaState, -1);
+		lua_pop(luaState, 1); // pop fragment shader path
+
+		lua_getfield(luaState, -1, "flags");
+
+		//default render state
+		spec.flags.alpha = false;
+		spec.flags.z_test = true;
+		spec.flags.z_write = true;
+		spec.flags.cull_back = true;
+
+		if (lua_istable(luaState, -1))
+		{
+			lua_getfield(luaState, -1, "alpha");
+			if (lua_isboolean(luaState, -1))
+				spec.flags.alpha = 0 != lua_toboolean(luaState, -1);
+			lua_pop(luaState, 1);
+
+			lua_getfield(luaState, -1, "z_test");
+			if (lua_isboolean(luaState, -1))
+				spec.flags.z_test = 0 != lua_toboolean(luaState, -1);
+			lua_pop(luaState, 1);
+
+			lua_getfield(luaState, -1, "z_write");
+			if (lua_isboolean(luaState, -1))
+				spec.flags.z_write = 0 != lua_toboolean(luaState, -1);
+			lua_pop(luaState, 1);
+
+			lua_getfield(luaState, -1, "cull_back");
+			if (lua_isboolean(luaState, -1))
+				spec.flags.cull_back = 0 != lua_toboolean(luaState, -1);
+			lua_pop(luaState, 1);
+		}
+
+		lua_pop(luaState, 2); // pop flags, main table
 		return true;
 	}
 }
 
-bool SaveFXB(const char * out_path,
-	std::string vertex_shd_path, std::string fragment_shd_path)
+bool SaveFXB(const char * out_path, const Effect::Spec & spec)
 {
 	std::ofstream outfile(out_path, std::ofstream::binary);
 
@@ -132,13 +163,20 @@ bool SaveFXB(const char * out_path,
 		return false;
 	}
 
-	uint16_t vertex_path_len = static_cast<uint16_t>(vertex_shd_path.length() + 1);
-	uint16_t fragment_path_len = static_cast<uint16_t>(fragment_shd_path.length() + 1);
+	// trick to convert the bit fields into a fixed char array, perfect for output
+	// as long as there are 8 or fewer flags, the output will be 1 byte, etc.
+	union { Effect::RenderState flags; char data[sizeof(Effect::RenderState)]; } converter;
+	converter.flags = spec.flags;
+	outfile.write(converter.data, sizeof(Effect::RenderState));
+
+	uint16_t vertex_path_len = static_cast<uint16_t>(spec.vertex_shd_path.length() + 1);
+	uint16_t fragment_path_len = static_cast<uint16_t>(spec.fragment_shd_path.length() + 1);
 
 	outfile.write(reinterpret_cast<char *>(&vertex_path_len), sizeof(uint16_t));
 	outfile.write(reinterpret_cast<char *>(&fragment_path_len), sizeof(uint16_t));
-	outfile.write(vertex_shd_path.c_str(), vertex_path_len);
-	outfile.write(fragment_shd_path.c_str(), fragment_path_len);
+	outfile.write(spec.vertex_shd_path.c_str(), vertex_path_len);
+	outfile.write(spec.fragment_shd_path.c_str(), fragment_path_len);
+
 	outfile.close();
 
 	if (outfile.fail())
@@ -154,14 +192,7 @@ bool SaveFXB(const char * out_path,
 
 bool eae6320::cEffectBuilder::Build( const std::vector<std::string>& )
 {
-	std::string vertex_shd_path;
-	std::string fragment_shd_path;
+	Effect::Spec spec;
 
-	if (!LoadFXT(m_path_source, vertex_shd_path, fragment_shd_path))
-		return false;
-
-	if (!SaveFXB(m_path_target, vertex_shd_path, fragment_shd_path))
-		return false;
-
-	return true;
+	return LoadFXT(m_path_source, spec) && SaveFXB(m_path_target, spec);
 }

@@ -81,8 +81,6 @@ bool eae6320::Graphics::Initialize( const HWND i_renderingWindow )
 
 	// don't draw tris that aren't facing camera
 	{
-		glEnable(GL_CULL_FACE);
-
 		const GLenum errorCode = glGetError();
 		switch (errorCode)
 		{
@@ -100,14 +98,6 @@ bool eae6320::Graphics::Initialize( const HWND i_renderingWindow )
 			UserOutput::Print(ss.str().c_str());
 			goto OnError;
 		}
-	}
-
-	// enable depth testing
-	{
-		glEnable(GL_DEPTH_TEST);
-		glDepthMask(GL_TRUE);
-		glDepthFunc(GL_LEQUAL);
-		assert(glGetError() == GL_NO_ERROR);
 	}
 
 	return true;
@@ -157,8 +147,56 @@ void eae6320::Graphics::SetCamera( Effect & effect, Camera & camera )
 	assert(error == GL_NO_ERROR);
 }
 
+void eae6320::Graphics::SetRenderState( Effect::RenderState render_state )
+{
+	if (render_state.alpha)
+	{
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	}
+	else
+	{
+		glDisable(GL_BLEND);
+	}
+	assert(glGetError() == GL_NO_ERROR);
+
+	if (render_state.z_test)
+	{
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LEQUAL);
+	}
+	else
+	{
+		glDisable(GL_DEPTH_TEST);
+	}
+	assert(glGetError() == GL_NO_ERROR);
+
+	if (render_state.z_write)
+	{
+		glDepthMask(GL_TRUE);
+	}
+	else
+	{
+		glDepthMask(GL_FALSE);
+	}
+	assert(glGetError() == GL_NO_ERROR);
+
+	if (render_state.cull_back)
+	{
+		glEnable(GL_CULL_FACE);
+		glFrontFace(GL_CCW);
+	}
+	else
+	{
+		glDisable(GL_CULL_FACE);
+	}
+	assert(glGetError() == GL_NO_ERROR);
+}
+
 void eae6320::Graphics::SetEffect( Effect & effect, const Matrix4 local2world )
 {
+	SetRenderState(effect.render_state);
+
 	glUseProgram(effect.parent);
 	const GLfloat * mat1 = reinterpret_cast<const GLfloat *>(&local2world);
 	glUniformMatrix4fv(effect.uni_local2world, 1, false, mat1);

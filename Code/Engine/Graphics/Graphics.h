@@ -31,6 +31,7 @@ namespace eae6320
 
 		/* used internally */
 		void SetCamera(Effect & effect, Camera & camera);
+		void SetRenderState(Effect::RenderState render_state);
 		void SetEffect(Effect & effect, const Matrix4 local2world);
 		void DrawMesh( Mesh & mesh );
 		bool LoadMesh( Mesh & output, Mesh::Data & input );
