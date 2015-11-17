@@ -167,7 +167,7 @@ void eae6320::Graphics::SetEffect( Effect & effect, const Matrix4 local2world )
 	int viewport[4];
 	glGetIntegerv(GL_VIEWPORT, viewport);
 	float aspect = static_cast<float>(viewport[2]) / static_cast<float>(viewport[3]);
-	float fov = std::atan(1) * 4 / 3;
+	float fov = std::atan(1.0f) * 4 / 3;
 	Matrix4 screenmat = ScreenTransform(fov, aspect, 0.1f, 100.0f);
 	const GLfloat * mat3 = reinterpret_cast<const GLfloat *>(&screenmat);
 	glUniformMatrix4fv(effect.uni_view2screen, 1, false, mat3);
