@@ -163,17 +163,14 @@ bool SaveFXB(const char * out_path, const Effect::Spec & spec)
 		return false;
 	}
 
-	// trick to convert the bit fields into a fixed char array, perfect for output
-	// as long as there are 8 or fewer flags, the output will be 1 byte, etc.
-	union { Effect::RenderState flags; char data[sizeof(Effect::RenderState)]; } converter;
-	converter.flags = spec.flags;
-	outfile.write(converter.data, sizeof(Effect::RenderState));
+	// as long as there are 8 or fewer flags, the output will be 1 byte, etc. (using VC++)
+	outfile.write(reinterpret_cast<const char *>(&spec.flags), sizeof(Effect::RenderState));
 
-	uint16_t vertex_path_len = static_cast<uint16_t>(spec.vertex_shd_path.length() + 1);
-	uint16_t fragment_path_len = static_cast<uint16_t>(spec.fragment_shd_path.length() + 1);
+	uint16_t vertex_path_len = static_cast<uint16_t>(spec.vertex_shd_path.size() + 1);
+	uint16_t fragment_path_len = static_cast<uint16_t>(spec.fragment_shd_path.size() + 1);
 
-	outfile.write(reinterpret_cast<char *>(&vertex_path_len), sizeof(uint16_t));
-	outfile.write(reinterpret_cast<char *>(&fragment_path_len), sizeof(uint16_t));
+	outfile.write(reinterpret_cast<const char *>(&vertex_path_len), sizeof(uint16_t));
+	outfile.write(reinterpret_cast<const char *>(&fragment_path_len), sizeof(uint16_t));
 	outfile.write(spec.vertex_shd_path.c_str(), vertex_path_len);
 	outfile.write(spec.fragment_shd_path.c_str(), fragment_path_len);
 

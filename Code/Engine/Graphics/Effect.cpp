@@ -59,10 +59,8 @@ namespace Graphics
 		Effect::Spec spec;
 		char * buf;
 
-		union { RenderState flags; char data[sizeof(RenderState)]; } converter;
-		buf = converter.data;
+		buf = reinterpret_cast<char *>(&spec.flags);
 		infile.read(buf, sizeof(RenderState));
-		spec.flags = converter.flags;
 		buf = NULL;
 
 		infile.read(reinterpret_cast<char *>(&vertex_path_len), sizeof(uint16_t));
