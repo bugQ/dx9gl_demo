@@ -567,7 +567,11 @@ void Render()
 	Clear();
 	BeginFrame();
 	for (size_t i = 0; i < num_models; ++i)
-		DrawModel(*models[i], camera);
+		if (!models[i]->effect->render_state.alpha)
+			DrawModel(*models[i], camera);
+	for (size_t i = 0; i < num_models; ++i)
+		if (models[i]->effect->render_state.alpha)
+			DrawModel(*models[i], camera);
 	EndFrame();
 }
 
