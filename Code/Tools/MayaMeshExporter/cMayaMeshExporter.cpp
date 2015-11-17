@@ -718,19 +718,6 @@ namespace
 	MStatus WriteMeshToFile( const MString& i_fileName, const std::vector<sVertex_maya>& i_vertexBuffer, const std::vector<size_t>& i_indexBuffer,
 		const std::vector<sMaterialInfo>& i_materialInfo )
 	{
-		// Maya's coordinate system is different than the default Direct3D behavior
-		// (it is right handed and UVs have (0,0) at the lower left corner).
-		// For our class I advised keeping things the Maya way (which matches the default OpenGL behavior),
-		// but if you wanted to convert everything in the exported file to match the standard Direct3D behavior
-		// one way to do it would be to make the following conversions:
-		//	* POSITION	-> x, y, -z
-		//	* NORMAL	-> nx, ny, -nz
-		//	* TANGENT	-> tx, ty, -tz
-		//	* BITANGENT	-> -btx, -bty, btz
-		//	* TEXCOORD	-> u, 1 - v
-		//
-		//	* triangle index order	-> index_0, index_2, index_1
-
 		std::ofstream fout( i_fileName.asChar() );
 		if ( fout.is_open() )
 		{
@@ -738,7 +725,26 @@ namespace
 			fout << "return\n"
 				"{\n";
 			{
-				EAE6320_TODO: Write out i_vertexBuffer and i_indexBuffer in your human-readable mesh format
+				fout << "\t-- despite being 1-indexed within Lua, this data is 0-indexed by the GPU.\n"
+					"\tvertices =\n"
+					"\t{\n";
+				for (size_t i = 0; i < i_vertexBuffer.size(); ++i)
+				{
+					sVertex_maya vertex = i_vertexBuffer[i];
+					fout << "\t\t{position = {" << vertex.x << ", " << vertex.y << ", " << vertex.z << "}, "
+						"color = {" << vertex.r << ", " << vertex.g << ", " << vertex.b << ", " << vertex.a << "}},"
+						" --" << i << "\n";
+				}
+				fout << "\t},\n"
+					"\t-- therefore, indices are exported based on 0-indexing of the above vertices.\n"
+					"\tindices =\n"
+					"\t{\n";
+				for (size_t i = 0; i < i_indexBuffer.size(); i += 3)
+				{
+					const size_t * polygon = &i_indexBuffer[i];
+					fout << "\t\t{" << polygon[0] << ", " << polygon[1] << ", " << polygon[2] << "},\n";
+				}
+				fout << "\t}\n";
 			}
 			// Close table
 			fout << "}\n";

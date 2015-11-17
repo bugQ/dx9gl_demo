@@ -10,7 +10,7 @@
 
 // This must come before any Maya header files
 // to make sure that windows.h is #included in a consistent way
-#include "../../Engine/Windows/Includes.h"
+#include "../../Engine/Windows/WindowsIncludes.h"
 
 #include <maya/MPxFileTranslator.h>
 
@@ -36,7 +36,7 @@ namespace eae6320
 		// and then implement reader().
 
 		// You can choose what the default file extension of an exported mesh is
-		virtual MString defaultExtension() const { return EAE6320_TODO; }
+		virtual MString defaultExtension() const { return MString("msh"); }
 
 		// Interface
 		//==========

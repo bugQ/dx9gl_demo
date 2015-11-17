@@ -18,8 +18,7 @@
 namespace
 {
 	// This will be displayed in Maya's dropdown list of available export formats
-	EAE6320_TODO: Enter your name in this description to make it easy on your graders who will build many of these plugins
-	const char* s_pluginName = "[YOUR NAME HERE]'s EAE6320 Mesh Format";
+	const char* s_pluginName = "Bug's Monster Mesh";
 }
 
 // Entry Point
