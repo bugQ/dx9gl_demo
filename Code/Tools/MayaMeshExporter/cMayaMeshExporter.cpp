@@ -731,9 +731,14 @@ namespace
 				for (size_t i = 0; i < i_vertexBuffer.size(); ++i)
 				{
 					sVertex_maya vertex = i_vertexBuffer[i];
-					fout << "\t\t{position = {" << vertex.x << ", " << vertex.y << ", " << vertex.z << "}, "
-						"color = {" << vertex.r << ", " << vertex.g << ", " << vertex.b << ", " << vertex.a << "}},"
-						" --" << i << "\n";
+					fout << "\t\t{ --" << i << "\n"
+						"\t\t\tposition = { " << vertex.x << ", " << vertex.y << ", " << vertex.z << " },\n"
+						"\t\t\tcolor = { " << vertex.r << ", " << vertex.g << ", " << vertex.b << ", " << vertex.a << " },\n"
+						"\t\t\tnormal = { " << vertex.nx << ", " << vertex.ny << ", " << vertex.nz << " },\n"
+						"\t\t\ttangent = { " << vertex.tx << ", " << vertex.ty << ", " << vertex.tz << " },\n"
+						"\t\t\tbitangent = { " << vertex.btx << ", " << vertex.bty << ", " << vertex.btz << " },\n"
+						"\t\t\tuv = { " << vertex.u << ", " << vertex.v << " },\n"
+					"\t\t},\n";
 				}
 				fout << "\t},\n"
 					"\t-- therefore, indices are exported based on 0-indexing of the above vertices.\n"
