@@ -1,0 +1,13 @@
+return
+{
+	effect = "data/opaque.fxb",
+	uniforms =
+	{
+		-- this table uses some tricks:
+		-- v_thing refers to a uniform named g_thing in the vertex shader
+		-- f_thing refers to a uniform named g_thing in the fragment shader
+		-- single floats can be specified with or without brackets
+		
+		f_tint = { 0.7, 0.0, 0.4 },
+	}
+}
