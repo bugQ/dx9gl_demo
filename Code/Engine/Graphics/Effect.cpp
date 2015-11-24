@@ -133,6 +133,32 @@ namespace Graphics
 	}
 
 #if defined ( EAE6320_PLATFORM_GL )
+	Effect::UniformHandle Effect::GetUniformHandle(
+		const char * uniformName, ShaderType shaderType)
+	{
+		GLint handle = glGetUniformLocation(this->parent, uniformName);
+		if (handle == INVALID_UNIFORM_HANDLE)
+		{
+			std::stringstream errmsg;
+			errmsg << "No such uniform " << uniformName;
+			UserOutput::Print(errmsg.str(), __FILE__);
+			return INVALID_UNIFORM_HANDLE;
+		}
+
+	}
+
+	bool Effect::SetVec(UniformHandle handle, ShaderType shaderType, float * data, size_t len)
+	{
+		glUseProgram(this->parent);
+
+		PFNGLUNIFORM4FVPROC procs[4] = { glUniform1fv, glUniform2fv, glUniform3fv, glUniform4fv };
+		assert(len > 0 && len < 4);
+
+		procs[len - 1](handle, len, data);
+		assert(glGetError() == GL_NO_ERROR);
+		return glGetError() == GL_NO_ERROR;
+	}
+
 	Effect::~Effect()
 	{
 		if (parent != 0)
@@ -150,6 +176,34 @@ namespace Graphics
 		}
 	}
 #elif defined ( EAE6320_PLATFORM_D3D )
+	Effect::UniformHandle Effect::GetUniformHandle(
+		const char * uniformName, ShaderType shaderType)
+	{
+		D3DXHANDLE handle;
+		ID3DXConstantTable * constants = shaderType == ShaderType::Vertex
+			? this->vertex_shader.second
+			: this->fragment_shader.second;
+		handle = constants->GetConstantByName(NULL, uniformName);
+		if (INVALID_UNIFORM_HANDLE)
+		{
+			std::stringstream errmsg;
+			errmsg << "No such uniform " << uniformName;
+			UserOutput::Print(errmsg.str(), __FILE__);
+			return 0;
+		}
+	}
+
+	bool Effect::SetVec(UniformHandle handle, ShaderType shaderType, float * data, size_t len)
+	{
+		LPD3DXCONSTANTTABLE table = shaderType == ShaderType::Vertex
+			? this->vertex_shader.second
+			: this->fragment_shader.second;
+
+		HRESULT result = table->SetFloatArray(this->parent, handle, data, len);
+		assert(SUCCEEDED(result));
+		return SUCCEEDED(result);
+	}
+
 	Effect::~Effect()
 	{
 		if (vertex_shader.second) // constant table

@@ -122,13 +122,14 @@ bool LoadMTT(const char * in_path, Material::Spec &spec)
 			spec.params.resize(i + 1);
 			spec.param_names.resize(i + 1);
 
-			spec.params[i].handle = reinterpret_cast<Effect::UniformHandle>(offset);
+			spec.params[i].handle = DIFF2UHANDLE(offset);
 
 			if (lua_isstring(luaState, -2))
 			{
 				spec.param_names[i] = lua_tostring(luaState, -2);
 				if (spec.param_names[i][0] != 'v' && spec.param_names[i][0] != 'f')
 					goto OnKeyError;
+				spec.param_names[i][0] = 'g';
 				offset += spec.param_names[i].size() + 1;
 			}
 			else
@@ -175,7 +176,7 @@ bool LoadMTT(const char * in_path, Material::Spec &spec)
 
 			lua_pop(luaState, 1);
 		}
-		spec.num_params = i;
+		spec.num_params = static_cast<uint16_t>(i);
 
 		lua_pop(luaState, 2); // pop uniforms, main table
 		return true;

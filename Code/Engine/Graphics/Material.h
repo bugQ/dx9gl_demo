@@ -29,6 +29,10 @@ namespace Graphics
 		Effect * effect;
 		UniformParameter * params;
 		uint16_t num_params;
+
+		static Material * FromFile(const char * materialPath, Effect::Parent parent = 0);
+
+		~Material();
 	};
 }
 }

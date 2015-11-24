@@ -6,10 +6,16 @@
 #include "../Windows/WindowsIncludes.h"
 #endif
 #include <gl/GL.h>
+
+#define UHANDLE2DIFF(x) (static_cast<ptrdiff_t>(x))
+#define DIFF2UHANDLE(x) (static_cast<eae6320::Graphics::Effect::UniformHandle>(x))
 #elif defined ( EAE6320_PLATFORM_D3D )
 #include <d3d9.h>
 #include <d3dx9shader.h>
 #include <utility>
+
+#define UHANDLE2DIFF(x) (reinterpret_cast<ptrdiff_t>(x))
+#define DIFF2UHANDLE(x) (reinterpret_cast<eae6320::Graphics::Effect::UniformHandle>(x))
 #else
 #error "one of EAE6320_PLATFORM_GL or EAE6320_PLATFORM_D3D must be defined."
 #endif
@@ -72,6 +78,12 @@ namespace Graphics
 #endif
 			UniformHandle;
 
+#if defined( EAE6320_PLATFORM_GL )
+#define INVALID_UNIFORM_HANDLE (-1)
+#elif defined ( EAE6320_PLATFORM_D3D )
+#define INVALID_UNIFORM_HANDLE NULL
+#endif
+
 		enum ShaderType
 		{
 			Vertex,
@@ -114,6 +126,10 @@ namespace Graphics
 
 		static Effect * FromFile(const char * effectPath, Parent parent = 0);
 		static Effect * FromSpec(const Effect::Spec & spec, Parent parent = 0);
+
+		UniformHandle GetUniformHandle(const char * uniformName, ShaderType shaderType);
+
+		bool SetVec(UniformHandle handle, ShaderType shaderType, float * data, size_t len);
 
 		~Effect();
 	};
