@@ -8,5 +8,8 @@
 
 void eae6320::UserOutput::Print( std::string output, std::string filename )
 {
-	std::cerr << "Error: " << output << "\n";
+	std::cerr << "Error: ";
+	if (!filename.empty())
+		std::cerr << "(" << filename << ") ";
+	std::cerr << output << "\n";
 }

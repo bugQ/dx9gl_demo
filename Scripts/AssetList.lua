@@ -15,8 +15,8 @@ return
 		-- NOTE the first letter of each shader file determines the type
 		-- recommend prefices 'v_' for vertex and 'f_' for fragment/pixel
 		"vertex",
-		"fragment",
-		"fragment_thirdalpha",
+		"f_opaque",
+		"f_transparent",
 	},
 	effects = {
 		srcext = 'fxt', dstext = 'fxb',
