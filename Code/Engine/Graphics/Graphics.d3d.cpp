@@ -195,7 +195,7 @@ void eae6320::Graphics::SetRenderState( Effect::RenderState render_state )
 	}
 }
 
-void eae6320::Graphics::SetEffect( Effect & effect, const Matrix4 local2world )
+void eae6320::Graphics::SetEffect(Effect & effect)
 {
 	HRESULT result;
 
@@ -205,7 +205,11 @@ void eae6320::Graphics::SetEffect( Effect & effect, const Matrix4 local2world )
 	assert(SUCCEEDED(result));
 	result = s_direct3dDevice->SetPixelShader(effect.fragment_shader.first);
 	assert(SUCCEEDED(result));
+}
 
+void eae6320::Graphics::SetTransform(Effect & effect, const Matrix4 local2world)
+{
+	HRESULT result;
 	LPD3DXCONSTANTTABLE table = effect.vertex_shader.second;
 
 	const D3DXMATRIX * mat1 = reinterpret_cast<const D3DXMATRIX *>(&local2world);

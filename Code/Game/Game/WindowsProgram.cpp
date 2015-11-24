@@ -43,29 +43,31 @@ namespace
 	   this will all be replaced with actual asset files, later. */
 
 	// model_spec = mesh + effect indices
-	typedef struct { size_t mesh_idx, effect_idx; Vector3 position; } model_spec;
+	typedef struct { size_t mesh_idx, mat_idx; Vector3 position; } model_spec;
 
 	const char * mesh_files[] = {
 		"data/ball.vib",
 		"data/plane.vib"
 	};
-	const char * effect_files[] = {
-		"data/sprite.fxb",
-		"data/xlucent.fxb",
+	const char * material_files[] = {
+		"data/fuschia_opaque.mtb",
+		"data/lime_opaque.mtb",
+		"data/ochre_thirdalpha.mtb",
+		"data/violet_halfalpha.mtb"
 	};
 	model_spec model_specs[] = {
 		// one translucent ball
-		{0, 1, Vector3(0.0f, -1.25f, 2.0f)},
+		{0, 2, Vector3(0.0f, -1.25f, 2.0f)},
 		// one solid ball
 		{0, 0, Vector3(-1.0f, -1.0f, 4.0f)},
 		// one floor
-		{1, 0, Vector3(0.0f, -1.0f, 0.0f)}
+		{1, 1, Vector3(0.0f, -1.0f, 0.0f)}
 	};
 
 	/* end hardcoded asset list. */
 
 	Mesh ** meshes;
-	Effect ** effects;
+	Material ** materials;
 	Model ** models;
 	size_t num_models;
 
@@ -130,14 +132,22 @@ template <size_t N> Effect ** LoadEffects(const char * (&spec)[N])
 	return out;
 }
 
+template <size_t N> Material ** LoadMaterials(const char * (&spec)[N])
+{
+	Material ** out = new Material *[N];
+	for (size_t i = 0; i < N; ++i)
+		out[i] = Material::FromFile(spec[i]);
+	return out;
+}
+
 template <size_t N> Model ** BuildModels(model_spec (&spec)[N],
-	Mesh ** meshes, Effect ** effects, size_t &num_models)
+	Mesh ** meshes, Material ** materials, size_t &num_models)
 {
 	Model ** out = new Model *[N];
 	for (size_t i = 0; i < N; ++i)
 		out[i] = new Model(
 			*meshes[spec[i].mesh_idx],
-			*effects[spec[i].effect_idx],
+			*materials[spec[i].mat_idx],
 			spec[i].position);
 	num_models = N;
 	return out;
@@ -167,8 +177,8 @@ bool CreateMainWindow( const HINSTANCE i_thisInstanceOfTheProgram, const int i_i
 		}
 
 		meshes = LoadMeshes(mesh_files);
-		effects = LoadEffects(effect_files);
-		models = BuildModels(model_specs, meshes, effects, num_models);
+		materials = LoadMaterials(material_files);
+		models = BuildModels(model_specs, meshes, materials, num_models);
 		camera.position.z = -10;
 
 		return true;
@@ -439,7 +449,7 @@ bool CleanupMainWindow()
 		for (size_t i = countof(model_specs); i > 0; --i)
 			delete models[i-1];
 		delete[] models;
-		delete[] effects;
+		delete[] materials;
 		delete[] meshes;
 	}
 	return true;
@@ -567,10 +577,10 @@ void Render()
 	Clear();
 	BeginFrame();
 	for (size_t i = 0; i < num_models; ++i)
-		if (!models[i]->effect->render_state.alpha)
+		if (!models[i]->mat->effect->render_state.alpha)
 			DrawModel(*models[i], camera);
 	for (size_t i = 0; i < num_models; ++i)
-		if (models[i]->effect->render_state.alpha)
+		if (models[i]->mat->effect->render_state.alpha)
 			DrawModel(*models[i], camera);
 	EndFrame();
 }

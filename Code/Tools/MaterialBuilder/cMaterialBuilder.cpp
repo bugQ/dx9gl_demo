@@ -127,9 +127,16 @@ bool LoadMTT(const char * in_path, Material::Spec &spec)
 			if (lua_isstring(luaState, -2))
 			{
 				spec.param_names[i] = lua_tostring(luaState, -2);
-				if (spec.param_names[i][0] != 'v' && spec.param_names[i][0] != 'f')
+
+				if (spec.param_names[i][0] == 'v')
+					spec.params[i].shaderType = Effect::ShaderType::Vertex;
+				else if (spec.param_names[i][0] == 'f')
+					spec.params[i].shaderType = Effect::ShaderType::Fragment;
+				else
 					goto OnKeyError;
+
 				spec.param_names[i][0] = 'g';
+
 				offset += spec.param_names[i].size() + 1;
 			}
 			else

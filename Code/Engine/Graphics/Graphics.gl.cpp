@@ -193,11 +193,15 @@ void eae6320::Graphics::SetRenderState( Effect::RenderState render_state )
 	assert(glGetError() == GL_NO_ERROR);
 }
 
-void eae6320::Graphics::SetEffect( Effect & effect, const Matrix4 local2world )
+void eae6320::Graphics::SetEffect(Effect & effect)
 {
 	SetRenderState(effect.render_state);
 
 	glUseProgram(effect.parent);
+}
+
+void eae6320::Graphics::SetTransform( Effect & effect, const Matrix4 local2world )
+{
 	const GLfloat * mat1 = reinterpret_cast<const GLfloat *>(&local2world);
 	glUniformMatrix4fv(effect.uni_local2world, 1, false, mat1);
 	assert(glGetError() == GL_NO_ERROR);

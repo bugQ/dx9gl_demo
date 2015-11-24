@@ -11,6 +11,6 @@ mainh_f_END
 	// Set the fragment to the interpolated color that originated as per-vertex data
 	// (where color is represented by 4 floats representing "RGBA" == "Red/Green/Blue/Alpha")
 	{
-		o_color = vec4(i_color.rgb, i_color.a * g_alpha);
+		o_color = vec4(i_color.rgb * g_tint, i_color.a * g_alpha);
 	}
 }

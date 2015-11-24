@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Mesh.h"
-#include "Effect.h"
+#include "Material.h"
 #include "../Math/Vector3.h"
 #include "../Math/Versor.h"
 
@@ -13,11 +13,11 @@ struct Model
 {
 	// references only
 	Mesh * const mesh;
-	Effect * const effect;
+	Material * const mat;
 	Vector3 position;
 	Versor rotation;
 
-	Model(Mesh & mesh, Effect & effect, Vector3 position = Vector3::Zero);
+	Model(Mesh & mesh, Material & mat, Vector3 position = Vector3::Zero);
 };
 #include "Model.inl"
 }

@@ -22,7 +22,7 @@ return
 		srcext = 'fxt', dstext = 'fxb',
 		tool = 'EffectBuilder.exe',
 
-		"sprite",
+		"opaque",
 		"xlucent",
 	},
 	materials = {

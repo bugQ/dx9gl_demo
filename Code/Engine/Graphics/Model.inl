@@ -1,4 +1,4 @@
-inline Model::Model(Mesh & mesh, Effect & effect, Vector3 position)
-	: mesh(&mesh), effect(&effect), position(position)
+inline Model::Model(Mesh & mesh, Material & mat, Vector3 position)
+	: mesh(&mesh), mat(&mat), position(position)
 {
 }

@@ -129,7 +129,7 @@ namespace Graphics
 
 		UniformHandle GetUniformHandle(const char * uniformName, ShaderType shaderType);
 
-		bool SetVec(UniformHandle handle, ShaderType shaderType, float * data, size_t len);
+		bool SetVec(UniformHandle handle, ShaderType shaderType, float * data, uint8_t len);
 
 		~Effect();
 	};

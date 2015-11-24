@@ -145,6 +145,7 @@ namespace Graphics
 			return INVALID_UNIFORM_HANDLE;
 		}
 
+		return handle;
 	}
 
 	bool Effect::SetVec(UniformHandle handle, ShaderType shaderType, float * data, size_t len)
@@ -184,16 +185,17 @@ namespace Graphics
 			? this->vertex_shader.second
 			: this->fragment_shader.second;
 		handle = constants->GetConstantByName(NULL, uniformName);
-		if (INVALID_UNIFORM_HANDLE)
+		if (handle == INVALID_UNIFORM_HANDLE)
 		{
 			std::stringstream errmsg;
 			errmsg << "No such uniform " << uniformName;
 			UserOutput::Print(errmsg.str(), __FILE__);
 			return 0;
 		}
+		return handle;
 	}
 
-	bool Effect::SetVec(UniformHandle handle, ShaderType shaderType, float * data, size_t len)
+	bool Effect::SetVec(UniformHandle handle, ShaderType shaderType, float * data, uint8_t len)
 	{
 		LPD3DXCONSTANTTABLE table = shaderType == ShaderType::Vertex
 			? this->vertex_shader.second

@@ -12,8 +12,20 @@ namespace eae6320
 {
 namespace Graphics
 {
+	bool Material::SetParams()
+	{
+		for (size_t i = 0; i < num_params; ++i)
+			if (!effect->SetVec(
+					params[i].handle,
+					params[i].shaderType,
+					params[i].vec,
+					params[i].vec_length))
+				return false;
 
-	Material * FromFile(const char * materialPath, Effect::Parent parent)
+		return true;
+	}
+
+	Material * Material::FromFile(const char * materialPath, Effect::Parent parent)
 	{
 		HANDLE infile = CreateFile(materialPath, GENERIC_READ, 0, NULL, OPEN_EXISTING, 0, 0);
 		FILE_STANDARD_INFO info;
@@ -35,7 +47,7 @@ namespace Graphics
 			return NULL;
 		}
 
-		size_t total_bytes = static_cast<size_t>(info.EndOfFile.QuadPart);
+		DWORD total_bytes = static_cast<DWORD>(info.EndOfFile.QuadPart);
 		DWORD bytes_read;
 
 		char * buf = new char[total_bytes];
@@ -83,16 +95,20 @@ namespace Graphics
 			if (handle == INVALID_UNIFORM_HANDLE)
 				goto OnError;
 
-			if (!mat->effect->SetVec(
-				handle, param.shaderType, param.vec, param.vec_length))
-				goto OnError;
-
 			mat->params[i].handle = handle;
 		}
+
+		return mat;
 
 	OnError:
 		delete mat;
 		return NULL;
+	}
+
+	Material::~Material()
+	{
+		delete effect;
+		delete[] params;
 	}
 }
 }
