@@ -70,7 +70,7 @@ namespace Graphics
 #elif defined ( EAE6320_PLATFORM_D3D )
 			D3DXHANDLE
 #endif
-			PositionHandle;
+			UniformHandle;
 
 		enum ShaderType
 		{
@@ -110,7 +110,7 @@ namespace Graphics
 		RenderState render_state;
 
 		// this is a handle on the vertex shader's "g_position" uniform
-		PositionHandle uni_local2world, uni_world2view, uni_view2screen;
+		UniformHandle uni_local2world, uni_world2view, uni_view2screen;
 
 		static Effect * FromFile(const char * effectPath, Parent parent = 0);
 		static Effect * FromSpec(const Effect::Spec & spec, Parent parent = 0);

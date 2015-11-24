@@ -25,4 +25,13 @@ return
 		"sprite",
 		"xlucent",
 	},
+	materials = {
+		srcext = 'mtt', dstext = 'mtb',
+		tool = 'MaterialBuilder.exe',
+
+		"fuschia_opaque",
+		"lime_opaque",
+		"ochre_thirdalpha",
+		"violet_halfalpha",
+	},
 }
