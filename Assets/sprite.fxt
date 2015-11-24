@@ -1,5 +1,5 @@
 return
 {
   vertex = "data/vertex.shb",
-  fragment = "data/fragment.shb",
+  fragment = "data/f_opaque.shb",
 }

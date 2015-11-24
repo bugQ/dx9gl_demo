@@ -1,7 +1,7 @@
 return
 {
 	vertex = "data/vertex.shb",
-	fragment = "data/fragment_thirdalpha.shb",
+	fragment = "data/f_transparent.shb",
 	flags =
 	{
 		alpha = true,
