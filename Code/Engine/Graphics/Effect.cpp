@@ -148,7 +148,7 @@ namespace Graphics
 		return handle;
 	}
 
-	bool Effect::SetVec(UniformHandle handle, ShaderType shaderType, float * data, size_t len)
+	bool Effect::SetVec(UniformHandle handle, ShaderType shaderType, float * data, uint8_t len)
 	{
 		glUseProgram(this->parent);
 
@@ -156,8 +156,9 @@ namespace Graphics
 		assert(len > 0 && len < 4);
 
 		procs[len - 1](handle, len, data);
-		assert(glGetError() == GL_NO_ERROR);
-		return glGetError() == GL_NO_ERROR;
+		GLenum error = glGetError();
+		assert(error == GL_NO_ERROR);
+		return error == GL_NO_ERROR;
 	}
 
 	Effect::~Effect()
