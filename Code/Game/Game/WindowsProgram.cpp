@@ -634,8 +634,8 @@ bool WaitForMainWindowToClose( int& o_exitCode )
 			dir = Vector3::Zero;
 			dir += UserInput::IsKeyPressed('W') ? Vector3::K : Vector3::Zero;
 			dir += UserInput::IsKeyPressed('S') ? -Vector3::K : Vector3::Zero;
-			dir += UserInput::IsKeyPressed('D') ? Vector3::I : Vector3::Zero;
-			dir += UserInput::IsKeyPressed('A') ? -Vector3::I : Vector3::Zero;
+			dir += UserInput::IsKeyPressed('A') ? Vector3::I : Vector3::Zero;
+			dir += UserInput::IsKeyPressed('D') ? -Vector3::I : Vector3::Zero;
 			camera.position += dir * dt;
 
 			Render();
