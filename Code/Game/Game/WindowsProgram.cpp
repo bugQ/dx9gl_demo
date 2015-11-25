@@ -46,7 +46,8 @@ namespace
 	typedef struct { size_t mesh_idx, mat_idx; Vector3 position; } model_spec;
 
 	const char * mesh_files[] = {
-		"data/ball.vib",
+		"data/white_ball.vib",
+		"data/box.vib",
 		"data/plane.vib"
 	};
 	const char * material_files[] = {
@@ -60,8 +61,12 @@ namespace
 		{0, 2, Vector3(0.0f, -1.25f, 2.0f)},
 		// one solid ball
 		{0, 0, Vector3(-1.0f, -1.0f, 4.0f)},
+		// one translucent box
+		{1, 3, Vector3(3.0f, -1.5f, 0.0f) },
+		// one solid box
+		{ 1, 1, Vector3(-3.0f, 3.0f, 0.0f) },
 		// one floor
-		{1, 1, Vector3(0.0f, -1.0f, 0.0f)}
+		{2, 1, Vector3(0.0f, -1.0f, 0.0f)}
 	};
 
 	/* end hardcoded asset list. */

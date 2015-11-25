@@ -150,7 +150,7 @@ namespace Graphics
 
 	bool Effect::SetVec(UniformHandle handle, ShaderType shaderType, float * data, uint8_t len)
 	{
-		glUseProgram(this->parent);
+		//glUseProgram(this->parent);
 
 		PFNGLUNIFORM4FVPROC procs[4] = { glUniform1fv, glUniform2fv, glUniform3fv, glUniform4fv };
 		assert(len > 0 && len < 4);
