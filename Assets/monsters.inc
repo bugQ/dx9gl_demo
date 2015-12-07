@@ -39,6 +39,8 @@ void main()
 
 #define o_position gl_Position
 
+#define tex2D texture2D
+
 #define mul(a, b) ((a)*(b))
 
 #endif
@@ -46,6 +48,8 @@ void main()
 #define mainh_i_POSITION(n, name) mainh_i_arg(n, name, vec3, POSITION)
 #define mainh_i_COLOR(n, name) mainh_i_arg(n, name, vec4, COLOR)
 #define mainh_i_COLOR0(n, name) mainh_i_arg(n, name, vec4, COLOR0)
-#define mainh_o_POSITION(n, name) mainh_i_arg(n, name, vec4, POSITION)
+#define mainh_i_UV(n, name) mainh_i_arg(n, name, vec2, TEXCOORD0)
+#define mainh_o_POSITION(n, name) mainh_o_arg(n, name, vec4, POSITION)
 #define mainh_o_COLOR(n, name) mainh_o_arg(n, name, vec4, COLOR)
-#define mainh_o_COLOR0(n, name) mainh_i_arg(n, name, vec4, COLOR0)
+#define mainh_o_COLOR0(n, name) mainh_o_arg(n, name, vec4, COLOR0)
+#define mainh_o_UV(n, name) mainh_o_arg(n, name, vec2, TEXCOORD0)

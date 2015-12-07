@@ -2,15 +2,19 @@
 
 uniform vec3 g_tint;
 uniform float g_alpha;
+uniform sampler2D g_tex;
 
 mainh_f_BEGIN
+
 mainh_i_COLOR(0, i_color)
+mainh_i_UV(1, i_uv)
+
 // mainh_f_END includes the required fragment color output, o_color
 mainh_f_END
 {
 	// Set the fragment to the interpolated color that originated as per-vertex data
 	// (where color is represented by 4 floats representing "RGBA" == "Red/Green/Blue/Alpha")
 	{
-		o_color = vec4(i_color.rgb * g_tint, i_color.a * g_alpha);
+		o_color = tex2D(g_tex, i_uv) * vec4(i_color.rgb * g_tint, i_color.a * g_alpha);
 	}
 }

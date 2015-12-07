@@ -737,7 +737,7 @@ namespace
 						"\t\t\tnormal = { " << vertex.nx << ", " << vertex.ny << ", " << vertex.nz << " },\n"
 						"\t\t\ttangent = { " << vertex.tx << ", " << vertex.ty << ", " << vertex.tz << " },\n"
 						"\t\t\tbitangent = { " << vertex.btx << ", " << vertex.bty << ", " << vertex.btz << " },\n"
-						"\t\t\tuv = { " << vertex.u << ", " << vertex.v << " },\n"
+						"\t\t\tuv = { " << vertex.u << ", " << (1 - vertex.v) << " },\n"
 					"\t\t},\n";
 				}
 				fout << "\t},\n"

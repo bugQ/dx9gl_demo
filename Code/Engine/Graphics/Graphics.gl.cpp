@@ -534,6 +534,43 @@ namespace
 					goto OnExit;
 				}
 			}
+			// TexCoord (2)
+			// 2 floats == 8 bytes
+			// Offset = 16
+			{
+				const GLuint vertexElementLocation = 2;
+				const GLint elementCount = 2;
+				const GLboolean notNormalized = GL_FALSE;	// The given floats should be used as-is
+				glVertexAttribPointer(vertexElementLocation, elementCount, GL_FLOAT, notNormalized, stride, offset);
+				const GLenum errorCode = glGetError();
+				if (errorCode == GL_NO_ERROR)
+				{
+					glEnableVertexAttribArray(vertexElementLocation);
+					const GLenum errorCode = glGetError();
+					if (errorCode == GL_NO_ERROR)
+					{
+						offset = reinterpret_cast<GLvoid*>(reinterpret_cast<uint8_t*>(offset) + (elementCount * sizeof(float)));
+					}
+					else
+					{
+						wereThereErrors = true;
+						std::stringstream errorMessage;
+						errorMessage << "OpenGL failed to enable the TEXCOORD0 vertex attribute: " <<
+							reinterpret_cast<const char*>(gluErrorString(errorCode));
+						eae6320::UserOutput::Print(errorMessage.str());
+						goto OnExit;
+					}
+				}
+				else
+				{
+					wereThereErrors = true;
+					std::stringstream errorMessage;
+					errorMessage << "OpenGL failed to set the TEXCOORD0 vertex attribute: " <<
+						reinterpret_cast<const char*>(gluErrorString(errorCode));
+					eae6320::UserOutput::Print(errorMessage.str());
+					goto OnExit;
+				}
+			}
 		}
 
 		// Create an index buffer object and make it active

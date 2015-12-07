@@ -49,7 +49,7 @@ bool eae6320::cMeshBuilder::Build( const std::vector<std::string>& )
 		// THIS IS THE FORMAT DEFINITION
 		// 4 bytes num_vertices (V)
 		// 4 bytes num_triangles (T)
-		// 12*V bytes vertices
+		// 24*V bytes vertices
 		// 3*4*T bytes indices
 		outfile.write(reinterpret_cast<char *>(&(mesh_data->num_vertices)),
 			sizeof(mesh_data->num_vertices));
