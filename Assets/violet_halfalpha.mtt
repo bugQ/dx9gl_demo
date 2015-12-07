@@ -1,14 +1,12 @@
 return
 {
 	effect = "data/xlucent.fxb",
-	uniforms =
+	vertex_uniforms =
 	{
-		-- this table uses some tricks:
-		-- v_thing refers to a uniform named g_thing in the vertex shader
-		-- f_thing refers to a uniform named g_thing in the fragment shader
-		-- single floats can be specified with or without brackets
-		
-		f_tint = { 0.4, 0.0, 0.7 },
-		f_alpha = 0.5,
-	}
+	},
+	fragment_uniforms =
+	{
+		g_tint = { 0.4, 0.0, 0.7 },
+		g_alpha = 0.5,
+	},
 }

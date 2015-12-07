@@ -103,11 +103,11 @@ bool LoadMTT(const char * in_path, Material::Spec &spec)
 
 		lua_pop(luaState, 1); // pop vertex shader path
 
-		lua_getfield(luaState, -1, "uniforms");  // uniforms table now at -1
+		lua_getfield(luaState, -1, "vertex_uniforms");  // uniforms table now at -1
 
 		if (!lua_istable(luaState, -1))
 		{
-			eae6320::UserOutput::Print("Must have a table named 'uniforms'\n");
+			eae6320::UserOutput::Print("Must have a table named 'vertex_uniforms'\n");
 			lua_pop(luaState, 2);
 			return false;
 		}
@@ -124,29 +124,9 @@ bool LoadMTT(const char * in_path, Material::Spec &spec)
 
 			spec.params[i].handle = DIFF2UHANDLE(offset);
 
-			if (lua_isstring(luaState, -2))
-			{
-				spec.param_names[i] = lua_tostring(luaState, -2);
-
-				if (spec.param_names[i][0] == 'v')
-					spec.params[i].shaderType = Effect::ShaderType::Vertex;
-				else if (spec.param_names[i][0] == 'f')
-					spec.params[i].shaderType = Effect::ShaderType::Fragment;
-				else
-					goto OnKeyError;
-
-				spec.param_names[i][0] = 'g';
-
-				offset += spec.param_names[i].size() + 1;
-			}
-			else
-			{
-			OnKeyError:
-				eae6320::UserOutput::Print(
-					"Each uniforms table key must start with 'v' or 'f'.");
-				lua_pop(luaState, 4);
-				return false;
-			}
+			spec.param_names[i] = lua_tostring(luaState, -2);
+			spec.params[i].shaderType = Effect::ShaderType::Vertex;
+			offset += spec.param_names[i].size() + 1;
 
 			if (lua_istable(luaState, -1))
 			{
@@ -176,7 +156,71 @@ bool LoadMTT(const char * in_path, Material::Spec &spec)
 			{
 			OnValueError:
 				eae6320::UserOutput::Print(
-					"Each uniform must be a number or sequence of 1-4 numbers.");
+					"Each uniform must be a single number or sequence of 1-4 numbers.");
+				lua_pop(luaState, 4);
+				return false;
+			}
+
+			lua_pop(luaState, 1);
+		}
+		spec.num_params = static_cast<uint16_t>(i);
+
+		lua_pop(luaState, 2); // pop vertex_uniforms
+
+		lua_getfield(luaState, -1, "fragment_uniforms");  // uniforms table now at -1
+
+		if (!lua_istable(luaState, -1))
+		{
+			eae6320::UserOutput::Print("Must have a table named 'fragment_uniforms'\n");
+			lua_pop(luaState, 2);
+			return false;
+		}
+
+		ptrdiff_t offset = 0;
+		lua_pushnil(luaState); // uniforms table now at -2
+		size_t i;
+		for (i = 0; lua_next(luaState, -2) != 0; ++i)
+		{	// lua_next pops key, pushes key & value
+			// uniforms table at -3, key (uniform name) at -2, value (uniform) at -1
+
+			spec.params.resize(i + 1);
+			spec.param_names.resize(i + 1);
+
+			spec.params[i].handle = DIFF2UHANDLE(offset);
+
+			spec.param_names[i] = lua_tostring(luaState, -2);
+			spec.params[i].shaderType = Effect::ShaderType::Fragment;
+			offset += spec.param_names[i].size() + 1;
+
+			if (lua_istable(luaState, -1))
+			{
+				const int len = luaL_len(luaState, -1);
+				if (len > 4 || len < 1)
+					goto OnValueError;
+				spec.params[i].vec_length = len;
+
+				for (int j = 0; j < len; ++j)
+				{
+					lua_rawgeti(luaState, -1, j + 1); // ... uniform at -2, element at -1
+					if (!lua_isnumber(luaState, -1))
+					{
+						lua_pop(luaState, 1);
+						goto OnValueError;
+					}
+					spec.params[i].vec[j] = static_cast<float>(lua_tonumber(luaState, -1));
+					lua_pop(luaState, 1);
+				}
+			}
+			else if (lua_isnumber(luaState, -1))
+			{
+				spec.params[i].vec_length = 1;
+				spec.params[i].vec[0] = static_cast<float>(lua_tonumber(luaState, -1));
+			}
+			else
+			{
+			OnValueError:
+				eae6320::UserOutput::Print(
+					"Each uniform must be a single number or sequence of 1-4 numbers.");
 				lua_pop(luaState, 4);
 				return false;
 			}
