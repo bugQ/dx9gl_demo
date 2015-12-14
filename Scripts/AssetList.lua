@@ -26,6 +26,12 @@ return
 		"opaque",
 		"xlucent",
 	},
+	textures = {
+		srcext = 'png', dstext = 'dds',
+		tool = 'TextureBuilder.exe',
+
+		"FFFFFF-1",
+	},
 	materials = {
 		srcext = 'mtt', dstext = 'mtb',
 		tool = 'MaterialBuilder.exe',

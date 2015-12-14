@@ -1,6 +1,10 @@
 return
 {
 	effect = "data/opaque.fxb",
+	textures =
+	{
+		g_tex = "data/FFFFFF-1.dds",
+	}
 	vertex_uniforms =
 	{
 	},
