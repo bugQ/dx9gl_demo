@@ -114,8 +114,8 @@ bool LoadMTT(const char * in_path, Material::Spec &spec)
 		
 		ptrdiff_t offset = 0;
 		lua_pushnil(luaState); // uniforms table now at -2
-		size_t i;
-		for (i = 0; lua_next(luaState, -2) != 0; ++i) 
+		size_t i = 0;
+		for (i; lua_next(luaState, -2) != 0; ++i) 
 		{	// lua_next pops key, pushes key & value
 			// uniforms table at -3, key (uniform name) at -2, value (uniform) at -1
 			
@@ -163,9 +163,8 @@ bool LoadMTT(const char * in_path, Material::Spec &spec)
 
 			lua_pop(luaState, 1);
 		}
-		spec.num_params = static_cast<uint16_t>(i);
 
-		lua_pop(luaState, 2); // pop vertex_uniforms
+		lua_pop(luaState, 1); // pop vertex_uniforms
 
 		lua_getfield(luaState, -1, "fragment_uniforms");  // uniforms table now at -1
 
@@ -176,10 +175,8 @@ bool LoadMTT(const char * in_path, Material::Spec &spec)
 			return false;
 		}
 
-		ptrdiff_t offset = 0;
 		lua_pushnil(luaState); // uniforms table now at -2
-		size_t i;
-		for (i = 0; lua_next(luaState, -2) != 0; ++i)
+		for (i; lua_next(luaState, -2) != 0; ++i)
 		{	// lua_next pops key, pushes key & value
 			// uniforms table at -3, key (uniform name) at -2, value (uniform) at -1
 
