@@ -9,6 +9,13 @@ namespace Graphics
 {
 	struct Material
 	{
+		typedef
+#if defined( EAE6320_PLATFORM_GL )
+			GLuint
+#elif defined ( EAE6320_PLATFORM_D3D )
+			LPDIRECT3DTEXTURE9
+#endif
+			TextureHandle;
 
 		struct UniformParameter
 		{
@@ -29,6 +36,7 @@ namespace Graphics
 		Effect * effect;
 		UniformParameter * params;
 		uint16_t num_params;
+		TextureHandle texture;
 
 		static Material * FromFile(const char * materialPath, Effect::Parent parent = 0);
 		bool SetParams();

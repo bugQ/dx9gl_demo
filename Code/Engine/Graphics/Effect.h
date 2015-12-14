@@ -1,11 +1,8 @@
 #pragma once
 
 #if defined ( EAE6320_PLATFORM_GL )
-#if defined ( _WIN32 )
-// <windows.h> must be #included before <gl/GL.h>
-#include "../Windows/WindowsIncludes.h"
-#endif
-#include <gl/GL.h>
+#include "OpenGLExtensions\OpenGlExtensions.h"
+#include <gl/GLU.h>
 
 #define UHANDLE2DIFF(x) (static_cast<ptrdiff_t>(x))
 #define DIFF2UHANDLE(x) (static_cast<eae6320::Graphics::Effect::UniformHandle>(x))
