@@ -72,7 +72,7 @@ inline Matrix4 Matrix4::rotation_q(Versor const & q)
 		q.y, -q.x, q.w, q.z,
 		-q.x, -q.y, -q.z, q.w).dot(Matrix4(
 			q.w, q.z, -q.y, -q.x,
-			-q.z, q.w, q.x, q.y,
+			-q.z, q.w, q.x, -q.y,
 			q.y, -q.x, q.w, -q.z,
 			q.x, q.y, q.z, q.w));
 }
