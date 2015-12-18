@@ -207,6 +207,12 @@ void eae6320::Graphics::SetEffect(Effect & effect)
 	assert(SUCCEEDED(result));
 }
 
+void eae6320::Graphics::SetMaterial(Material & material)
+{
+	SetEffect(*material.effect);
+	material.SetParams();
+}
+
 void eae6320::Graphics::SetTransform(Effect & effect, const Matrix4 local2world)
 {
 	HRESULT result;

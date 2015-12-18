@@ -54,6 +54,11 @@ namespace
 // Interface
 //==========
 
+Effect::Parent eae6320::Graphics::GetDevice()
+{
+	return 0;
+}
+
 bool eae6320::Graphics::LoadMesh(Mesh & output, Mesh::Data & input)
 {
 	return CreateVertexArray(output, input);
@@ -198,6 +203,13 @@ void eae6320::Graphics::SetEffect(Effect & effect)
 	SetRenderState(effect.render_state);
 
 	glUseProgram(effect.parent);
+}
+
+void eae6320::Graphics::SetMaterial(Material & material)
+{
+	SetEffect(*material.effect);
+	material.SetParams();
+
 }
 
 void eae6320::Graphics::SetTransform( Effect & effect, const Matrix4 local2world )

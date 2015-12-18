@@ -12,10 +12,22 @@ namespace Graphics
 		typedef
 #if defined( EAE6320_PLATFORM_GL )
 			GLuint
-#elif defined ( EAE6320_PLATFORM_D3D )
+#elif defined( EAE6320_PLATFORM_D3D )
 			LPDIRECT3DTEXTURE9
 #endif
 			TextureHandle;
+
+		typedef
+#if defined( EAE6320_PLATFORM_GL )
+			GLint
+#elif defined( EAE6320_PLATFORM_D3D )
+			DWORD
+#endif
+			Sampler;
+
+		typedef
+			unsigned int
+			TextureUnit;
 
 		struct UniformParameter
 		{
@@ -36,10 +48,10 @@ namespace Graphics
 		Effect * effect;
 		UniformParameter * params;
 		uint16_t num_params;
-		TextureHandle texture;
 
 		static Material * FromFile(const char * materialPath, Effect::Parent parent = 0);
 		bool SetParams();
+		bool SetTexture(Sampler samp, TextureHandle tex, TextureUnit unit);
 
 		~Material();
 	};

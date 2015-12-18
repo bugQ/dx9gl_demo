@@ -132,16 +132,18 @@ template <size_t N> Mesh ** LoadMeshes(const char * (&spec)[N])
 template <size_t N> Effect ** LoadEffects(const char * (&spec)[N])
 {
 	Effect ** out = new Effect *[N];
+	Effect::Parent parent = Graphics::GetDevice();
 	for (size_t i = 0; i < N; ++i)
-		out[i] = Effect::FromFile(spec[i]);
+		out[i] = Effect::FromFile(spec[i], parent);
 	return out;
 }
 
 template <size_t N> Material ** LoadMaterials(const char * (&spec)[N])
 {
 	Material ** out = new Material *[N];
+	Effect::Parent parent = Graphics::GetDevice();
 	for (size_t i = 0; i < N; ++i)
-		out[i] = Material::FromFile(spec[i]);
+		out[i] = Material::FromFile(spec[i], parent);
 	return out;
 }
 

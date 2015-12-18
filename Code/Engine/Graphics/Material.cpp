@@ -16,6 +16,9 @@ namespace
 	eae6320::Graphics::Material::TextureHandle LoadTexture(
 		const char * texture_path,
 		eae6320::Graphics::Effect::Parent parent = 0);
+	eae6320::Graphics::Material::Sampler GetSampler(
+		eae6320::Graphics::Material & material,
+		eae6320::Graphics::Effect::UniformHandle handle);
 }
 
 namespace eae6320
@@ -24,14 +27,22 @@ namespace Graphics
 {
 	bool Material::SetParams()
 	{
-		for (size_t i = 0; i < num_params; ++i)
-			if (params[i].vec_length > 0
-				&& !effect->SetVec(
+		for (size_t i = 0; i < num_params; ++i) {
+			if (params[i].vec_length == 0)
+			{
+				Sampler samp = *reinterpret_cast<Sampler *>(&params[i].handle);
+				TextureHandle tex = *reinterpret_cast<TextureHandle *>(params[i].vec);
+				TextureUnit unit = *reinterpret_cast<TextureUnit *>(params[i].vec + 2);
+
+				SetTexture(samp, tex, unit);
+			}
+			else if (!effect->SetVec(
 					params[i].handle,
 					params[i].shaderType,
 					params[i].vec,
 					params[i].vec_length))
 				return false;
+		}
 
 		return true;
 	}
@@ -95,6 +106,7 @@ namespace Graphics
 		memcpy(mat->params, scanptr, num_params * sizeof(Material::UniformParameter));
 		scanptr += num_params * sizeof(Material::UniformParameter);
 
+		unsigned int texture_unit = 0;
 		for (size_t i = 0; i < num_params; ++i)
 		{
 			Material::UniformParameter & param = mat->params[i];
@@ -106,14 +118,19 @@ namespace Graphics
 			if (handle == INVALID_UNIFORM_HANDLE)
 				goto OnError;
 
-			mat->params[i].handle = handle;
 
 			if (mat->params[i].vec_length == 0)
 			{
 				char * texture_path = param_name + strlen(param_name) + 1;
 
-				mat->texture = LoadTexture(texture_path, parent);
+				// this is horrendous and I know it
+				// but it easily allows for multiple samplers
+				*reinterpret_cast<TextureHandle *>(mat->params[i].vec) = LoadTexture(texture_path, parent);
+				*reinterpret_cast<TextureUnit *>(mat->params[i].vec + 2) = texture_unit++;
+				*reinterpret_cast<Sampler *>(&mat->params[i].handle) = GetSampler(*mat, handle);
 			}
+			else
+				mat->params[i].handle = handle;
 		}
 
 		return mat;
@@ -121,6 +138,37 @@ namespace Graphics
 	OnError:
 		delete mat;
 		return NULL;
+	}
+
+	bool eae6320::Graphics::Material::SetTexture(Sampler samp, TextureHandle tex, TextureUnit unit)
+	{
+#if defined( EAE6320_PLATFORM_GL )
+		GLenum error;
+
+		glActiveTexture(GL_TEXTURE0 + unit);
+		error = glGetError();
+		assert(error == GL_NO_ERROR);
+		if (error != GL_NO_ERROR)
+			return false;
+
+		glBindTexture(GL_TEXTURE_2D, tex);
+		error = glGetError();
+		assert(error == GL_NO_ERROR);
+		if (error != GL_NO_ERROR)
+			return false;
+
+		glUniform1i(samp, unit);
+		error = glGetError();
+		assert(error == GL_NO_ERROR);
+		if (error != GL_NO_ERROR)
+			return false;
+#elif defined( EAE6320_PLATFORM_D3D )
+		HRESULT result = this->effect->parent->SetTexture(samp, tex);
+		assert(SUCCEEDED(result));
+		if (!SUCCEEDED(result))
+			return false;
+#endif
+		return true;
 	}
 
 	Material::~Material()
@@ -388,8 +436,14 @@ namespace
 			o_texture = 0;
 		}
 
-		return !wereThereErrors;
+		return o_texture;
 	}
+
+	GLint GetSampler(eae6320::Graphics::Material & material, GLint handle)
+	{
+		return handle;
+	}
+
 #elif defined ( EAE6320_PLATFORM_D3D )
 	LPDIRECT3DTEXTURE9 LoadTexture(
 		const char * texture_path,
@@ -409,9 +463,15 @@ namespace
 		const HRESULT result = D3DXCreateTextureFromFileEx(parent, texture_path, useDimensionsFromFile, useDimensionsFromFile, useMipMapsFromFile,
 			staticTexture, useFormatFromFile, letD3dManageMemory, useDefaultFiltering, useDefaultFiltering, noColorKey, noSourceInfo, noColorPalette,
 			&handle);
+
 		assert(SUCCEEDED(result));
 		
 		return handle;
+	}
+
+	DWORD GetSampler(eae6320::Graphics::Material & material, D3DXHANDLE handle)
+	{
+		return material.effect->fragment_shader.second->GetSamplerIndex(handle);
 	}
 #endif
 }

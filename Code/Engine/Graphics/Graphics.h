@@ -22,9 +22,7 @@ namespace eae6320
 {
 	namespace Graphics
 	{
-#ifdef EAE6320_PLATFORM_D3D
 		Effect::Parent GetDevice(); // used within Effect
-#endif
 
 		// must be called at startup
 		bool Initialize( const HWND i_renderingWindow );
@@ -33,6 +31,7 @@ namespace eae6320
 		void SetCamera(Effect & effect, Camera & camera);
 		void SetRenderState(Effect::RenderState render_state);
 		void SetEffect(Effect & effect);
+		void SetMaterial(Material & material);
 		void SetTransform(Effect & effect, const Matrix4 local2world);
 		void DrawMesh( Mesh & mesh );
 		bool LoadMesh( Mesh & output, Mesh::Data & input );
