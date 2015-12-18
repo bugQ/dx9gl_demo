@@ -15,7 +15,8 @@ namespace Graphics
 	bool Material::SetParams()
 	{
 		for (size_t i = 0; i < num_params; ++i)
-			if (!effect->SetVec(
+			if (params[i].vec_length > 0
+				&& !effect->SetVec(
 					params[i].handle,
 					params[i].shaderType,
 					params[i].vec,

@@ -103,7 +103,53 @@ bool LoadMTT(const char * in_path, Material::Spec &spec)
 
 		lua_pop(luaState, 1); // pop vertex shader path
 
-		lua_getfield(luaState, -1, "vertex_uniforms");  // uniforms table now at -1
+		ptrdiff_t offset = 0;
+		size_t i = 0;
+
+		lua_getfield(luaState, -1, "textures");  // textures table now at -1
+
+		if (!lua_istable(luaState, -1))
+		{
+			eae6320::UserOutput::Print("Must have a table named 'textures'\n");
+			lua_pop(luaState, 2);
+			return false;
+		}
+
+		lua_pushnil(luaState); // textures table now at -2
+		for (i; lua_next(luaState, -2) != 0; ++i)
+		{
+			spec.params.resize(i + 1);
+			spec.param_names.resize(i + 1);
+
+			spec.params[i].handle = DIFF2UHANDLE(offset);
+
+			spec.param_names[i] = lua_tostring(luaState, -2);
+			spec.params[i].shaderType = Effect::ShaderType::Fragment;
+
+			if (lua_isstring(luaState, -1))
+			{
+				spec.params[i].vec_length = 0; // using 0 as code for texture
+
+				// append texture path to param name, separated with null char
+				spec.param_names[i].append(1, '\0');
+				spec.param_names[i].append(lua_tostring(luaState, -1));
+			}
+			else
+			{
+				eae6320::UserOutput::Print(
+					"Each texture entry must have a string path to the texture.");
+				lua_pop(luaState, 4);
+				return false;
+			}
+
+			offset += spec.param_names[i].size() + 1;
+
+			lua_pop(luaState, 1);
+		}
+
+		lua_pop(luaState, 1); // pop textures table
+
+		lua_getfield(luaState, -1, "vertex_uniforms");  // vertex_uniforms table now at -1
 
 		if (!lua_istable(luaState, -1))
 		{
@@ -112,9 +158,7 @@ bool LoadMTT(const char * in_path, Material::Spec &spec)
 			return false;
 		}
 		
-		ptrdiff_t offset = 0;
-		lua_pushnil(luaState); // uniforms table now at -2
-		size_t i = 0;
+		lua_pushnil(luaState); // vertex_uniforms table now at -2
 		for (i; lua_next(luaState, -2) != 0; ++i) 
 		{	// lua_next pops key, pushes key & value
 			// uniforms table at -3, key (uniform name) at -2, value (uniform) at -1
@@ -224,9 +268,10 @@ bool LoadMTT(const char * in_path, Material::Spec &spec)
 
 			lua_pop(luaState, 1);
 		}
-		spec.num_params = static_cast<uint16_t>(i);
 
 		lua_pop(luaState, 2); // pop uniforms, main table
+
+		spec.num_params = static_cast<uint16_t>(i);
 		return true;
 	}
 }
