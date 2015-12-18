@@ -132,7 +132,7 @@ bool LoadMTT(const char * in_path, Material::Spec &spec)
 			{
 				const int len = luaL_len(luaState, -1);
 				if (len > 4 || len < 1)
-					goto OnValueError;
+					goto OnVertexValueError;
 				spec.params[i].vec_length = len;
 
 				for (int j = 0; j < len; ++j)
@@ -141,7 +141,7 @@ bool LoadMTT(const char * in_path, Material::Spec &spec)
 					if (!lua_isnumber(luaState, -1))
 					{
 						lua_pop(luaState, 1);
-						goto OnValueError;
+						goto OnVertexValueError;
 					}
 					spec.params[i].vec[j] = static_cast<float>(lua_tonumber(luaState, -1));
 					lua_pop(luaState, 1);
@@ -154,7 +154,7 @@ bool LoadMTT(const char * in_path, Material::Spec &spec)
 			}
 			else
 			{
-			OnValueError:
+			OnVertexValueError:
 				eae6320::UserOutput::Print(
 					"Each uniform must be a single number or sequence of 1-4 numbers.");
 				lua_pop(luaState, 4);
@@ -193,7 +193,7 @@ bool LoadMTT(const char * in_path, Material::Spec &spec)
 			{
 				const int len = luaL_len(luaState, -1);
 				if (len > 4 || len < 1)
-					goto OnValueError;
+					goto OnFragmentValueError;
 				spec.params[i].vec_length = len;
 
 				for (int j = 0; j < len; ++j)
@@ -202,7 +202,7 @@ bool LoadMTT(const char * in_path, Material::Spec &spec)
 					if (!lua_isnumber(luaState, -1))
 					{
 						lua_pop(luaState, 1);
-						goto OnValueError;
+						goto OnFragmentValueError;
 					}
 					spec.params[i].vec[j] = static_cast<float>(lua_tonumber(luaState, -1));
 					lua_pop(luaState, 1);
@@ -215,7 +215,7 @@ bool LoadMTT(const char * in_path, Material::Spec &spec)
 			}
 			else
 			{
-			OnValueError:
+			OnFragmentValueError:
 				eae6320::UserOutput::Print(
 					"Each uniform must be a single number or sequence of 1-4 numbers.");
 				lua_pop(luaState, 4);
