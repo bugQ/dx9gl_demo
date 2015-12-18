@@ -19,6 +19,8 @@
 *.opensdf
 /ipch
 
+*.VC.opendb
+
 # Temporary Files
 #============
 *.idb

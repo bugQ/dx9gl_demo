@@ -155,7 +155,7 @@ namespace Graphics
 		PFNGLUNIFORM4FVPROC procs[4] = { glUniform1fv, glUniform2fv, glUniform3fv, glUniform4fv };
 		assert(len > 0 && len < 4);
 
-		procs[len - 1](handle, len, data);
+		procs[len - 1](handle, 1, data);
 		GLenum error = glGetError();
 		assert(error == GL_NO_ERROR);
 		return error == GL_NO_ERROR;
