@@ -205,13 +205,6 @@ void eae6320::Graphics::SetEffect(Effect & effect)
 	glUseProgram(effect.parent);
 }
 
-void eae6320::Graphics::SetMaterial(Material & material)
-{
-	SetEffect(*material.effect);
-	material.SetParams();
-
-}
-
 void eae6320::Graphics::SetTransform( Effect & effect, const Matrix4 local2world )
 {
 	const GLfloat * mat1 = reinterpret_cast<const GLfloat *>(&local2world);

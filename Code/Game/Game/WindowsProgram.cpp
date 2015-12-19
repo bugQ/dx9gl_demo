@@ -54,7 +54,9 @@ namespace
 		"data/fuschia_opaque.mtb",
 		"data/lime_opaque.mtb",
 		"data/ochre_thirdalpha.mtb",
-		"data/violet_halfalpha.mtb"
+		"data/violet_halfalpha.mtb",
+		"data/eae6320png.mtb",
+		"data/alphapng.mtb"
 	};
 	model_spec model_specs[] = {
 		// one translucent ball
@@ -62,11 +64,11 @@ namespace
 		// one solid ball
 		{0, 0, Vector3(-1.0f, -1.0f, 4.0f)},
 		// one translucent box
-		{1, 3, Vector3(3.0f, -1.5f, 0.0f) },
+		{1, 3, Vector3(3.0f, -1.5f, 0.0f)},
 		// one solid box
-		{ 1, 1, Vector3(-3.0f, 3.0f, 0.0f) },
+		{1, 1, Vector3(-3.0f, 3.0f, 0.0f)},
 		// one floor
-		{2, 1, Vector3(0.0f, -1.0f, 0.0f)}
+		{2, 4, Vector3(0.0f, -1.0f, 0.0f)}
 	};
 
 	/* end hardcoded asset list. */

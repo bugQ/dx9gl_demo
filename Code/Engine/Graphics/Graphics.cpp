@@ -11,3 +11,9 @@ void eae6320::Graphics::DrawModel(Model & model, Camera & camera)
 	Graphics::SetCamera(*model.mat->effect, camera);
 	Graphics::DrawMesh(*model.mesh);
 }
+
+void eae6320::Graphics::SetMaterial(Material & material)
+{
+	SetEffect(*material.effect);
+	material.SetParams();
+}

@@ -39,8 +39,7 @@ namespace {
 		++depth;
 		for (int i = 0; i < numVertices; ++i)
 		{
-			lua_rawgeti(&luaState, -1, i+1); // vertex table now at -1
-			++depth;
+			lua_rawgeti(&luaState, -1, i+1); // vertex now at -1
 
 			if (!lua_istable(&luaState, -1))
 			{
@@ -95,7 +94,7 @@ namespace {
 
 			vertices[i].z = (float)lua_tonumber(&luaState, -1);
 
-			lua_pop(&luaState, 2); // pop z and position, leave vertex table
+			lua_pop(&luaState, 2); // pop z and position, leave vertex
 			depth -= 2;
 
 			const char * const colorkey = "color";
@@ -136,8 +135,45 @@ namespace {
 			vertices[i].b = static_cast<uint8_t>(rgba[2] * 255);
 			vertices[i].a = static_cast<uint8_t>(rgba[3] * 255);
 
-			lua_pop(&luaState, 2); // pop color and vertex, leave vertices
-			depth -= 2;
+			lua_pop(&luaState, 1); // pop color, leave vertex
+			depth -= 1;
+
+			const char * const uvkey = "uv";
+			lua_getfield(&luaState, -1, uvkey); // uv array now at -1
+			++depth;
+
+			if (!lua_istable(&luaState, -1) || luaL_len(&luaState, -1) != 2)
+			{
+			OnBadUV:
+				std::stringstream errstr;
+				errstr << key << " must have " << uvkey
+					<< " as a coordinate pair of normalized numbers";
+				UserOutput::Print(errstr.str());
+				numVertices = -1;
+				goto OnExit;
+			}
+
+			double uv[2];
+
+			++depth;
+			for (int j = 0; j < 2; ++j)
+			{
+				lua_rawgeti(&luaState, -1, j + 1); // uv coordinate now at -1
+
+				if (!lua_isnumber(&luaState, -1))
+					goto OnBadUV;
+
+				uv[j] = lua_tonumber(&luaState, -1);
+
+				lua_pop(&luaState, 1);
+			}
+			--depth;
+
+			vertices[i].u = static_cast<float>(uv[0]);
+			vertices[i].v = static_cast<float>(1.0 - uv[1]);
+
+			lua_pop(&luaState, 2); // pop uv array and vertex, leave vertices
+			--depth;
 		}
 		--depth;
 

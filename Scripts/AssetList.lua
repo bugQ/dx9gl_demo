@@ -31,6 +31,8 @@ return
 		tool = 'TextureBuilder.exe',
 
 		"FFFFFF-1",
+		"eae6320",
+		"alpha",
 	},
 	materials = {
 		srcext = 'mtt', dstext = 'mtb',
@@ -40,5 +42,7 @@ return
 		"lime_opaque",
 		"ochre_thirdalpha",
 		"violet_halfalpha",
+		"eae6320png",
+		"alphapng",
 	},
 }

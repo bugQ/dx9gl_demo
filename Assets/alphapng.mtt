@@ -1,0 +1,16 @@
+return
+{
+	effect = "data/xlucent.fxb",
+	textures =
+	{
+		g_tex = "data/alpha.dds",
+	},
+	vertex_uniforms =
+	{
+	},
+	fragment_uniforms =
+	{
+		g_tint = { 1, 1, 1 },
+		g_alpha = 1,
+	},
+}
