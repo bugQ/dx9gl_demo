@@ -6,6 +6,7 @@ return
 
 		"white_ball",
 		"box",
+		"square",
 		"plane",
 	},
 	shaders = {

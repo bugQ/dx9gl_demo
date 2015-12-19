@@ -48,6 +48,7 @@ namespace
 	const char * mesh_files[] = {
 		"data/white_ball.vib",
 		"data/box.vib",
+		"data/square.vib",
 		"data/plane.vib"
 	};
 	const char * material_files[] = {
@@ -62,13 +63,15 @@ namespace
 		// one translucent ball
 		{0, 2, Vector3(0.0f, -1.25f, 2.0f)},
 		// one solid ball
-		{0, 0, Vector3(-1.0f, -1.0f, 4.0f)},
+		{0, 0, Vector3(-1.0f, -1.0f, 2.0f)},
 		// one translucent box
-		{1, 3, Vector3(3.0f, -1.5f, 0.0f)},
+		{1, 3, Vector3(2.0f, -0.5f, 5.0f)},
 		// one solid box
 		{1, 1, Vector3(-3.0f, 3.0f, 0.0f)},
-		// one floor
-		{2, 4, Vector3(0.0f, -1.0f, 0.0f)}
+		// one translucent square (w/ "alpha" texture)
+		{2, 5, Vector3(-0.56f, 0.56f, 8.2f)},
+		// one floor (w/ "eae6320" texture)
+		{3, 4, Vector3(0.0f, -1.0f, 4.0f)}
 	};
 
 	/* end hardcoded asset list. */
@@ -308,8 +311,8 @@ HWND CreateMainWindowHandle( const HINSTANCE i_thisInstanceOfTheProgram, const i
 	{
 		// In a real game these values would come from an external source
 		// rather than be hard-coded
-		const int desiredWidth = 800;
-		const int desiredHeight = 600;
+		const int desiredWidth = 1024;
+		const int desiredHeight = 576;
 
 		// Calculate how much of the window is coming from the "non-client area"
 		// (the borders and title bar)
