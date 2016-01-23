@@ -634,17 +634,17 @@ bool WaitForMainWindowToClose( int& o_exitCode )
 			Time::OnNewFrame();
 			float dt = Time::GetSecondsElapsedThisFrame();
 			float angle = 0;
-			angle += UserInput::IsKeyPressed(VK_RIGHT) ? 1.0f : 0.0f;
-			angle += UserInput::IsKeyPressed(VK_LEFT) ? -1.0f : 0.0f;
+			angle += UserInput::IsKeyPressed('D') ? 1.0f : 0.0f;
+			angle += UserInput::IsKeyPressed('A') ? -1.0f : 0.0f;
 			camera.yaw += angle * dt;
 			
 			Vector3 dir = Vector3::Zero;
+			dir += UserInput::IsKeyPressed(VK_LEFT) ? Vector3::I : Vector3::Zero;
+			dir += UserInput::IsKeyPressed(VK_RIGHT) ? -Vector3::I : Vector3::Zero;
 			dir += UserInput::IsKeyPressed(VK_UP) ? -Vector3::J : Vector3::Zero;
 			dir += UserInput::IsKeyPressed(VK_DOWN) ? Vector3::J : Vector3::Zero;
 			dir += UserInput::IsKeyPressed('W') ? Vector3::K : Vector3::Zero;
 			dir += UserInput::IsKeyPressed('S') ? -Vector3::K : Vector3::Zero;
-			dir += UserInput::IsKeyPressed('A') ? Vector3::I : Vector3::Zero;
-			dir += UserInput::IsKeyPressed('D') ? -Vector3::I : Vector3::Zero;
 			Versor rotated = Versor(Vector4(dir, 0.0f)).rotate(camera.rotation().inverse());
 			dir = Vector3(rotated.x, rotated.y, rotated.z);
 			camera.position += dir * camera_track_speed * dt;
