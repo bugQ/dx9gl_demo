@@ -16,8 +16,9 @@ struct Model
 	Material * const mat;
 	Vector3 position;
 	Versor rotation;
+	Vector3 scale;
 
-	Model(Mesh & mesh, Material & mat, Vector3 position = Vector3::Zero);
+	Model(Mesh & mesh, Material & mat, Vector3 position = Vector3::Zero, Vector3 scale = Vector3::One);
 };
 #include "Model.inl"
 }

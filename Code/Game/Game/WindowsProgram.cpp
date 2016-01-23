@@ -38,41 +38,42 @@ namespace
 	// In our class, however, we will only have a single main window.
 	HWND s_mainWindow = NULL;
 
+	float camera_track_speed = 3.0f;
+	float camera_pan_speed = 1.0f;
 
 	/* begin hardcoded asset list.  whoops !!
 	   this will all be replaced with actual asset files, later. */
 
 	// model_spec = mesh + effect indices
-	typedef struct { size_t mesh_idx, mat_idx; Vector3 position; } model_spec;
+	typedef struct { size_t mesh_idx, mat_idx; Vector3 position; Vector3 scale; } model_spec;
 
-	const char * mesh_files[] = {
-		"data/white_ball.vib",
-		"data/box.vib",
-		"data/square.vib",
-		"data/plane.vib"
-	};
-	const char * material_files[] = {
-		"data/fuschia_opaque.mtb",
-		"data/lime_opaque.mtb",
-		"data/ochre_thirdalpha.mtb",
-		"data/violet_halfalpha.mtb",
-		"data/eae6320png.mtb",
-		"data/alphapng.mtb"
-	};
-	model_spec model_specs[] = {
-		// one translucent ball
-		{0, 2, Vector3(0.0f, -1.25f, 2.0f)},
-		// one solid ball
-		{0, 0, Vector3(-1.0f, -1.0f, 2.0f)},
-		// one translucent box
-		{1, 3, Vector3(2.0f, -0.5f, 5.0f)},
-		// one solid box
-		{1, 1, Vector3(-3.0f, 3.0f, 0.0f)},
-		// one translucent square (w/ "alpha" texture)
-		{2, 5, Vector3(-0.56f, 0.56f, 8.2f)},
-		// one floor (w/ "eae6320" texture)
-		{3, 4, Vector3(0.0f, -1.0f, 4.0f)}
-	};
+	Vector3 origin = Vector3(0.0f, 0.0f, 0.0f);
+	Vector3 cm = Vector3(0.01f, 0.01f, 0.01f);
+
+	const char * mesh_files[] =
+		{ "data/ctf_ceiling.vib"
+		, "data/ctf_cement.vib"
+		, "data/ctf_floor.vib"
+		, "data/ctf_metal.vib"
+		, "data/ctf_railing.vib"
+		, "data/ctf_walls.vib"
+		};
+	const char * material_files[] =
+		{ "data/lime_opaque.mtb"
+		, "data/ctf_cement.mtb"
+		, "data/ctf_floor.mtb"
+		, "data/ctf_metal.mtb"
+		, "data/ctf_railing.mtb"
+		, "data/ctf_walls.mtb"
+		};
+	model_spec model_specs[] =
+		{ {0, 1, origin, cm}
+		, {1, 1, origin, cm}
+		, {2, 2, origin, cm}
+		, {3, 3, origin, cm}
+		, {4, 4, origin, cm}
+		, {5, 5, origin, cm}
+		};
 
 	/* end hardcoded asset list. */
 
@@ -160,7 +161,8 @@ template <size_t N> Model ** BuildModels(model_spec (&spec)[N],
 		out[i] = new Model(
 			*meshes[spec[i].mesh_idx],
 			*materials[spec[i].mat_idx],
-			spec[i].position);
+			spec[i].position,
+			spec[i].scale);
 	num_models = N;
 	return out;
 }
@@ -249,7 +251,7 @@ HWND CreateMainWindowHandle( const HINSTANCE i_thisInstanceOfTheProgram, const i
 	{
 		// The window's "caption"
 		// (The text that is displayed in the title bar)
-		const char* windowCaption = "Bug's EAE6320 Game";
+		const char* windowCaption = "Bug's EAE6330 Game";
 		// The window's style
 		const DWORD windowStyle =
 			// "Overlapped" is basically the same as "top-level"
@@ -631,19 +633,21 @@ bool WaitForMainWindowToClose( int& o_exitCode )
 			// Usually there will be no messages in the queue, and the game can run
 			Time::OnNewFrame();
 			float dt = Time::GetSecondsElapsedThisFrame();
-			Vector3 dir = Vector3::Zero;
-			dir += UserInput::IsKeyPressed(VK_UP) ? Vector3::J : Vector3::Zero;
-			dir += UserInput::IsKeyPressed(VK_DOWN) ? -Vector3::J : Vector3::Zero;
-			dir += UserInput::IsKeyPressed(VK_RIGHT) ? Vector3::I : Vector3::Zero;
-			dir += UserInput::IsKeyPressed(VK_LEFT) ? -Vector3::I : Vector3::Zero;
-			models[0]->position += dir * dt;
+			float angle = 0;
+			angle += UserInput::IsKeyPressed(VK_RIGHT) ? 1.0f : 0.0f;
+			angle += UserInput::IsKeyPressed(VK_LEFT) ? -1.0f : 0.0f;
+			camera.yaw += angle * dt;
 			
-			dir = Vector3::Zero;
+			Vector3 dir = Vector3::Zero;
+			dir += UserInput::IsKeyPressed(VK_UP) ? -Vector3::J : Vector3::Zero;
+			dir += UserInput::IsKeyPressed(VK_DOWN) ? Vector3::J : Vector3::Zero;
 			dir += UserInput::IsKeyPressed('W') ? Vector3::K : Vector3::Zero;
 			dir += UserInput::IsKeyPressed('S') ? -Vector3::K : Vector3::Zero;
 			dir += UserInput::IsKeyPressed('A') ? Vector3::I : Vector3::Zero;
 			dir += UserInput::IsKeyPressed('D') ? -Vector3::I : Vector3::Zero;
-			camera.position += dir * dt;
+			Versor rotated = Versor(Vector4(dir, 0.0f)).rotate(camera.rotation().inverse());
+			dir = Vector3(rotated.x, rotated.y, rotated.z);
+			camera.position += dir * camera_track_speed * dt;
 
 			Render();
 		}

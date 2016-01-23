@@ -8,4 +8,9 @@ Camera::Camera()
 {
 }
 
+Versor Camera::rotation()
+{
+	return Versor::rotation_y(yaw);
+}
+
 }

@@ -1,0 +1,15 @@
+return
+{
+	effect = "data/opaque.fxb",
+	textures =
+	{
+		g_tex = "data/wall_D.dds",
+	},
+	vertex_uniforms =
+	{
+	},
+	fragment_uniforms =
+	{
+		g_tint = { 1, 1, 1 },
+	},
+}

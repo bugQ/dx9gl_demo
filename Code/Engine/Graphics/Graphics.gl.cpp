@@ -144,8 +144,9 @@ void eae6320::Graphics::DrawMesh( Mesh & mesh )
 
 void eae6320::Graphics::SetCamera( Effect & effect, Camera & camera )
 {
-	Matrix4 viewmat = Matrix4::rotation_q(camera.rotation);
+	Matrix4 viewmat = Matrix4::Identity;
 	viewmat.vec3(3) = camera.position;
+	viewmat = viewmat.dot(Matrix4::rotation_q(camera.rotation()));
 	const GLfloat * mat2 = reinterpret_cast<const GLfloat *>(&viewmat);
 	glUniformMatrix4fv(effect.uni_world2view, 1, false, mat2);
 	GLenum error = glGetError();
