@@ -37,11 +37,17 @@ namespace eae6320
 		void DrawMesh( Mesh & mesh );
 		bool LoadMesh( Mesh & output, Mesh::Data & input );
 
-		/* debug draws*/
+#ifdef _DEBUG
 		bool InitWireframe( Wireframe & wireframe );
 		bool BufferWireframe( Wireframe & wireframe );
 		void DrawWireMesh( Mesh & wire_pool );
 		void DrawWireframe( Wireframe & wireframe, Camera & camera ); // the kit&kaboodle
+#else
+		inline bool InitWireframe(Wireframe & wireframe) { return true; }
+		inline bool BufferWireframe(Wireframe & wireframe) { return true; }
+		inline void DrawWireMesh(Mesh & wire_pool) {}
+		inline void DrawWireframe(Wireframe & wireframe, Camera & camera) {}
+#endif
 
 		/* main graphics loop functions */
 		void Clear();

@@ -2,6 +2,7 @@
 
 #include "Graphics.h"
 
+#ifdef _DEBUG
 void eae6320::Graphics::DrawWireframe(Wireframe & wireframe, Camera & camera)
 {
 	eae6320::Graphics::BufferWireframe(wireframe);
@@ -11,6 +12,7 @@ void eae6320::Graphics::DrawWireframe(Wireframe & wireframe, Camera & camera)
 	Graphics::SetCamera(*wireframe.material->effect, camera);
 	Graphics::DrawWireMesh(*wireframe.mesh);
 }
+#endif
 
 void eae6320::Graphics::DrawModel(Model & model, Camera & camera)
 {

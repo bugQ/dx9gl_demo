@@ -129,6 +129,7 @@ void eae6320::Graphics::DrawMesh( Mesh & mesh )
 	}
 }
 
+#ifdef _DEBUG
 bool eae6320::Graphics::InitWireframe(Wireframe & wireframe)
 {
 	// The usage tells Direct3D how this vertex buffer will be used
@@ -283,6 +284,7 @@ void eae6320::Graphics::DrawWireMesh(Mesh & mesh)
 		assert(SUCCEEDED(result));
 	}
 }
+#endif
 
 void eae6320::Graphics::SetCamera( Effect & effect, Camera & camera )
 {

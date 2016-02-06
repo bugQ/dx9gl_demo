@@ -1,4 +1,6 @@
 #include "stdafx.h"
+
+#ifdef _DEBUG
 #include "Wireframe.h"
 #include <math.h>
 
@@ -120,3 +122,4 @@ void Wireframe::clear()
 
 }
 }
+#endif
