@@ -1,0 +1,13 @@
+return
+{
+	effect = "data/debug.fxb",
+	textures =
+	{
+	},
+	vertex_uniforms =
+	{
+	},
+	fragment_uniforms =
+	{
+	},
+}

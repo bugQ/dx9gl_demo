@@ -2,6 +2,16 @@
 
 #include "Graphics.h"
 
+void eae6320::Graphics::DrawWireframe(Wireframe & wireframe, Camera & camera)
+{
+	eae6320::Graphics::BufferWireframe(wireframe);
+
+	Graphics::SetMaterial(*wireframe.material);
+	Graphics::SetTransform(*wireframe.material->effect, Matrix4::Identity);
+	Graphics::SetCamera(*wireframe.material->effect, camera);
+	Graphics::DrawWireMesh(*wireframe.mesh);
+}
+
 void eae6320::Graphics::DrawModel(Model & model, Camera & camera)
 {
 	Matrix4 local2world = Matrix4::rotation_q(model.rotation);

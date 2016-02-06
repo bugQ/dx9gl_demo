@@ -59,7 +59,7 @@ namespace
 		, "data/ctf_walls.vib"
 		};
 	const char * material_files[] =
-		{ "data/lime_opaque.mtb"
+		{ "data/debug.mtb"
 		, "data/ctf_cement.mtb"
 		, "data/ctf_floor.mtb"
 		, "data/ctf_metal.mtb"
@@ -83,6 +83,8 @@ namespace
 	size_t num_models;
 
 	Camera camera;
+
+	Wireframe * wireframe;
 
 	// Window classes are almost always identified by name;
 	// there is also a unique ATOM associated with them,
@@ -194,6 +196,9 @@ bool CreateMainWindow( const HINSTANCE i_thisInstanceOfTheProgram, const int i_i
 		materials = LoadMaterials(material_files);
 		models = BuildModels(model_specs, meshes, materials, num_models);
 		camera.position.z = -10;
+
+		wireframe = new Wireframe(materials[0]);
+		eae6320::Graphics::InitWireframe(*wireframe);
 
 		return true;
 
@@ -465,6 +470,8 @@ bool CleanupMainWindow()
 		delete[] models;
 		delete[] materials;
 		delete[] meshes;
+
+		delete wireframe;
 	}
 	return true;
 }
@@ -590,12 +597,19 @@ void Render()
 {
 	Clear();
 	BeginFrame();
+	
 	for (size_t i = 0; i < num_models; ++i)
 		if (!models[i]->mat->effect->render_state.alpha)
 			DrawModel(*models[i], camera);
 	for (size_t i = 0; i < num_models; ++i)
 		if (models[i]->mat->effect->render_state.alpha)
 			DrawModel(*models[i], camera);
+	
+	wireframe->addAABB(Vector3(0, 0, 0), Vector3(0.3f, 0.3f, 0.3f), Vector4(1.0f, 1.0f, 1.0f, 1.0f));
+
+	eae6320::Graphics::DrawWireframe(*wireframe, camera);
+	wireframe->clear();
+
 	EndFrame();
 }
 

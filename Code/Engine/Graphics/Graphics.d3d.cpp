@@ -129,6 +129,161 @@ void eae6320::Graphics::DrawMesh( Mesh & mesh )
 	}
 }
 
+bool eae6320::Graphics::InitWireframe(Wireframe & wireframe)
+{
+	// The usage tells Direct3D how this vertex buffer will be used
+	DWORD usage = 0;
+	{
+		// The type of vertex processing should match what was specified when the device interface was created with CreateDevice()
+		const HRESULT result = GetVertexProcessingUsage(usage);
+		if (FAILED(result))
+		{
+			return false;
+		}
+		// Our code will only ever write to the buffer
+		usage |= D3DUSAGE_WRITEONLY;
+	}
+
+	Mesh & mesh = *wireframe.mesh;
+
+	// Initialize the vertex format
+	{
+		// These elements must match the Vertex layout struct exactly.
+		// They instruct Direct3D how to match the binary data in the vertex buffer
+		// to the input elements in a vertex shader
+		// (by using D3DDECLUSAGE enums here and semantics in the shader,
+		// so that, for example, D3DDECLUSAGE_POSITION here matches with POSITION in shader code).
+		// Note that OpenGL uses arbitrarily assignable number IDs to do the same thing.
+		D3DVERTEXELEMENT9 vertexElements[] =
+		{
+			// Stream 0
+
+			// POSITION
+			// 3 floats == 12 bytes
+			// Offset = 0
+			{ 0, 0, D3DDECLTYPE_FLOAT4, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 },
+
+			// COLOR0
+			// D3DCOLOR == 4 bytes
+			// Offset = 12
+			{ 0, 12, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR, 0 },
+
+			// TEXCOORDS0
+			// 2 floats == 8 bytes
+			{ 0, 16, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 },
+
+			// The following marker signals the end of the vertex declaration
+			D3DDECL_END()
+		};
+		HRESULT result = s_direct3dDevice->CreateVertexDeclaration(vertexElements, &mesh.vertex_declaration);
+		if (!SUCCEEDED(result))
+		{
+			eae6320::UserOutput::Print("Direct3D failed to create a Direct3D9 vertex declaration");
+			return false;
+		}
+	}
+
+	const unsigned int bufferSize = sizeof(Mesh::Vertex) * Wireframe::MAXLINES * 2;
+	// Create a vertex buffer
+	{
+		mesh.num_vertices = 0;
+		// We will define our own vertex format
+		const DWORD useSeparateVertexDeclaration = 0;
+		// Place the vertex buffer into memory that Direct3D thinks is the most appropriate
+		const D3DPOOL useDefaultPool = D3DPOOL_DEFAULT;
+		HANDLE* const notUsed = NULL;
+		const HRESULT result = s_direct3dDevice->CreateVertexBuffer(bufferSize,
+			usage, useSeparateVertexDeclaration, useDefaultPool, &mesh.vertex_buffer, notUsed);
+		if (FAILED(result))
+		{
+			eae6320::UserOutput::Print("Direct3D failed to create a vertex buffer");
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool eae6320::Graphics::BufferWireframe(Wireframe & wireframe)
+{
+	Mesh & mesh = *wireframe.mesh;
+
+	// Fill the vertex buffer with the wireframe's vertices
+	{
+		// Before the vertex buffer can be changed it must be "locked"
+		Mesh::Vertex * vertexData;
+		{
+			const unsigned int lockEntireBuffer = 0;
+			const DWORD useDefaultLockingBehavior = 0;
+			const HRESULT result = mesh.vertex_buffer->Lock(lockEntireBuffer, Wireframe::MAXLINES * 2,
+				reinterpret_cast<void**>(&vertexData), useDefaultLockingBehavior);
+			if (FAILED(result))
+			{
+				eae6320::UserOutput::Print("Direct3D failed to lock the vertex buffer");
+				return false;
+			}
+		}
+		// Fill the buffer
+		{
+			for (unsigned int i = 0; i < wireframe.num_lines * 2; ++i)
+				vertexData[i] = wireframe.points[i];
+			mesh.num_triangles = static_cast<uint32_t>(wireframe.num_lines);
+			mesh.num_vertices = static_cast<uint32_t>(2 * wireframe.num_lines);
+		}
+		// The buffer must be "unlocked" before it can be used
+		{
+			const HRESULT result = mesh.vertex_buffer->Unlock();
+			if (FAILED(result))
+			{
+				eae6320::UserOutput::Print("Direct3D failed to unlock the vertex buffer");
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+void eae6320::Graphics::DrawWireMesh(Mesh & mesh)
+{
+	// Set the vertex declaration for this mesh
+	{
+		HRESULT result = s_direct3dDevice->SetVertexDeclaration(mesh.vertex_declaration);
+		assert(SUCCEEDED(result));
+	}
+	// Bind a specific vertex buffer to the device as a data source
+	{
+		// There can be multiple streams of data feeding the display adaptor at the same time
+		const unsigned int streamIndex = 0;
+		// It's possible to start streaming data in the middle of a vertex buffer
+		const unsigned int bufferOffset = 0;
+		// The "stride" defines how large a single vertex is in the stream of data
+		const unsigned int bufferStride = sizeof(Mesh::Vertex);
+		HRESULT result = s_direct3dDevice->SetStreamSource(streamIndex, mesh.vertex_buffer, bufferOffset, bufferStride);
+		assert(SUCCEEDED(result));
+	}
+	/*
+	// Bind a specific index buffer to the device as a data source
+	{
+		HRESULT result = s_direct3dDevice->SetIndices(mesh.index_buffer);
+		assert(SUCCEEDED(result));
+	}
+	*/
+	// Render objects from the current streams
+	{
+		// We are using triangles as the "primitive" type,
+		// and we have defined the vertex buffer as a line list
+		// (meaning that every line is defined by two vertices)
+		const D3DPRIMITIVETYPE primitiveType = D3DPT_LINELIST;
+		// It's possible to start rendering primitives in the middle of the stream
+		const unsigned int indexOfFirstVertexToRender = 0;
+		// We are drawing a square
+		const unsigned int primitiveCountToRender = mesh.num_triangles;	// How many triangles^Wlines will be drawn?
+		HRESULT result = s_direct3dDevice->DrawPrimitive(primitiveType, indexOfFirstVertexToRender, primitiveCountToRender);
+		assert(SUCCEEDED(result));
+	}
+}
+
 void eae6320::Graphics::SetCamera( Effect & effect, Camera & camera )
 {
 	HRESULT result;

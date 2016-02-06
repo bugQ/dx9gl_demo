@@ -19,6 +19,7 @@ return
 		-- NOTE the first letter of each shader file determines the type
 		-- recommend prefices 'v_' for vertex and 'f_' for fragment/pixel
 		"vertex",
+		"f_debug",
 		"f_opaque",
 		"f_transparent",
 	},
@@ -26,6 +27,7 @@ return
 		srcext = 'fxt', dstext = 'fxb',
 		tool = 'EffectBuilder.exe',
 
+		"debug",
 		"opaque",
 		"xlucent",
 	},
@@ -44,7 +46,7 @@ return
 		srcext = 'mtt', dstext = 'mtb',
 		tool = 'MaterialBuilder.exe',
 
-		"lime_opaque",
+		"debug",
 		"ctf_cement",
 		"ctf_floor",
 		"ctf_metal",

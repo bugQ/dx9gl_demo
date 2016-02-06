@@ -13,6 +13,7 @@
 #include "Effect.h"
 #include "Model.h"
 #include "Camera.h"
+#include "Wireframe.h"
 #include "../Math/Matrix4.h"
 
 // Interface
@@ -35,6 +36,12 @@ namespace eae6320
 		void SetTransform(Effect & effect, const Matrix4 local2world);
 		void DrawMesh( Mesh & mesh );
 		bool LoadMesh( Mesh & output, Mesh::Data & input );
+
+		/* debug draws*/
+		bool InitWireframe( Wireframe & wireframe );
+		bool BufferWireframe( Wireframe & wireframe );
+		void DrawWireMesh( Mesh & wire_pool );
+		void DrawWireframe( Wireframe & wireframe, Camera & camera ); // the kit&kaboodle
 
 		/* main graphics loop functions */
 		void Clear();
