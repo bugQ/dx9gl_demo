@@ -24,6 +24,7 @@ struct Wireframe
 	void addLine(Vector3 p1, Vector4 color1, Vector3 p2, Vector4 color2);
 	void addAABB(Vector3 center, Vector3 extents, Vector4 color);
 	void addSphere(Vector3 center, float radius, uint8_t resolution, Vector4 color);
+	void addCylinder(Vector3 center, float radius, float extent, uint8_t resolution, Vector4 color);
 
 	void clear();
 

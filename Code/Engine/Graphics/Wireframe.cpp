@@ -115,6 +115,36 @@ void Wireframe::addSphere(Vector3 center, float radius, uint8_t resolution, Vect
 	}
 }
 
+void Wireframe::addCylinder(Vector3 center, float radius, float extent, uint8_t resolution, Vector4 color)
+{
+	static const float tau = acos(-1.0f) * 2.0f;
+	float dtheta = tau / resolution;
+
+	Vector3 center1 = center + Vector3::J * extent;
+	Vector3 center2 = center - Vector3::J * extent;
+
+	for (int i = 0; i < resolution; i++) {
+		float theta = i * dtheta;
+		float theta_1 = (i + 1) * dtheta;
+		float ctheta = cos(theta), ctheta_1 = cos(theta_1);
+		float stheta = sin(theta), stheta_1 = sin(theta_1);
+
+		Vector3 leg0 = Vector3(ctheta, 0, stheta) * radius;
+		Vector3 leg1 = Vector3(ctheta_1, 0, stheta_1) * radius;
+
+		Vector3 p0 = center1 + leg0;
+		Vector3 p1 = center1 + leg1;
+		Vector3 p2 = center2 + leg0;
+		Vector3 p3 = center2 + leg1;
+
+		addLine(center1, color, p0, color);
+		addLine(p0, color, p1, color);
+		addLine(p1, color, p3, color);
+		addLine(p3, color, p2, color);
+		addLine(p2, color, center2, color);
+	}
+}
+
 
 
 void Wireframe::clear()

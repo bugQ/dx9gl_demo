@@ -607,6 +607,7 @@ void Render()
 	
 	wireframe->addAABB(Vector3(0, 0, 0), Vector3(0.3f, 0.3f, 0.3f), Vector4(1.0f, 1.0f, 1.0f, 1.0f));
 	wireframe->addSphere(Vector3(1, 0, 0), 0.3f, 6, Vector4(1.0f, 0.7f, 0.2f, 1.0f));
+	wireframe->addCylinder(Vector3(-1, 0, 0), 0.3f, 0.3f, 12, Vector4(0.7f, 1.0f, 0.2f, 1.0f));
 
 	eae6320::Graphics::DrawWireframe(*wireframe, camera);
 	wireframe->clear();
