@@ -73,11 +73,11 @@ void Wireframe::addAABB(Vector3 center, Vector3 extents, Vector4 color)
 
 void Wireframe::addSphere(Vector3 center, float radius, uint8_t resolution, Vector4 color)
 {
-	static const float pi = cos(-1.0f);
+	static const float pi = acos(-1.0f);
 	float dphi = pi / resolution;
 	float dtheta = dphi;
 
-	for (int i = 1; i < resolution - 1; i++) {
+	for (int i = 1; i < resolution; i++) {
 		float phi = i * dphi;
 		float phi_1 = (i - 1) * dphi;
 
@@ -97,7 +97,7 @@ void Wireframe::addSphere(Vector3 center, float radius, uint8_t resolution, Vect
 			addLine(p0, color, p2, color);
 		}
 	}
-
+	
 	float phi = (resolution - 1) * dphi;
 
 	Vector3 p1 = center + Vector3(0, 0, -radius);
@@ -114,6 +114,8 @@ void Wireframe::addSphere(Vector3 center, float radius, uint8_t resolution, Vect
 		addLine(p0, color, p1, color);
 	}
 }
+
+
 
 void Wireframe::clear()
 {
