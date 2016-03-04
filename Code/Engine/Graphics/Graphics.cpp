@@ -25,6 +25,12 @@ void eae6320::Graphics::DrawModel(Model & model, Camera & camera)
 	Graphics::DrawMesh(*model.mesh);
 }
 
+void eae6320::Graphics::DrawSprite(Sprite & sprite)
+{
+	Graphics::SetMaterial(*model.mat);
+	Graphics::DrawQuad(sprite.xy, sprite.uv);
+}
+
 void eae6320::Graphics::SetMaterial(Material & material)
 {
 	SetEffect(*material.effect);

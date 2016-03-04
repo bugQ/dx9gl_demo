@@ -14,6 +14,7 @@
 #include "Model.h"
 #include "Camera.h"
 #include "Wireframe.h"
+#include "Sprite.h"
 #include "../Math/Matrix4.h"
 
 // Interface
@@ -36,6 +37,8 @@ namespace eae6320
 		void SetTransform(Effect & effect, const Matrix4 local2world);
 		void DrawMesh( Mesh & mesh );
 		bool LoadMesh( Mesh & output, Mesh::Data & input );
+		void DrawSprite(Sprite & sprite);
+		void DrawQuad(Sprite::Rect & xy, Sprite::Rect & uv);
 
 #ifdef _DEBUG
 		bool InitWireframe( Wireframe & wireframe );

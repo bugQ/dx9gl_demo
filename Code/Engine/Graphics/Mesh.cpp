@@ -450,8 +450,6 @@ namespace Graphics
 			vertex_buffer->Release();
 		if (index_buffer)
 			index_buffer->Release();
-		if (vertex_declaration)
-			vertex_declaration->Release();
 	}
 #elif defined ( EAE6320_PLATFORM_GL )
 	Mesh::~Mesh()

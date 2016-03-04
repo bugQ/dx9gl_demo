@@ -68,7 +68,6 @@ namespace Graphics
 #elif defined ( EAE6320_PLATFORM_D3D )
 		IDirect3DVertexBuffer9 * vertex_buffer;
 		IDirect3DIndexBuffer9 * index_buffer;
-		IDirect3DVertexDeclaration9 * vertex_declaration;
 #endif
 
 		~Mesh();
