@@ -238,7 +238,7 @@ void eae6320::Graphics::DrawQuad(Sprite::Rect & xy, Sprite::Rect & uv)
 
 			Mesh::Vertex &v3 = vertexData[3];
 			v3.x = xy.x1; v3.y = xy.y1; v3.z = 1.0f;
-			v3.r = v2.g = v2.b = v2.a = UINT8_MAX;
+			v3.r = v3.g = v3.b = v3.a = UINT8_MAX;
 			v3.u = uv.x1; v3.v = uv.y1;
 		}
 		// The buffer must be "unlocked" before it can be used
