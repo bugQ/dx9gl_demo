@@ -205,8 +205,29 @@ void eae6320::Graphics::DrawMesh( Mesh & mesh )
 	}
 }
 
-void eae6320::Graphics::DrawQuad(Sprite::Rect & xy, Sprite::Rect & uv)
+void eae6320::Graphics::DrawSpriteQuad(Sprite & sprite)
 {
+	// Normalize sprite coordinates to the narrower viewport dimension
+	// i.e. ensure that [-1,1] in x and y is always visible and square
+	Sprite::Rect xy = sprite.xy, & uv = sprite.uv;
+	D3DVIEWPORT9 viewport;
+	HRESULT result = sprite.mat->effect->parent->GetViewport(&viewport);
+	assert(SUCCEEDED(result));
+	float w = static_cast<float>(viewport.Width);
+	float h = static_cast<float>(viewport.Height);
+	if (w > h)
+	{
+		float aspect = h / w;
+		xy.x0 *= aspect;
+		xy.x1 *= aspect;
+	}
+	else
+	{
+		float aspect = w / h;
+		xy.y0 *= aspect;
+		xy.y1 *= aspect;
+	}
+
 	// Fill the vertex buffer with the triangle's vertices
 	{
 		// Before the vertex buffer can be changed it must be "locked"

@@ -38,7 +38,7 @@ namespace eae6320
 		void DrawMesh( Mesh & mesh );
 		bool LoadMesh( Mesh & output, Mesh::Data & input );
 		void DrawSprite(Sprite & sprite);
-		void DrawQuad(Sprite::Rect & xy, Sprite::Rect & uv);
+		void DrawSpriteQuad(Sprite & sprite);
 
 #ifdef _DEBUG
 		bool InitWireframe( Wireframe & wireframe );

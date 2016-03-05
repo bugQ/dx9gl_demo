@@ -81,7 +81,7 @@ namespace
 		, {5, 5, origin, cm}
 		};
 	sprite_spec sprite_specs[] =
-		{ {6, {-0.6f, 1.0f, -0.0f, 0.2f}, standardUV}
+		{ {6, {-1.2f, -0.4f, -0.6f, -1.0f}, standardUV}
 		};
 	/* end hardcoded asset list. */
 
