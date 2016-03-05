@@ -44,6 +44,7 @@ return
 		"railing_D",
 		"wall_D",
 		"eae6320_a",
+		"numbers",
 	},
 	materials = {
 		srcext = 'mtt', dstext = 'mtb',
@@ -56,5 +57,6 @@ return
 		"ctf_railing",
 		"ctf_walls",
 		"eae6320_a",
+		"numbers",
 	},
 }

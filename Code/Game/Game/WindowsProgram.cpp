@@ -71,6 +71,7 @@ namespace
 		, "data/ctf_railing.mtb"
 		, "data/ctf_walls.mtb"
 		, "data/eae6320_a.mtb"
+		, "data/numbers.mtb"
 		};
 	model_spec model_specs[] =
 		{ {0, 1, origin, cm}
@@ -81,7 +82,9 @@ namespace
 		, {5, 5, origin, cm}
 		};
 	sprite_spec sprite_specs[] =
-		{ {6, {-1.2f, -0.4f, -0.6f, -1.0f}, standardUV}
+		{ {6, {-1.2f, -0.4f, -0.6f, -1.0f}, standardUV }
+		, {7, {0.78f, -0.8f, 0.9f, -0.95f}, {0.1f, 0.0f, 0.2f, 1.0f} }
+		, {7, {0.9f, -0.8f, 1.02f, -0.95f}, {0.9f, 0.0f, 1.0f, 1.0f} }
 		};
 	/* end hardcoded asset list. */
 
