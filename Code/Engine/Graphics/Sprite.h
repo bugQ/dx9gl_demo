@@ -15,13 +15,16 @@ struct Sprite
 
 	Rect xy, uv;
 	Material * const mat;
+	bool active;
 
-	Sprite(Material * material, Rect xy, Rect uv = { 0, 0, 1, 1 })
-		: mat(material), xy(xy), uv(uv)
+	Sprite(Material & material, Rect xy, Rect uv = { 0, 0, 1, 1 }, bool active = true)
+		: mat(&material), xy(xy), uv(uv), active(active)
 	{
 	}
 
-	~Sprite();
+	~Sprite()
+	{
+	}
 };
 }
 }

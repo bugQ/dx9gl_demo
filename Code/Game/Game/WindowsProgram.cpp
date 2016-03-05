@@ -47,8 +47,13 @@ namespace
 	// model_spec = mesh + effect indices
 	typedef struct { size_t mesh_idx, mat_idx; Vector3 position; Vector3 scale; } model_spec;
 
+	// sprite_spec = material + pixel rect + texel rect
+	typedef struct { size_t mat_idx; Sprite::Rect xy; Sprite::Rect uv; } sprite_spec;
+
 	Vector3 origin = Vector3(0.0f, 0.0f, 0.0f);
 	Vector3 cm = Vector3(0.01f, 0.01f, 0.01f);
+
+	Sprite::Rect standardUV = { 0.0f, 0.0f, 1.0f, 1.0f };
 
 	const char * mesh_files[] =
 		{ "data/ctf_ceiling.vib"
@@ -65,6 +70,7 @@ namespace
 		, "data/ctf_metal.mtb"
 		, "data/ctf_railing.mtb"
 		, "data/ctf_walls.mtb"
+		, "data/eae6320_a.mtb"
 		};
 	model_spec model_specs[] =
 		{ {0, 1, origin, cm}
@@ -74,13 +80,17 @@ namespace
 		, {4, 4, origin, cm}
 		, {5, 5, origin, cm}
 		};
-
+	sprite_spec sprite_specs[] =
+		{ {6, {-0.6f, -1.0f, -0.0f, -0.2f}, standardUV}
+		};
 	/* end hardcoded asset list. */
 
 	Mesh ** meshes;
 	Material ** materials;
 	Model ** models;
 	size_t num_models;
+	Sprite ** sprites;
+	size_t num_sprites;
 
 	Camera camera;
 
@@ -169,6 +179,19 @@ template <size_t N> Model ** BuildModels(model_spec (&spec)[N],
 	return out;
 }
 
+template <size_t N> Sprite ** BuildSprites(sprite_spec(&spec)[N],
+	Material ** materials, size_t &num_sprites)
+{
+	Sprite ** out = new Sprite *[N];
+	for (size_t i = 0; i < N; ++i)
+		out[i] = new Sprite(
+			*materials[spec[i].mat_idx],
+			spec[i].xy,
+			spec[i].uv);
+	num_sprites = N;
+	return out;
+}
+
 bool CreateMainWindow( const HINSTANCE i_thisInstanceOfTheProgram, const int i_initialWindowDisplayState )
 {
 	// Every window that Windows creates must belong to a "class".
@@ -195,6 +218,7 @@ bool CreateMainWindow( const HINSTANCE i_thisInstanceOfTheProgram, const int i_i
 		meshes = LoadMeshes(mesh_files);
 		materials = LoadMaterials(material_files);
 		models = BuildModels(model_specs, meshes, materials, num_models);
+		sprites = BuildSprites(sprite_specs, materials, num_sprites);
 		camera.position.z = -10;
 
 		wireframe = new Wireframe(materials[0]);
@@ -470,6 +494,7 @@ bool CleanupMainWindow()
 		delete[] models;
 		delete[] materials;
 		delete[] meshes;
+		delete[] sprites;
 
 		delete wireframe;
 	}
@@ -604,6 +629,10 @@ void Render()
 	for (size_t i = 0; i < num_models; ++i)
 		if (models[i]->mat->effect->render_state.alpha)
 			DrawModel(*models[i], camera);
+
+	for (size_t i = 0; i < num_sprites; ++i)
+		if (sprites[i]->active)
+			DrawSprite(*sprites[i]);
 	
 	wireframe->addAABB
 		( Vector3(0, 0.5f, 5)

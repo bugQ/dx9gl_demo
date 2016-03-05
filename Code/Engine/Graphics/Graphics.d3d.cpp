@@ -220,7 +220,25 @@ void eae6320::Graphics::DrawQuad(Sprite::Rect & xy, Sprite::Rect & uv)
 		}
 		// Fill the buffer
 		{
-			vertexData[0].
+			Mesh::Vertex &v0 = vertexData[0];
+			v0.x = xy.x0; v0.y = xy.y0; v0.z = 0.0f;
+			v0.r = v0.g = v0.b = v0.a = UINT8_MAX;
+			v0.u = uv.x0; v0.v = uv.y0;
+
+			Mesh::Vertex &v1 = vertexData[1];
+			v1.x = xy.x1; v1.y = xy.y0; v1.z = 0.0f;
+			v1.r = v1.g = v1.b = v1.a = UINT8_MAX;
+			v1.u = uv.x1; v1.v = uv.y0;
+
+			Mesh::Vertex &v2 = vertexData[2];
+			v2.x = xy.x0; v2.y = xy.y1; v2.z = 0.0f;
+			v2.r = v2.g = v2.b = v2.a = UINT8_MAX;
+			v2.u = uv.x0; v2.v = uv.y1;
+
+			Mesh::Vertex &v3 = vertexData[3];
+			v3.x = xy.x1; v3.y = xy.y1; v3.z = 0.0f;
+			v3.r = v2.g = v2.b = v2.a = UINT8_MAX;
+			v3.u = uv.x1; v3.v = uv.y1;
 		}
 		// The buffer must be "unlocked" before it can be used
 		{
@@ -228,7 +246,30 @@ void eae6320::Graphics::DrawQuad(Sprite::Rect & xy, Sprite::Rect & uv)
 			assert(SUCCEEDED(result));
 		}
 	}
-	
+	// Bind a specific vertex buffer to the device as a data source
+	{
+		// There can be multiple streams of data feeding the display adaptor at the same time
+		const unsigned int streamIndex = 0;
+		// It's possible to start streaming data in the middle of a vertex buffer
+		const unsigned int bufferOffset = 0;
+		// The "stride" defines how large a single vertex is in the stream of data
+		const unsigned int bufferStride = sizeof(Mesh::Vertex);
+		HRESULT result = s_direct3dDevice->SetStreamSource(streamIndex, s_spriteVertexBuffer, bufferOffset, bufferStride);
+		assert(SUCCEEDED(result));
+	}
+	// Render objects from the current streams
+	{
+		// We are using triangles as the "primitive" type,
+		// and we have defined the vertex buffer as a line list
+		// (meaning that every line is defined by two vertices)
+		const D3DPRIMITIVETYPE primitiveType = D3DPT_TRIANGLESTRIP;
+		// It's possible to start rendering primitives in the middle of the stream
+		const unsigned int indexOfFirstVertexToRender = 0;
+		// We are drawing a square
+		const unsigned int primitiveCountToRender = 2;	// How many triangles will be drawn?
+		HRESULT result = s_direct3dDevice->DrawPrimitive(primitiveType, indexOfFirstVertexToRender, primitiveCountToRender);
+		assert(SUCCEEDED(result));
+	}
 }
 
 #ifdef _DEBUG
@@ -323,13 +364,6 @@ void eae6320::Graphics::DrawWireMesh(Mesh & mesh)
 		HRESULT result = s_direct3dDevice->SetStreamSource(streamIndex, mesh.vertex_buffer, bufferOffset, bufferStride);
 		assert(SUCCEEDED(result));
 	}
-	/*
-	// Bind a specific index buffer to the device as a data source
-	{
-		HRESULT result = s_direct3dDevice->SetIndices(mesh.index_buffer);
-		assert(SUCCEEDED(result));
-	}
-	*/
 	// Render objects from the current streams
 	{
 		// We are using triangles as the "primitive" type,

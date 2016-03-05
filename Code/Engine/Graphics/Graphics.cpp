@@ -27,7 +27,7 @@ void eae6320::Graphics::DrawModel(Model & model, Camera & camera)
 
 void eae6320::Graphics::DrawSprite(Sprite & sprite)
 {
-	Graphics::SetMaterial(*model.mat);
+	Graphics::SetMaterial(*sprite.mat);
 	Graphics::DrawQuad(sprite.xy, sprite.uv);
 }
 
