@@ -139,6 +139,7 @@ bool eae6320::Graphics::Initialize( const HWND i_renderingWindow )
 				return false;
 			}
 			// Our code will only ever write to the buffer
+			usage |= D3DUSAGE_DYNAMIC;
 			usage |= D3DUSAGE_WRITEONLY;
 		}
 
@@ -212,7 +213,7 @@ void eae6320::Graphics::DrawQuad(Sprite::Rect & xy, Sprite::Rect & uv)
 		Mesh::Vertex * vertexData;
 		{
 			const unsigned int lockEntireBuffer = 0;
-			const DWORD useDefaultLockingBehavior = 0;
+			const DWORD useDefaultLockingBehavior = D3DLOCK_DISCARD;
 			const unsigned int bufferSize = sizeof(Mesh::Vertex) * 4;
 			const HRESULT result = s_spriteVertexBuffer->Lock(lockEntireBuffer, bufferSize,
 				reinterpret_cast<void**>(&vertexData), useDefaultLockingBehavior);
@@ -221,22 +222,22 @@ void eae6320::Graphics::DrawQuad(Sprite::Rect & xy, Sprite::Rect & uv)
 		// Fill the buffer
 		{
 			Mesh::Vertex &v0 = vertexData[0];
-			v0.x = xy.x0; v0.y = xy.y0; v0.z = 0.0f;
+			v0.x = xy.x0; v0.y = xy.y0; v0.z = 1.0f;
 			v0.r = v0.g = v0.b = v0.a = UINT8_MAX;
 			v0.u = uv.x0; v0.v = uv.y0;
 
 			Mesh::Vertex &v1 = vertexData[1];
-			v1.x = xy.x1; v1.y = xy.y0; v1.z = 0.0f;
+			v1.x = xy.x1; v1.y = xy.y0; v1.z = 1.0f;
 			v1.r = v1.g = v1.b = v1.a = UINT8_MAX;
 			v1.u = uv.x1; v1.v = uv.y0;
 
 			Mesh::Vertex &v2 = vertexData[2];
-			v2.x = xy.x0; v2.y = xy.y1; v2.z = 0.0f;
+			v2.x = xy.x0; v2.y = xy.y1; v2.z = 1.0f;
 			v2.r = v2.g = v2.b = v2.a = UINT8_MAX;
 			v2.u = uv.x0; v2.v = uv.y1;
 
 			Mesh::Vertex &v3 = vertexData[3];
-			v3.x = xy.x1; v3.y = xy.y1; v3.z = 0.0f;
+			v3.x = xy.x1; v3.y = xy.y1; v3.z = 1.0f;
 			v3.r = v2.g = v2.b = v2.a = UINT8_MAX;
 			v3.u = uv.x1; v3.v = uv.y1;
 		}

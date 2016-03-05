@@ -1,0 +1,24 @@
+#include "monsters.inc"
+
+
+uniform mat4 g_local2world;
+uniform mat4 g_world2view;
+uniform mat4 g_view2screen;
+
+
+mainh_v_BEGIN
+
+mainh_i_POSITION(0, i_point)
+mainh_i_COLOR(1, i_color)
+mainh_i_UV(2, i_uv)
+
+mainh_o_COLOR(0, o_color)
+mainh_o_UV(1, o_uv)
+
+// mainh_v_END includes the required vertex position output, o_position
+mainh_v_END
+{
+	o_position = vec4(i_point, 1.0);
+	o_color = i_color;
+	o_uv = i_uv;
+}

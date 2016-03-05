@@ -81,7 +81,7 @@ namespace
 		, {5, 5, origin, cm}
 		};
 	sprite_spec sprite_specs[] =
-		{ {6, {-0.6f, -1.0f, -0.0f, -0.2f}, standardUV}
+		{ {6, {0.4f, 1.0f, 0.8f, 0.2f}, standardUV}
 		};
 	/* end hardcoded asset list. */
 
@@ -629,10 +629,6 @@ void Render()
 	for (size_t i = 0; i < num_models; ++i)
 		if (models[i]->mat->effect->render_state.alpha)
 			DrawModel(*models[i], camera);
-
-	for (size_t i = 0; i < num_sprites; ++i)
-		if (sprites[i]->active)
-			DrawSprite(*sprites[i]);
 	
 	wireframe->addAABB
 		( Vector3(0, 0.5f, 5)
@@ -674,6 +670,11 @@ void Render()
 
 	eae6320::Graphics::DrawWireframe(*wireframe, camera);
 	wireframe->clear();
+
+
+	for (size_t i = 0; i < num_sprites; ++i)
+		if (sprites[i]->active)
+			DrawSprite(*sprites[i]);
 
 	EndFrame();
 }

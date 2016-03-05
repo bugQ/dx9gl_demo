@@ -118,6 +118,8 @@ namespace Graphics
 
 		RenderState render_state;
 
+		bool usesTransform = false;
+
 		// this is a handle on the vertex shader's "g_position" uniform
 		UniformHandle uni_local2world, uni_world2view, uni_view2screen;
 

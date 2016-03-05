@@ -1,6 +1,6 @@
 return
 {
-	effect = "data/xlucent.fxb",
+	effect = "data/sprite.fxb",
 	textures =
 	{
 		g_tex = "data/eae6320_a.dds",
@@ -11,5 +11,6 @@ return
 	fragment_uniforms =
 	{
 		g_tint = { 1, 1, 1 },
+		g_alpha = 1,
 	},
 }

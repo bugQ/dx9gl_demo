@@ -671,8 +671,8 @@ namespace
 				uniform_handle_1 = glGetUniformLocation(effect->parent, "g_local2world");
 				if (uniform_handle_1 == -1)
 				{
-					eae6320::UserOutput::Print("No g_local2world uniform found");
-					return false;
+					//eae6320::UserOutput::Print("No g_local2world uniform found");
+					return true;
 				}
 				uniform_handle_2 = glGetUniformLocation(effect->parent, "g_world2view");
 				if (uniform_handle_2 == -1)
@@ -772,8 +772,8 @@ namespace
 		uniform_handle_1 = constants->GetConstantByName(NULL, "g_local2world");
 		if (!uniform_handle_1)
 		{
-			eae6320::UserOutput::Print("No g_local2world uniform found");
-			return false;
+			//eae6320::UserOutput::Print("No g_local2world uniform found");
+			return true;
 		}
 		effect->uni_local2world = uniform_handle_1;
 		uniform_handle_2 = constants->GetConstantByName(NULL, "g_world2view");

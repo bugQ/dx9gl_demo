@@ -1,0 +1,12 @@
+return
+{
+	vertex = "data/v_sprite.shb",
+	fragment = "data/f_transparent.shb",
+	flags =
+	{
+		alpha = true,
+		z_test = false,
+		z_write = false,
+		cull_back = false,
+	}
+}

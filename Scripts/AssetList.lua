@@ -22,6 +22,7 @@ return
 		"f_debug",
 		"f_opaque",
 		"f_transparent",
+		"v_sprite",
 	},
 	effects = {
 		srcext = 'fxt', dstext = 'fxb',
@@ -30,6 +31,7 @@ return
 		"debug",
 		"opaque",
 		"xlucent",
+		"sprite",
 	},
 	textures = {
 		srcext = 'png', dstext = 'dds',
