@@ -18,47 +18,21 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Vector3.h">
+    <ClInclude Include="stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Matrix4.h">
+    <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Vector4.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Versor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Intersections.h">
+    <ClInclude Include="Terrain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Vector3.inl">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="Matrix4.inl">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="Vector4.inl">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="Versor.inl">
-      <Filter>Header Files</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="Vector3.cpp">
+    <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Matrix4.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Vector4.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Intersections.cpp">
+    <ClCompile Include="Terrain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
