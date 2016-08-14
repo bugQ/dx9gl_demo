@@ -245,7 +245,6 @@ bool CreateMainWindow( const HINSTANCE i_thisInstanceOfTheProgram, const int i_i
 		debug_menu->add_checkbox("debug_sphere.active", debug_sphere.active);
 		debug_menu->add_slider("debug_sphere.radius",
 			debug_sphere.radius_min, debug_sphere.radius_max, debug_sphere.radius);
-		debug_menu->SetActive(true);
 
 		return true;
 
@@ -705,11 +704,17 @@ bool WaitForMainWindowToClose( int& o_exitCode )
 			angle += UserInput::IsKeyPressed('D') ? 1.0f : 0.0f;
 			angle += UserInput::IsKeyPressed('A') ? -1.0f : 0.0f;
 			camera.yaw += angle * dt;
-			
-			if (debug_menu->IsActive()) do
+
+			static int prevkey = -1;
+			if (debug_menu->IsActive())
 			{
-				static int prevkey = -1;
-				if (UserInput::IsKeyPressed(prevkey)) break;
+				if (prevkey != VK_OEM_3 && UserInput::IsKeyPressed(VK_OEM_3))
+				{
+					debug_menu->SetActive(false);
+					prevkey = VK_OEM_3;
+				}
+				else if (UserInput::IsKeyPressed(prevkey))
+					/* pass */;
 				else if (UserInput::IsKeyPressed(VK_UP))
 				{
 					debug_menu->CursorUp();
@@ -732,7 +737,15 @@ bool WaitForMainWindowToClose( int& o_exitCode )
 				}
 				else prevkey = -1;
 
-			} while (false);
+			}
+			else if (UserInput::IsKeyPressed(VK_OEM_3))
+			{
+				if (prevkey != VK_OEM_3)
+				{
+					debug_menu->SetActive(true);
+					prevkey = VK_OEM_3;
+				}
+			}
 			else
 			{
 				Vector3 dir = Vector3::Zero;
@@ -745,6 +758,7 @@ bool WaitForMainWindowToClose( int& o_exitCode )
 				Versor rotated = Versor(Vector4(dir, 0.0f)).rotate(camera.rotation().inverse());
 				dir = Vector3(rotated.x, rotated.y, rotated.z);
 				camera.position += dir * camera_track_speed * dt;
+				prevkey = -1;
 			}
 
 			Render();
