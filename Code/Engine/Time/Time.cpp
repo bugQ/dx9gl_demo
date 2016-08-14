@@ -14,10 +14,15 @@ namespace
 {
 	bool s_isInitialized = false;
 
-	double s_secondsPerCount = 0.0;
+	double s_secondsPerCount = std::numeric_limits<double>::infinity();
+	long long s_countsPerSecond = 0;
 	LARGE_INTEGER s_totalCountsElapsed_atInitializion = { 0 };
 	LARGE_INTEGER s_totalCountsElapsed_duringRun = { 0 };
 	LARGE_INTEGER s_totalCountsElapsed_previousFrame = { 0 };
+	long long s_totalCountsElapsed_currentSecond = 0;
+	int s_totalFramesElapsed_currentSecond = 0;
+	int s_measuredFramesPerSecond = 0;
+
 }
 
 // Helper Function Declarations
@@ -56,6 +61,11 @@ float eae6320::Time::GetSecondsElapsedThisFrame()
 		* s_secondsPerCount );
 }
 
+int eae6320::Time::GetFramesPerSecond()
+{
+	return s_measuredFramesPerSecond;
+}
+
 void eae6320::Time::OnNewFrame()
 {
 	{
@@ -74,6 +84,17 @@ void eae6320::Time::OnNewFrame()
 		assert( result != FALSE );
 		s_totalCountsElapsed_duringRun.QuadPart = totalCountsElapsed.QuadPart - s_totalCountsElapsed_atInitializion.QuadPart;
 	}
+	// Update the FPS counter
+	{
+		s_totalCountsElapsed_currentSecond += s_totalCountsElapsed_duringRun.QuadPart - s_totalCountsElapsed_previousFrame.QuadPart;
+		s_totalFramesElapsed_currentSecond += 1;
+		if (s_totalCountsElapsed_currentSecond > s_countsPerSecond)
+		{
+			s_totalCountsElapsed_currentSecond -= s_countsPerSecond;
+			s_measuredFramesPerSecond = s_totalFramesElapsed_currentSecond;
+			s_totalFramesElapsed_currentSecond = 0;
+		}
+	}
 }
 
 // Initialization / Shut Down
@@ -90,7 +111,8 @@ bool eae6320::Time::Initialize( std::string* o_errorMessage )
 		{
 			if ( countsPerSecond.QuadPart != 0 )
 			{
-				s_secondsPerCount = 1.0 / static_cast<double>( countsPerSecond.QuadPart );
+				s_countsPerSecond = countsPerSecond.QuadPart;
+				s_secondsPerCount = 1.0 / static_cast<double>( s_countsPerSecond );
 			}
 			else
 			{

@@ -17,7 +17,7 @@ namespace eae6320
 
 			virtual void activate_left() = 0;
 			virtual void activate_right() = 0;
-			virtual char* text_format() const = 0;
+			virtual const char* text_format() const = 0;
 
 			Widget(char* id) : id(id) {}
 			virtual ~Widget() {}
@@ -47,7 +47,7 @@ namespace eae6320
 				param = denormalize(std::min(resolution, position() + 1));
 			}
 
-			virtual char* text_format() const;
+			virtual const char* text_format() const;
 		};
 		class CheckBox : public Widget
 		{
@@ -60,20 +60,20 @@ namespace eae6320
 			virtual void activate_left() { param = false; }
 			virtual void activate_right() { param = true; }
 
-			virtual char* text_format() const { return param ? "(#)" : "( )"; }
+			virtual const char* text_format() const { return param ? "(#)" : "( )"; }
 		};
 		class Text : public Widget
 		{
-			char* &param;
+			std::string &param;
 
 		public:
-			Text(char* id, char* &param) : Widget(id), param(param) {}
+			Text(char* id, std::string & param) : Widget(id), param(param) {}
 			virtual ~Text() {}
 
 			virtual void activate_left() {}
 			virtual void activate_right() {}
 
-			virtual char* text_format() const { return param; }
+			virtual const char* text_format() const { return param.c_str(); }
 		};
 
 		std::vector<Widget *> widgets;
@@ -91,7 +91,7 @@ namespace eae6320
 			{ widgets.push_back(new Slider(id, min, max, param)); }
 		void add_checkbox(char* id, bool &param)
 			{ widgets.push_back(new CheckBox(id, param)); }
-		void add_text(char* id, char* &param)
+		void add_text(char* id, std::string &param)
 			{ widgets.push_back(new Text(id, param)); }
 
 		void SetActive(bool b) { active = b; }
@@ -107,7 +107,7 @@ namespace eae6320
 		bool IsActive() { return false; }
 		void add_slider(char* id, float min, float max, float& param) {}
 		void add_checkbox(char* id, bool &param) {}
-		void add_text(char* id, char* &param) {}
+		void add_text(char* id, std::string &param) {}
 		void Draw(int x = 0, int y = 0) {}
 #endif // !_DEBUG
 	};

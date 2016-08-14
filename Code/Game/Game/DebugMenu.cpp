@@ -14,7 +14,7 @@ int DebugMenu::Widget::draw(int x, int y) const
 	return Graphics::DrawDebugText(x, y, builder.str());
 }
 
-char* DebugMenu::Slider::text_format() const
+const char* DebugMenu::Slider::text_format() const
 {
 	const size_t len = resolution / 4 + 2;
 	char *gauge = new char[len + 10];
