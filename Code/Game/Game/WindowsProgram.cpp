@@ -672,7 +672,7 @@ void Render()
 	EndFrame();
 }
 
-bool WaitForMainWindowToClose( int& o_exitCode )
+bool WaitForMainWindowToClose(int& o_exitCode)
 {
 	// Any time something happens that Windows cares about, it will send the main window a message.
 
@@ -698,10 +698,10 @@ bool WaitForMainWindowToClose( int& o_exitCode )
 			HWND getMessagesFromAnyWindowBelongingToTheCurrentThread = NULL;
 			unsigned int getAllMessageTypes = 0;
 			unsigned int ifAMessageExistsRemoveItFromTheQueue = PM_REMOVE;
-			hasWindowsSentAMessage = PeekMessage( &message, getMessagesFromAnyWindowBelongingToTheCurrentThread,
-				getAllMessageTypes, getAllMessageTypes, ifAMessageExistsRemoveItFromTheQueue ) == TRUE;
+			hasWindowsSentAMessage = PeekMessage(&message, getMessagesFromAnyWindowBelongingToTheCurrentThread,
+				getAllMessageTypes, getAllMessageTypes, ifAMessageExistsRemoveItFromTheQueue) == TRUE;
 		}
-		if ( !hasWindowsSentAMessage )
+		if (!hasWindowsSentAMessage)
 		{
 			// Usually there will be no messages in the queue, and the game can run
 			Time::OnNewFrame();
@@ -710,6 +710,9 @@ bool WaitForMainWindowToClose( int& o_exitCode )
 			angle += UserInput::IsKeyPressed('D') ? 1.0f : 0.0f;
 			angle += UserInput::IsKeyPressed('A') ? -1.0f : 0.0f;
 			camera.yaw += angle * dt;
+			Vector3 dir = Vector3::Zero;
+			dir += UserInput::IsKeyPressed('W') ? Vector3::K : Vector3::Zero;
+			dir += UserInput::IsKeyPressed('S') ? -Vector3::K : Vector3::Zero;
 
 			static int prevkey = -1;
 			if (debug_menu->IsActive())
@@ -754,18 +757,16 @@ bool WaitForMainWindowToClose( int& o_exitCode )
 			}
 			else
 			{
-				Vector3 dir = Vector3::Zero;
 				dir += UserInput::IsKeyPressed(VK_LEFT) ? Vector3::I : Vector3::Zero;
 				dir += UserInput::IsKeyPressed(VK_RIGHT) ? -Vector3::I : Vector3::Zero;
 				dir += UserInput::IsKeyPressed(VK_UP) ? -Vector3::J : Vector3::Zero;
 				dir += UserInput::IsKeyPressed(VK_DOWN) ? Vector3::J : Vector3::Zero;
-				dir += UserInput::IsKeyPressed('W') ? Vector3::K : Vector3::Zero;
-				dir += UserInput::IsKeyPressed('S') ? -Vector3::K : Vector3::Zero;
-				Versor rotated = Versor(Vector4(dir, 0.0f)).rotate(camera.rotation().inverse());
-				dir = Vector3(rotated.x, rotated.y, rotated.z);
-				camera.position += dir * camera_track_speed * dt;
 				prevkey = -1;
 			}
+
+			Versor rotated = Versor(Vector4(dir, 0.0f)).rotate(camera.rotation().inverse());
+			dir = Vector3(rotated.x, rotated.y, rotated.z);
+			camera.position += dir * camera_track_speed * dt;
 
 			Render();
 		}
@@ -778,19 +779,19 @@ bool WaitForMainWindowToClose( int& o_exitCode )
 
 			// First, the message must be "translated"
 			// (Key presses are translated into character messages)
-			TranslateMessage( &message );
+			TranslateMessage(&message);
 
 			// Then, the message is sent on to the appropriate processing function.
 			// This function is specified in the lpfnWndProc field of the WNDCLASSEX struct
 			// used to register a class with Windows.
 			// In the case of the main window in this example program
 			// it will always be OnMessageReceived()
-			DispatchMessage( &message );
+			DispatchMessage(&message);
 		}
-	} while ( message.message != WM_QUIT );
+	} while (message.message != WM_QUIT);
 
 	// The exit code for the application is stored in the WPARAM of a WM_QUIT message
-	o_exitCode = static_cast<int>( message.wParam );
+	o_exitCode = static_cast<int>(message.wParam);
 
 	return true;
 }
