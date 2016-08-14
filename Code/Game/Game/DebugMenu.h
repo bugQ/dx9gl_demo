@@ -121,9 +121,14 @@ namespace eae6320
 #else // !_DEBUG
 		void SetActive(bool) {}
 		bool IsActive() { return false; }
+		void CursorUp() { }
+		void CursorDown() { }
+		void CursorLeft() { }
+		void CursorRight() { }
 		void add_slider(char* id, float min, float max, float& param) {}
 		void add_checkbox(char* id, bool &param) {}
 		void add_text(char* id, std::string &param) {}
+		void add_button(char* id, void(&callback)(void)) {}
 		void Draw(int x = 0, int y = 0) {}
 #endif // !_DEBUG
 	};
