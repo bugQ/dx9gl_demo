@@ -243,12 +243,14 @@ bool CreateMainWindow(const HINSTANCE i_thisInstanceOfTheProgram, const int i_in
 
 		wireframe = new Wireframe(materials[0]);
 		eae6320::Graphics::InitWireframe(*wireframe);
+
+		fps_display = new std::string;
+
 		debug_menu = new DebugMenu();
 		debug_menu->add_text("fps", *fps_display);
 		debug_menu->add_checkbox("debug_sphere.active", debug_sphere.active);
 		debug_menu->add_slider("debug_sphere.radius",
 			debug_sphere.radius_min, debug_sphere.radius_max, debug_sphere.radius);
-		fps_display = new std::string;
 
 		return true;
 
