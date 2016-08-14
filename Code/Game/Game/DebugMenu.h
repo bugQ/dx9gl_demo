@@ -60,7 +60,8 @@ namespace eae6320
 			virtual void activate_left() { param = false; }
 			virtual void activate_right() { param = true; }
 
-			virtual const char* text_format() const { return param ? "(#)" : "( )"; }
+			virtual const char* text_format() const
+				{ return param ? "(off   -> on)" : "(off <-   on)"; }
 		};
 		class Text : public Widget
 		{
