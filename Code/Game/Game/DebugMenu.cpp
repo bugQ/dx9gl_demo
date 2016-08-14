@@ -17,7 +17,9 @@ int DebugMenu::Widget::draw(int x, int y) const
 char* DebugMenu::Slider::text_format() const
 {
 	const size_t len = resolution / 4 + 2;
-	char *gauge = new char[len + 1];
+	char *gauge = new char[len + 10];
+	gauge[len] = ' ';
+	snprintf(gauge + len + 1, 8, "%f", param);
 
 	int ticks = std::max(0, position());
 
@@ -48,7 +50,6 @@ char* DebugMenu::Slider::text_format() const
 
 	gauge[0] = param < min ? '<' : '[';
 	gauge[len - 1] = param > max ? '>' : ']';
-	gauge[len] = '\0';
 
 	return gauge;
 }
@@ -64,9 +65,12 @@ void DebugMenu::Draw(int x, int y)
 	*/
 
 	std::ostringstream builder;
-	std::vector<Widget *>::const_iterator it;
-	for (it = widgets.begin(); it != widgets.end(); ++it)
-		builder << (*it)->id << "\n  " << (*it)->text_format() << "\n";
+	for (int i = 0; i < widgets.size(); ++i)
+	{
+		builder << widgets[i]->id
+			<< ((i == cursor) ? "\n=> " : "\n   ")
+			<< widgets[i]->text_format() << "\n";
+	}
 	Graphics::DrawDebugText(x, y, builder.str());
 }
 

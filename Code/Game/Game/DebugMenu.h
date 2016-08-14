@@ -25,26 +25,27 @@ namespace eae6320
 		class Slider : public Widget
 		{
 			static const int resolution = 64;
-			const float min, max, range_recip;
+			const float min, max;
 			float &param;
 
-			float normalized() const { return (param - min) * range_recip; }
+			float normalized() const { return (param - min) / (max - min); }
 			float denormalize(float x) const { return x * (max - min) + min; }
+			float denormalize(int pos) const { return denormalize((float)pos / resolution); }
 			int position() const { return (int) floor(normalized() * resolution); }
 
 		public:
 			Slider(char* id, float min, float max, float &param)
-				: Widget(id), min(min), max(max), param(param), range_recip(1.0f / (max - min)) {}
+				: Widget(id), min(min), max(max), param(param) {}
 			virtual ~Slider() {}
 
 			virtual void activate_left()
 			{
-				param = denormalize((float) std::max(0, position() - 1));
-			};
+				param = denormalize(std::max(0, position() - 1));
+			}
 			virtual void activate_right()
 			{
-				param = denormalize((float) std::min(resolution, position() + 1));
-			};
+				param = denormalize(std::min(resolution, position() + 1));
+			}
 
 			virtual char* text_format() const;
 		};
@@ -56,8 +57,8 @@ namespace eae6320
 			CheckBox(char* id, bool &param) : Widget(id), param(param) {}
 			virtual ~CheckBox() {}
 
-			virtual void activate_left() {}
-			virtual void activate_right() { param = !param; }
+			virtual void activate_left() { param = false; }
+			virtual void activate_right() { param = true; }
 
 			virtual char* text_format() const { return param ? "(#)" : "( )"; }
 		};
@@ -76,6 +77,7 @@ namespace eae6320
 		};
 
 		std::vector<Widget *> widgets;
+		size_t cursor = 0;
 		bool active = false;
 
 #endif // _DEBUG
@@ -94,6 +96,11 @@ namespace eae6320
 
 		void SetActive(bool b) { active = b; }
 		bool IsActive() { return active; }
+		void CursorUp() { cursor = cursor > 0 ? cursor - 1 : 0; }
+		void CursorDown() { cursor = cursor < widgets.size() - 1 ? cursor + 1 : cursor; }
+		void CursorLeft() { if (widgets.size() > cursor) widgets[cursor]->activate_left(); }
+		void CursorRight() { if (widgets.size() > cursor) widgets[cursor]->activate_right(); }
+
 		void Draw(int x = 0, int y = 0);
 #else // !_DEBUG
 		void SetActive(bool) {}

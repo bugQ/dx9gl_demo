@@ -101,7 +101,7 @@ namespace
 	DebugMenu * debug_menu;
 
 	struct {
-		const float radius_min = 0.5f;
+		const float radius_min = 1.0f;
 		const float radius_max = 5.0f;
 		const float radius_default = 1.5f;
 		float radius = radius_default;
@@ -109,6 +109,7 @@ namespace
 		void debug_sphere_reset() { radius = radius_default; }
 		void draw(Wireframe* wireframe)
 		{
+			if (!active) return;
 			wireframe->addSphere(Vector3(0, 0, 0), radius, 16, Vector4(1.0f, 0.7f, 0.2f, 1.0f));
 		}
 	} debug_sphere;
@@ -705,16 +706,46 @@ bool WaitForMainWindowToClose( int& o_exitCode )
 			angle += UserInput::IsKeyPressed('A') ? -1.0f : 0.0f;
 			camera.yaw += angle * dt;
 			
-			Vector3 dir = Vector3::Zero;
-			dir += UserInput::IsKeyPressed(VK_LEFT) ? Vector3::I : Vector3::Zero;
-			dir += UserInput::IsKeyPressed(VK_RIGHT) ? -Vector3::I : Vector3::Zero;
-			dir += UserInput::IsKeyPressed(VK_UP) ? -Vector3::J : Vector3::Zero;
-			dir += UserInput::IsKeyPressed(VK_DOWN) ? Vector3::J : Vector3::Zero;
-			dir += UserInput::IsKeyPressed('W') ? Vector3::K : Vector3::Zero;
-			dir += UserInput::IsKeyPressed('S') ? -Vector3::K : Vector3::Zero;
-			Versor rotated = Versor(Vector4(dir, 0.0f)).rotate(camera.rotation().inverse());
-			dir = Vector3(rotated.x, rotated.y, rotated.z);
-			camera.position += dir * camera_track_speed * dt;
+			if (debug_menu->IsActive()) do
+			{
+				static int prevkey = -1;
+				if (UserInput::IsKeyPressed(prevkey)) break;
+				else if (UserInput::IsKeyPressed(VK_UP))
+				{
+					debug_menu->CursorUp();
+					prevkey = VK_UP;
+				}
+				else if (UserInput::IsKeyPressed(VK_DOWN))
+				{
+					debug_menu->CursorDown();
+					prevkey = VK_DOWN;
+				}
+				else if (UserInput::IsKeyPressed(VK_LEFT))
+				{
+					debug_menu->CursorLeft();
+					prevkey = UserInput::IsKeyPressed(VK_SHIFT) ? VK_LEFT : -1;
+				}
+				else if (UserInput::IsKeyPressed(VK_RIGHT))
+				{
+					debug_menu->CursorRight();
+					prevkey = UserInput::IsKeyPressed(VK_SHIFT) ? VK_RIGHT : -1;
+				}
+				else prevkey = -1;
+
+			} while (false);
+			else
+			{
+				Vector3 dir = Vector3::Zero;
+				dir += UserInput::IsKeyPressed(VK_LEFT) ? Vector3::I : Vector3::Zero;
+				dir += UserInput::IsKeyPressed(VK_RIGHT) ? -Vector3::I : Vector3::Zero;
+				dir += UserInput::IsKeyPressed(VK_UP) ? -Vector3::J : Vector3::Zero;
+				dir += UserInput::IsKeyPressed(VK_DOWN) ? Vector3::J : Vector3::Zero;
+				dir += UserInput::IsKeyPressed('W') ? Vector3::K : Vector3::Zero;
+				dir += UserInput::IsKeyPressed('S') ? -Vector3::K : Vector3::Zero;
+				Versor rotated = Versor(Vector4(dir, 0.0f)).rotate(camera.rotation().inverse());
+				dir = Vector3(rotated.x, rotated.y, rotated.z);
+				camera.position += dir * camera_track_speed * dt;
+			}
 
 			Render();
 		}
