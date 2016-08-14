@@ -75,6 +75,19 @@ namespace eae6320
 
 			virtual const char* text_format() const { return param.c_str(); }
 		};
+		class Button : public Widget
+		{
+			void (&callback)(void);
+
+		public:
+			Button(char* id, void (&callback)(void)) : Widget(id), callback(callback) {}
+			virtual ~Button() {}
+
+			virtual void activate_left() {}
+			virtual void activate_right() { callback(); }
+
+			virtual const char* text_format() const { return "(press right)"; }
+		};
 
 		std::vector<Widget *> widgets;
 		size_t cursor = 0;
@@ -93,6 +106,8 @@ namespace eae6320
 			{ widgets.push_back(new CheckBox(id, param)); }
 		void add_text(char* id, std::string &param)
 			{ widgets.push_back(new Text(id, param)); }
+		void add_button(char* id, void (&callback)(void))
+			{ widgets.push_back(new Button(id, callback)); }
 
 		void SetActive(bool b) { active = b; }
 		bool IsActive() { return active; }

@@ -108,13 +108,15 @@ namespace
 		const float radius_default = 1.5f;
 		float radius = radius_default;
 		bool active;
-		void debug_sphere_reset() { radius = radius_default; }
+		void reset() { radius = radius_default; }
 		void draw(Wireframe* wireframe)
 		{
 			if (!active) return;
 			wireframe->addSphere(Vector3(0, 0, 0), radius, 16, Vector4(1.0f, 0.7f, 0.2f, 1.0f));
 		}
 	} debug_sphere;
+
+	void debug_sphere_reset() { debug_sphere.reset(); }
 
 	// Window classes are almost always identified by name;
 	// there is also a unique ATOM associated with them,
@@ -251,6 +253,7 @@ bool CreateMainWindow(const HINSTANCE i_thisInstanceOfTheProgram, const int i_in
 		debug_menu->add_checkbox("debug_sphere.active", debug_sphere.active);
 		debug_menu->add_slider("debug_sphere.radius",
 			debug_sphere.radius_min, debug_sphere.radius_max, debug_sphere.radius);
+		debug_menu->add_button("debug_sphere.reset", debug_sphere_reset);
 
 		return true;
 
