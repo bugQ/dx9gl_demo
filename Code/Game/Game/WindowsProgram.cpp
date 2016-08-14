@@ -7,6 +7,8 @@
 
 #include "WindowsProgram.h"
 
+#include "DebugMenu.h"
+
 // Resource.h contains the #defines for the icon resources
 // that the main window will use
 #include "Resources/Resource.h"
@@ -83,8 +85,6 @@ namespace
 		};
 	sprite_spec sprite_specs[] =
 		{ {6, {-1.2f, -0.4f, -0.6f, -1.0f}, standardUV }
-		, {7, {0.78f, -0.8f, 0.9f, -0.95f}, {0.1f, 0.0f, 0.2f, 1.0f} }
-		, {7, {0.9f, -0.8f, 1.02f, -0.95f}, {0.9f, 0.0f, 1.0f, 1.0f} }
 		};
 	/* end hardcoded asset list. */
 
@@ -98,6 +98,20 @@ namespace
 	Camera camera;
 
 	Wireframe * wireframe;
+	DebugMenu * debug_menu;
+
+	struct {
+		const float radius_min = 0.5f;
+		const float radius_max = 5.0f;
+		const float radius_default = 1.5f;
+		float radius = radius_default;
+		bool active;
+		void debug_sphere_reset() { radius = radius_default; }
+		void draw(Wireframe* wireframe)
+		{
+			wireframe->addSphere(Vector3(0, 0, 0), radius, 16, Vector4(1.0f, 0.7f, 0.2f, 1.0f));
+		}
+	} debug_sphere;
 
 	// Window classes are almost always identified by name;
 	// there is also a unique ATOM associated with them,
@@ -226,6 +240,11 @@ bool CreateMainWindow( const HINSTANCE i_thisInstanceOfTheProgram, const int i_i
 
 		wireframe = new Wireframe(materials[0]);
 		eae6320::Graphics::InitWireframe(*wireframe);
+		debug_menu = new DebugMenu();
+		debug_menu->add_checkbox("debug_sphere.active", debug_sphere.active);
+		debug_menu->add_slider("debug_sphere.radius",
+			debug_sphere.radius_min, debug_sphere.radius_max, debug_sphere.radius);
+		debug_menu->SetActive(true);
 
 		return true;
 
@@ -500,6 +519,7 @@ bool CleanupMainWindow()
 		delete[] sprites;
 
 		delete wireframe;
+		delete debug_menu;
 	}
 	return true;
 }
@@ -633,51 +653,15 @@ void Render()
 		if (models[i]->mat->effect->render_state.alpha)
 			DrawModel(*models[i], camera);
 	
-	wireframe->addAABB
-		( Vector3(0, 0.5f, 5)
-		, Vector3(0.3f, 0.3f, 0.3f)
-		, Vector4(1.0f, 1.0f, 1.0f, 1.0f)
-		);
-	wireframe->addSphere
-		( Vector3(1, 0.5f, 5)
-		, 0.3f
-		, 6
-		, Vector4(1.0f, 0.7f, 0.2f, 1.0f)
-		);
-	wireframe->addCylinder
-		( Vector3(-1, 0.5f, 5)
-		, 0.3f
-		, 0.3f
-		, 12
-		, Vector4(0.7f, 1.0f, 0.2f, 1.0f)
-		);
-
-	wireframe->addAABB
-		( Vector3(-1, -0.5f, 5)
-		, Vector3(0.3f, 0.3f, 0.3f)
-		, Vector4(1.0f, 0.2f, 0.7f, 1.0f)
-		);
-	wireframe->addSphere
-		( Vector3(0, -0.5f, 5)
-		, 0.3f
-		, 6
-		, Vector4(0.7f, 0.2f, 1.0f, 1.0f)
-		);
-	wireframe->addCylinder
-		( Vector3(1, -0.5f, 5)
-		, 0.3f
-		, 0.3f
-		, 12
-		, Vector4(0.0f, 0.0f, 0.0f, 1.0f)
-		);
-
+	debug_sphere.draw(wireframe);
 	eae6320::Graphics::DrawWireframe(*wireframe, camera);
 	wireframe->clear();
-
 
 	for (size_t i = 0; i < num_sprites; ++i)
 		if (sprites[i]->active)
 			DrawSprite(*sprites[i]);
+
+	debug_menu->Draw();
 
 	EndFrame();
 }

@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <d3d9.h>
 #include <d3dx9shader.h>
+#include <d3dx9core.h>
 #include <sstream>
 #include "../Debug_Runtime/UserOutput.h"
 #include "Effect.h"
@@ -23,6 +24,7 @@ namespace
 	IDirect3DDevice9* s_direct3dDevice = NULL;
 	IDirect3DVertexDeclaration9* s_standardVertexFormat = NULL;
 	IDirect3DVertexBuffer9* s_spriteVertexBuffer = NULL;
+	ID3DXFont* s_debugFont = NULL;
 }
 
 // Helper Function Declarations
@@ -160,6 +162,29 @@ bool eae6320::Graphics::Initialize( const HWND i_renderingWindow )
 			}
 		}
 	}
+
+#ifdef _DEBUG
+	{
+		const HRESULT result = D3DXCreateFont(s_direct3dDevice
+			, 32 // font height
+			, 0 // font width
+			, FW_NORMAL // font weight
+			, 1 // mip levels
+			, false // italic
+			, DEFAULT_CHARSET // charset
+			, OUT_DEFAULT_PRECIS // output precision
+			, ANTIALIASED_QUALITY // quality
+			, DEFAULT_PITCH | FF_DONTCARE // pitch and family
+			, "Consolas" // face name
+			, &s_debugFont);
+
+		if (FAILED(result))
+		{
+			eae6320::UserOutput::Print("Direct3D failed to initialize a font");
+			return false;
+		}
+	}
+#endif // _DEBUG
 
 	return true;
 
@@ -400,6 +425,32 @@ void eae6320::Graphics::DrawWireMesh(Mesh & mesh)
 		assert(SUCCEEDED(result));
 	}
 }
+
+// returns height of drawn text
+int eae6320::Graphics::DrawDebugText(int x, int y, std::string & text)
+{
+	RECT rect;
+	BOOL success = GetClientRect(s_renderingWindow, &rect);
+	assert(success);
+
+	rect.top = rect.bottom >> 5;
+	rect.bottom = rect.bottom - rect.top;
+	rect.left = rect.right >> 5;
+	rect.right = rect.right - rect.left;
+
+	rect.top += y;
+	rect.left += x;
+
+	int text_height = s_debugFont->DrawText(
+		NULL, // sprite
+		text.c_str(), // string
+		-1, // count
+		&rect, // rect
+		DT_LEFT | DT_NOCLIP, // format
+		0xffccff66); // color
+
+	return text_height;
+}
 #endif
 
 void eae6320::Graphics::SetCamera( Effect & effect, Camera & camera )
@@ -535,6 +586,14 @@ void eae6320::Graphics::EndFrame()
 bool eae6320::Graphics::ShutDown()
 {
 	bool wereThereErrors = false;
+
+#ifdef _DEBUG
+	if (s_debugFont)
+	{
+		s_debugFont->Release();
+		s_debugFont = NULL;
+	}
+#endif
 
 	if ( s_direct3dInterface )
 	{

@@ -197,11 +197,13 @@
     <Image Include="Resources\small.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DebugMenu.h" />
     <ClInclude Include="Resources\Resource.h" />
     <ClInclude Include="Resources\targetver.h" />
     <ClInclude Include="WindowsProgram.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DebugMenu.cpp" />
     <ClCompile Include="EntryPoint.cpp" />
     <ClCompile Include="WindowsProgram.cpp" />
   </ItemGroup>

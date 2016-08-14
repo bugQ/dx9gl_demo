@@ -45,6 +45,8 @@ namespace eae6320
 		bool BufferWireframe( Wireframe & wireframe );
 		void DrawWireMesh( Mesh & wire_pool );
 		void DrawWireframe( Wireframe & wireframe, Camera & camera ); // the kit&kaboodle
+
+		int DrawDebugText( int x, int y, std::string & text );
 #else
 		inline bool InitWireframe(Wireframe & wireframe) { return true; }
 		inline bool BufferWireframe(Wireframe & wireframe) { return true; }
