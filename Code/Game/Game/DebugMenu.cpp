@@ -56,8 +56,6 @@ const char* DebugMenu::Slider::text_format() const
 
 void DebugMenu::Draw(int x, int y)
 {
-	if (!active) return;
-
 	/*
 	std::vector<Widget *>::const_iterator it;
 	for (it = widgets.begin(); it != widgets.end(); ++it)

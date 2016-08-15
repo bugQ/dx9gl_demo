@@ -30,7 +30,10 @@
     <ClInclude Include="Versor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Intersections.h">
+    <ClInclude Include="Triangle3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -58,7 +61,13 @@
     <ClCompile Include="Vector4.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Intersections.cpp">
+    <ClCompile Include="Triangle3.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Vector2.inl">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Vector2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

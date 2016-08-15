@@ -18,6 +18,10 @@ inline Vector3 Vector3::cross(Vector3 const & rhs) const {
 	return Vector3(y*rhs.z - z*rhs.y, x*rhs.z - z*rhs.x, x*rhs.y - y*rhs.x);
 }
 
+inline Vector3 Vector3::scale(Vector3 const & rhs) const {
+	return Vector3(x * rhs.x, y * rhs.y, z * rhs.z);
+}
+
 inline float Vector3::norm() const
 {
 	return sqrt(x*x + y*y + z*z);
@@ -71,11 +75,6 @@ inline Vector3 operator-(Vector3 const & lhs, Vector3 const & rhs)
 inline Vector3 & operator-=(Vector3 & lhs, Vector3 const & rhs)
 {
 	lhs.x -= rhs.x; lhs.y -= rhs.y; lhs.z -= rhs.z; return lhs;
-}
-
-inline float operator*(Vector3 const & lhs, Vector3 const & rhs)
-{
-	return lhs.dot(rhs);
 }
 
 inline Vector3 operator*(Vector3 const & lhs, float const rhs)

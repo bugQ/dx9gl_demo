@@ -8,9 +8,6 @@ namespace eae6320
 struct Camera
 {
 	Vector3 position;
-	float yaw;
-	Versor rotation();
-
-	Camera();
+	Versor rotation;
 };
 }

@@ -3,6 +3,14 @@ inline Vector4::Vector4(float x, float y, float z, float w) : x(x), y(y), z(z), 
 inline Vector4::Vector4(Vector4 const & v) : x(v.x), y(v.y), z(v.z), w(v.w) {}
 inline Vector4::Vector4(Vector3 const & v, float w) : x(v.x), y(v.y), z(v.z), w(w) {}
 
+inline Vector3 Vector4::xyz() const {
+	return Vector3(x, y, z);
+}
+
+inline Vector3 Vector4::rgb() const {
+	return xyz();
+}
+
 inline Vector4 Vector4::operator+() const {
 	return Vector4(+x, +y, +z, +w);
 }
@@ -66,11 +74,6 @@ inline Vector4 operator-(Vector4 const & lhs, Vector4 const & rhs)
 inline Vector4 & operator-=(Vector4 & lhs, Vector4 const & rhs)
 {
 	lhs.x -= rhs.x; lhs.y -= rhs.y; lhs.z -= rhs.z; lhs.w -= rhs.w; return lhs;
-}
-
-inline float operator*(Vector4 const & lhs, Vector4 const & rhs)
-{
-	return lhs.dot(rhs);
 }
 
 inline Vector4 operator*(Vector4 const & lhs, float const rhs)

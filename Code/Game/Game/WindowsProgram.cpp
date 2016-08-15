@@ -20,8 +20,16 @@ This file contains all of the function definitions for this example program
 // graphics API calls during gameplay
 #include "../../Engine/Graphics/Graphics.h"
 
+#include "../../Engine/Physics/Terrain.h"
 #include "../../Engine/Time/Time.h"
 #include "../../Engine/UserInput/UserInput.h"
+
+#include "Controller.h"
+#include "FlyCam.h"
+#include "Player.h"
+
+#include "../../Engine/Debug_Runtime/UserOutput.h"
+#include <sstream>
 
 // Static Data Initialization
 //===========================
@@ -57,31 +65,32 @@ namespace
 
 	Sprite::Rect standardUV = { 0.0f, 0.0f, 1.0f, 1.0f };
 
+	const char * terrain_file = "data/ctf_collision.vib";
 	const char * mesh_files[] =
 	{ "data/ctf_ceiling.vib"
-		, "data/ctf_cement.vib"
-		, "data/ctf_floor.vib"
-		, "data/ctf_metal.vib"
-		, "data/ctf_railing.vib"
-		, "data/ctf_walls.vib"
+	, "data/ctf_cement.vib"
+	, "data/ctf_floor.vib"
+	, "data/ctf_metal.vib"
+	, "data/ctf_railing.vib"
+	, "data/ctf_walls.vib"
 	};
 	const char * material_files[] =
 	{ "data/debug.mtb"
-		, "data/ctf_cement.mtb"
-		, "data/ctf_floor.mtb"
-		, "data/ctf_metal.mtb"
-		, "data/ctf_railing.mtb"
-		, "data/ctf_walls.mtb"
-		, "data/eae6320_a.mtb"
-		, "data/numbers.mtb"
+	, "data/ctf_cement.mtb"
+	, "data/ctf_floor.mtb"
+	, "data/ctf_metal.mtb"
+	, "data/ctf_railing.mtb"
+	, "data/ctf_walls.mtb"
+	, "data/eae6320_a.mtb"
+	, "data/numbers.mtb"
 	};
 	model_spec model_specs[] =
 	{ { 0, 1, origin, cm }
-		,{ 1, 1, origin, cm }
-		,{ 2, 2, origin, cm }
-		,{ 3, 3, origin, cm }
-		,{ 4, 4, origin, cm }
-		,{ 5, 5, origin, cm }
+	, { 1, 1, origin, cm }
+	, { 2, 2, origin, cm }
+	, { 3, 3, origin, cm }
+	, { 4, 4, origin, cm }
+	, { 5, 5, origin, cm }
 	};
 	sprite_spec sprite_specs[] =
 	{ { 6,{ -1.2f, -0.4f, -0.6f, -1.0f }, standardUV }
@@ -94,8 +103,13 @@ namespace
 	size_t num_models;
 	Sprite ** sprites;
 	size_t num_sprites;
+	Physics::Terrain * terrain;
 
-	Camera camera;
+	FlyCam * fly_cam;
+	Player * player;
+
+	Camera * active_cam;
+	Controller * active_controller;
 
 	Wireframe * wireframe;
 	DebugMenu * debug_menu;
@@ -132,6 +146,14 @@ namespace
 
 int CreateMainWindowAndReturnExitCodeWhenItCloses(const HINSTANCE i_thisInstanceOfTheProgram, const int i_initialWindowDisplayState)
 {
+	std::ostringstream oss;
+	Vector3 n;
+	float t;
+	bool collided = Triangle3(Vector3(0, 0, 0), Vector3(0, 0, 1), Vector3(0, 1, 0))
+		.intersect_segment(Vector3(-1.5, 0.25, 0.25), Vector3(0.5, 0.25, 0.25), t, n);
+	oss << (int)collided << " (" << n.x << ", " << n.y << ", " << n.z << ") " << t << std::endl;
+	UserOutput::Print(oss.str());
+
 	// Try to create the main window
 	if (CreateMainWindow(i_thisInstanceOfTheProgram, i_initialWindowDisplayState))
 	{
@@ -241,7 +263,13 @@ bool CreateMainWindow(const HINSTANCE i_thisInstanceOfTheProgram, const int i_in
 		materials = LoadMaterials(material_files);
 		models = BuildModels(model_specs, meshes, materials, num_models);
 		sprites = BuildSprites(sprite_specs, materials, num_sprites);
-		camera.position.z = -10;
+
+		terrain = Physics::Terrain::FromBinFile(terrain_file, cm);
+
+		fly_cam = new FlyCam(Vector3(0, 0, 10), 0, camera_track_speed, camera_pan_speed);
+		player = new Player(Vector3(0, 0, 10), 0, 2, *terrain, 2.0f);
+		active_cam = &player->head_cam;
+		active_controller = player;
 
 		wireframe = new Wireframe(materials[0]);
 		eae6320::Graphics::InitWireframe(*wireframe);
@@ -657,13 +685,20 @@ void Render()
 
 	for (size_t i = 0; i < num_models; ++i)
 		if (!models[i]->mat->effect->render_state.alpha)
-			DrawModel(*models[i], camera);
+			DrawModel(*models[i], *active_cam);
 	for (size_t i = 0; i < num_models; ++i)
 		if (models[i]->mat->effect->render_state.alpha)
-			DrawModel(*models[i], camera);
+			DrawModel(*models[i], *active_cam);
 
 	debug_sphere.draw(wireframe);
-	eae6320::Graphics::DrawWireframe(*wireframe, camera);
+	for (size_t i = 0; i < terrain->num_triangles; ++i)
+	{
+		Triangle3 tri = terrain->triangles[i];
+		wireframe->addLine(tri.a, Vector4::One, tri.b, Vector4::One);
+		wireframe->addLine(tri.b, Vector4::One, tri.c, Vector4::One);
+		wireframe->addLine(tri.c, Vector4::One, tri.a, Vector4::One);
+	}
+	eae6320::Graphics::DrawWireframe(*wireframe, *active_cam);
 	wireframe->clear();
 
 	for (size_t i = 0; i < num_sprites; ++i)
@@ -672,7 +707,9 @@ void Render()
 
 	fps_display->swap(std::to_string(Time::GetFramesPerSecond()));
 
-	debug_menu->Draw();
+
+	if(active_controller == debug_menu)
+		debug_menu->Draw();
 
 	EndFrame();
 }
@@ -711,67 +748,50 @@ bool WaitForMainWindowToClose(int& o_exitCode)
 			// Usually there will be no messages in the queue, and the game can run
 			Time::OnNewFrame();
 			float dt = Time::GetSecondsElapsedThisFrame();
-			float angle = 0;
-			angle += UserInput::IsKeyPressed('D') ? 1.0f : 0.0f;
-			angle += UserInput::IsKeyPressed('A') ? -1.0f : 0.0f;
-			camera.yaw += angle * dt;
-			Vector3 dir = Vector3::Zero;
-			dir += UserInput::IsKeyPressed('W') ? Vector3::K : Vector3::Zero;
-			dir += UserInput::IsKeyPressed('S') ? -Vector3::K : Vector3::Zero;
 
+			Vector2 joy_left = Vector2::Zero;
+			Vector2 joy_right = Vector2::Zero;
+			if (UserInput::IsKeyPressed('W')) joy_left += Vector2::J;
+			if (UserInput::IsKeyPressed('S')) joy_left -= Vector2::J;
+			if (UserInput::IsKeyPressed('A')) joy_left -= Vector2::I;
+			if (UserInput::IsKeyPressed('D')) joy_left += Vector2::I;
+			if (UserInput::IsKeyPressed(VK_UP))    joy_right += Vector2::J;
+			if (UserInput::IsKeyPressed(VK_DOWN))  joy_right -= Vector2::J;
+			if (UserInput::IsKeyPressed(VK_LEFT))  joy_right -= Vector2::I;
+			if (UserInput::IsKeyPressed(VK_RIGHT)) joy_right += Vector2::I;
+			Controller::Controls controls = { joy_left, joy_right };
+
+#ifdef _DEBUG
 			static int prevkey = -1;
-			if (debug_menu->IsActive())
+			if (active_controller == debug_menu)
 			{
-				if (prevkey != VK_OEM_3 && UserInput::IsKeyPressed(VK_OEM_3))
+				if (UserInput::IsKeyPressed(VK_OEM_3))
 				{
-					debug_menu->SetActive(false);
-					prevkey = VK_OEM_3;
+					if (prevkey != VK_OEM_3)
+					{
+						if (active_cam == &player->head_cam)
+							active_controller = player;
+						else if (active_cam == &fly_cam->fly_cam)
+							active_controller = fly_cam;
+						prevkey = VK_OEM_3;
+					}
 				}
-				else if (UserInput::IsKeyPressed(prevkey))
-					/* pass */;
-				else if (UserInput::IsKeyPressed(VK_UP))
-				{
-					debug_menu->CursorUp();
-					prevkey = VK_UP;
-				}
-				else if (UserInput::IsKeyPressed(VK_DOWN))
-				{
-					debug_menu->CursorDown();
-					prevkey = VK_DOWN;
-				}
-				else if (UserInput::IsKeyPressed(VK_LEFT))
-				{
-					debug_menu->CursorLeft();
-					prevkey = UserInput::IsKeyPressed(VK_SHIFT) ? VK_LEFT : -1;
-				}
-				else if (UserInput::IsKeyPressed(VK_RIGHT))
-				{
-					debug_menu->CursorRight();
-					prevkey = UserInput::IsKeyPressed(VK_SHIFT) ? VK_RIGHT : -1;
-				}
-				else prevkey = -1;
-
+				else
+					prevkey = -1;
 			}
 			else if (UserInput::IsKeyPressed(VK_OEM_3))
 			{
 				if (prevkey != VK_OEM_3)
 				{
-					debug_menu->SetActive(true);
+					active_controller = debug_menu;
 					prevkey = VK_OEM_3;
 				}
 			}
 			else
-			{
-				dir += UserInput::IsKeyPressed(VK_LEFT) ? Vector3::I : Vector3::Zero;
-				dir += UserInput::IsKeyPressed(VK_RIGHT) ? -Vector3::I : Vector3::Zero;
-				dir += UserInput::IsKeyPressed(VK_UP) ? -Vector3::J : Vector3::Zero;
-				dir += UserInput::IsKeyPressed(VK_DOWN) ? Vector3::J : Vector3::Zero;
 				prevkey = -1;
-			}
+#endif // _DEBUG
 
-			Versor rotated = Versor(Vector4(dir, 0.0f)).rotate(camera.rotation().inverse());
-			dir = Vector3(rotated.x, rotated.y, rotated.z);
-			camera.position += dir * camera_track_speed * dt;
+			active_controller->update(controls, dt);
 
 			Render();
 		}

@@ -27,10 +27,16 @@
     </ClInclude>
     <ClInclude Include="WindowsProgram.h" />
     <ClInclude Include="DebugMenu.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="Controller.h" />
+    <ClInclude Include="FlyCam.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EntryPoint.cpp" />
     <ClCompile Include="WindowsProgram.cpp" />
     <ClCompile Include="DebugMenu.cpp" />
+    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Controller.cpp" />
+    <ClCompile Include="FlyCam.cpp" />
   </ItemGroup>
 </Project>

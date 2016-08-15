@@ -10,6 +10,7 @@ return
 		"ctf_metal",
 		"ctf_railing",
 		"ctf_walls",
+		"ctf_collision",
 	},
 	shaders = {
 		srcext = 'shd', dstext = 'shb',

@@ -17,9 +17,14 @@ inline Versor Versor::inverse()
 	return Versor(-x, -y, -z, w);
 }
 
-inline Versor Versor::rotate(Versor rotation)
+inline Versor Versor::rotate_by(Versor rotation)
 {
 	return rotation * (*this) * rotation.inverse();
+}
+
+inline Vector3 Versor::rotate(Vector3 direction)
+{
+	return Versor(Vector4(direction, 0.0f)).rotate_by(*this).xyz();
 }
 
 inline Versor Versor::rotation_x(float radians)

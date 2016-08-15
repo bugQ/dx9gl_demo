@@ -15,6 +15,9 @@ namespace eae6320
 		Vector4(Vector4 const & v);
 		Vector4(Vector3 const & v, float w);
 
+		Vector3 xyz() const;
+		Vector3 rgb() const;
+
 		Vector4 operator+() const;
 		Vector4 operator-() const;
 
@@ -35,7 +38,6 @@ namespace eae6320
 	inline Vector4 & operator+=(Vector4 & lhs, Vector4 const & rhs);
 	inline Vector4 operator-(Vector4 const & lhs, Vector4 const & rhs);
 	inline Vector4 & operator-=(Vector4 & lhs, Vector4 const & rhs);
-	inline float operator*(Vector4 const & lhs, Vector4 const & rhs);
 	inline Vector4 operator*(Vector4 const & lhs, float const rhs);
 	inline Vector4 operator*(float lhs, Vector4 const & rhs);
 	inline Vector4 & operator*=(Vector4 & lhs, float rhs);

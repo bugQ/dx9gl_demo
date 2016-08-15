@@ -11,7 +11,8 @@ namespace eae6320
 		Versor(Vector4 const & v);
 
 		Versor inverse();
-		Versor rotate(Versor rotation);
+		Versor rotate_by(Versor rotation);
+		Vector3 rotate(Vector3 direction);
 
 		static Versor rotation_x(float radians);
 		static Versor rotation_y(float radians);

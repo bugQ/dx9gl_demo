@@ -14,7 +14,7 @@ namespace Graphics
 
 struct Wireframe
 {
-	static const size_t MAXLINES = 1024;
+	static const size_t MAXLINES = 5000;
 
 	Mesh::Vertex points[MAXLINES * 2];
 	size_t num_lines;

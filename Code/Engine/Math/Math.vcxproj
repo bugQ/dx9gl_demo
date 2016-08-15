@@ -157,14 +157,19 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Intersections.cpp" />
     <ClCompile Include="Matrix4.cpp" />
+    <ClCompile Include="Triangle3.cpp" />
+    <ClCompile Include="Vector2.cpp" />
+    <None Include="Vector2.inl">
+      <FileType>Document</FileType>
+    </None>
     <ClCompile Include="Vector3.cpp" />
     <ClCompile Include="Vector4.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Intersections.h" />
     <ClInclude Include="Matrix4.h" />
+    <ClInclude Include="Triangle3.h" />
+    <ClInclude Include="Vector2.h" />
     <ClInclude Include="Versor.h" />
     <ClInclude Include="Vector3.h" />
     <ClInclude Include="Vector4.h" />

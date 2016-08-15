@@ -4,9 +4,11 @@
 #include <vector>
 #include <algorithm>
 
+#include "Controller.h"
+
 namespace eae6320
 {
-	class DebugMenu
+	class DebugMenu : public Controller
 	{
 #ifdef _DEBUG
 		struct Widget
@@ -92,10 +94,25 @@ namespace eae6320
 
 		std::vector<Widget *> widgets;
 		size_t cursor = 0;
-		bool active = false;
 
 #endif // _DEBUG
 	public:
+		enum Control { none, up, down, left, right };
+
+		Control joy2dir(Vector2 joystick)
+		{
+			if (abs(joystick.y) > abs(joystick.x * 2))
+			{
+				if (joystick.y > 0.5f) return up;
+				if (joystick.y < -0.5f) return down;
+			}
+			else if (abs(joystick.x) > abs(joystick.y * 2))
+			{
+				if (joystick.x > 0.5f) return right;
+				if (joystick.x < -0.5f) return left;
+			}
+			return none;
+		}
 
 		DebugMenu() {}
 		~DebugMenu() {}
@@ -110,26 +127,43 @@ namespace eae6320
 		void add_button(char* id, void (&callback)(void))
 			{ widgets.push_back(new Button(id, callback)); }
 
-		void SetActive(bool b) { active = b; }
-		bool IsActive() { return active; }
-		void CursorUp() { cursor = cursor > 0 ? cursor - 1 : 0; }
-		void CursorDown() { cursor = cursor < widgets.size() - 1 ? cursor + 1 : cursor; }
-		void CursorLeft() { if (widgets.size() > cursor) widgets[cursor]->activate_left(); }
-		void CursorRight() { if (widgets.size() > cursor) widgets[cursor]->activate_right(); }
+		void ControlCursor(Control c)
+		{
+			switch (c)
+			{
+			case up: cursor = cursor > 0 ? cursor - 1 : 0; break;
+			case down: cursor = cursor < widgets.size() - 1 ? cursor + 1 : cursor; break;
+			case left: if (widgets.size() > cursor) widgets[cursor]->activate_left(); break;
+			case right: if (widgets.size() > cursor) widgets[cursor]->activate_right(); break;
+			}
+		}
 
 		void Draw(int x = 0, int y = 0);
+
+		void update(Controls controls, float dt)
+		{
+			static Control prev_dir = none;
+			Control dir = joy2dir(controls.joy_right);
+			if (prev_dir != dir)
+			{
+				ControlCursor(dir);
+
+				if (dynamic_cast<Slider *>(widgets[cursor]) != NULL && (dir == left || dir == right))
+					prev_dir = none;
+				else
+					prev_dir = dir;
+			}
+		}
 #else // !_DEBUG
 		void SetActive(bool) {}
 		bool IsActive() { return false; }
-		void CursorUp() { }
-		void CursorDown() { }
-		void CursorLeft() { }
-		void CursorRight() { }
+		void ControlCursor(Control c) {}
 		void add_slider(char* id, float min, float max, float& param) {}
 		void add_checkbox(char* id, bool &param) {}
 		void add_text(char* id, std::string &param) {}
 		void add_button(char* id, void(&callback)(void)) {}
 		void Draw(int x = 0, int y = 0) {}
+		void update(Controls controls, float dt) {}
 #endif // !_DEBUG
 	};
 }

@@ -458,7 +458,7 @@ void eae6320::Graphics::SetCamera( Effect & effect, Camera & camera )
 	HRESULT result;
 	Matrix4 viewmat = Matrix4::Identity;
 	viewmat.vec3(3) = camera.position;
-	viewmat = viewmat.dot(Matrix4::rotation_q(camera.rotation()));
+	viewmat = viewmat.dot(Matrix4::rotation_q(camera.rotation));
 	const D3DXMATRIX * mat2 = reinterpret_cast<const D3DXMATRIX *>(&viewmat);
 	LPD3DXCONSTANTTABLE table = effect.vertex_shader.second;
 	result = table->SetMatrixTranspose(s_direct3dDevice, effect.uni_world2view, mat2);
