@@ -31,7 +31,7 @@ inline Versor Versor::rotation_x(float radians)
 {
 	float half = radians * 0.5f;
 	float c = cos(half), s = sin(half);
-	return Versor(0.0f, 0.0f, s, c);
+	return Versor(s, 0.0f, 0.0f, c);
 }
 
 inline Versor Versor::rotation_y(float radians)
@@ -46,5 +46,5 @@ inline Versor Versor::rotation_z(float radians)
 {
 	float half = radians * 0.5f;
 	float c = cos(half), s = sin(half);
-	return Versor(s, 0.0f, 0.0f, c);
+	return Versor(0.0f, 0.0f, s, c);
 }

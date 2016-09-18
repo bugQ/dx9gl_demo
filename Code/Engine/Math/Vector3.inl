@@ -10,6 +10,15 @@ inline Vector3 Vector3::operator-() const {
 	return Vector3(-x, -y, -z);
 }
 
+inline float Vector3::operator[](size_t i) const {
+	switch (i) {
+	case 0: return x;
+	case 1: return y;
+	case 2: return z;
+	default: return std::numeric_limits<float>::signaling_NaN();
+	}
+}
+
 inline float Vector3::dot(Vector3 const & rhs) const {
 	return x*rhs.x + y*rhs.y + z*rhs.z;
 }

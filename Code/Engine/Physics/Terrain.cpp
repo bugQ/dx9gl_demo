@@ -36,11 +36,21 @@ Terrain::Terrain(Triangle3 * triangles, size_t num_triangles)
 
 Terrain * Terrain::FromBinFile(const char * collision_mesh_path, Vector3 scale)
 {
+	/**/
 	Graphics::Mesh::Data * mesh_data = Graphics::Mesh::Data::FromBinFile(collision_mesh_path);
 	Triangle3 * triangles = cache_triangles(mesh_data, scale);
 	size_t num_triangles = mesh_data->num_triangles;
 
 	delete mesh_data;
+	/*/
+	size_t num_triangles = 3;
+	Triangle3 * triangles = new Triangle3[num_triangles]
+	{
+		Triangle3(Vector3(-1, -1, 0), Vector3(-1, 1, 0), Vector3(1, -1, 0)),
+		Triangle3(Vector3(0, 1, 2), Vector3(2, 1, 3), Vector3(1, -1, 3)),
+		Triangle3(Vector3(2, 1, 2), Vector3(2 ,1, 3), Vector3(0, 1, 2))
+	};
+	/**/
 	return new Terrain(triangles, num_triangles);
 }
 
@@ -50,23 +60,24 @@ Terrain::~Terrain()
 	delete[] triangles;
 }
 
-bool Terrain::intersect_segment(Vector3 p, Vector3 q, float &t, Vector3 &n) const
+float Terrain::intersect_ray(Vector3 o, Vector3 dir, Vector3 * n) const
 {
-	t = std::numeric_limits<float>::infinity();
-
+	float t = std::numeric_limits<float>::infinity();
 	for (size_t i = 0; i < num_triangles; ++i)
 	{
-		float t_i;
-		Vector3 n_i;
-
-		if (triangles[i].intersect_segment(p, q, t_i, n_i) && t_i < t)
+		Vector3 n_i = triangles[i].normal;
+/*		if ((q - p).dot(n_i) > 0)
+			n_i = -n_i;
+		Vector3 s = n_i * r;
+		*/
+		float t_i = triangles[i].intersect_ray(o, dir);
+		if (t_i > 0 && t_i < t)
 		{
 			t = t_i;
-			n = n_i;
+			if (n) *n = triangles[i].normal;
 		}
 	}
-
-	return std::isfinite(t);
+	return t;
 }
 
 }

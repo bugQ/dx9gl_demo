@@ -17,7 +17,7 @@ namespace Physics
 		static Terrain * FromBinFile(const char * collision_mesh_path, Vector3 scale);
 		~Terrain();
 
-		bool intersect_segment(Vector3 p, Vector3 q, float &t, Vector3 &n) const;
+		float intersect_ray(Vector3 p, Vector3 q, Vector3 * n) const;
 	};
 }
 }

@@ -5,10 +5,10 @@ namespace eae6320
 
 void FlyCam::update(Controls controls, float dt)
 {
-	yaw += controls.joy_right.x * panning_speed * dt;
+	yaw += -controls.joy_right.x * panning_speed * dt;
 	fly_cam.rotation = Versor::rotation_y(yaw);
-	Vector3 dir(controls.joy_left.x, controls.joy_right.y, controls.joy_left.y);
-	dir = fly_cam.rotation.inverse().rotate(dir);
+	Vector3 dir(controls.joy_left.x, controls.joy_right.y, -controls.joy_left.y);
+	dir = fly_cam.rotation.rotate(dir);
 	fly_cam.position += dir * tracking_speed * dt;
 }
 

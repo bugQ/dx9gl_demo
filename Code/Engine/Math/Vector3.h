@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <limits>
 
 namespace eae6320
 {
@@ -14,6 +15,7 @@ namespace eae6320
 
 		Vector3 operator+() const;
 		Vector3 operator-() const;
+		float operator[](size_t i) const;
 
 		float dot(Vector3 const & rhs) const;
 		Vector3 cross(Vector3 const & rhs) const;

@@ -15,7 +15,7 @@ struct Collider : public UprightEntity
 		: UprightEntity(position, yaw), height(height) {}
 	virtual ~Collider() {}
 
-	bool move(Vector3 displacement, const Terrain & terrain);
+	void move(Vector3 displacement, const Terrain & terrain);
 };
 }
 }

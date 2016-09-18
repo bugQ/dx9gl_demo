@@ -11,10 +11,11 @@ Player::Player(Vector3 position, float yaw, float height, const Physics::Terrain
 
 void Player::update(Controls controls, float dt)
 {
-	yaw += dt * controls.joy_right.x;
-	Vector3 dir(controls.joy_left.x, 0, controls.joy_left.y);
-	dir = head_cam.rotation.inverse().rotate(dir);
-	move(dir * speed * dt, terrain);
+	yaw += dt * -controls.joy_right.x;
+	Vector3 dir(controls.joy_left.x, -0.1f, -controls.joy_left.y);
+	dir = head_cam.rotation.rotate(dir);
+	if (dir != Vector3::Zero)
+		move(dir * speed * dt, terrain);
 	update_cam();
 }
 

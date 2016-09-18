@@ -12,10 +12,10 @@ namespace eae6320
 		Triangle3(Vector3 a, Vector3 b, Vector3 c)
 			: a(a), b(b), c(c)
 		{
-			normal = (b - a).cross(c - a);
+			normal = (b - a).cross(c - a).normalize();
 		}
 		~Triangle3() {}
 
-		bool intersect_segment(Vector3 p, Vector3 q, float &t, Vector3 &n) const;
+		float intersect_ray(Vector3 p, Vector3 q) const;
 	};
 }

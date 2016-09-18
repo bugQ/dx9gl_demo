@@ -9,35 +9,35 @@ namespace eae6320
 namespace Physics
 {
 
-bool Collider::move(Vector3 displacement, const Terrain & terrain)
+void Collider::move(Vector3 s, const Terrain & terrain)
 {
-	if (displacement == Vector3::Zero) return false;
-
-	Vector3 checkpoints[2] = { position, position - height * Vector3::J };
+	if (s == Vector3::Zero) return;
 
 	float t = std::numeric_limits<float>::infinity();
+	float d = s.norm();
 	Vector3 n;
-	for (size_t i = 0; i < 2; ++i)
-	{
-		Vector3 p = checkpoints[i];
-		Vector3 q = p + displacement;
-		float t_i;
-		Vector3 n_i;
 
-		if (terrain.intersect_segment(p, q, t_i, n_i))
-		{
-			t = t_i;
-			n = n_i;
-		}
+	Vector3 o = position - height * Vector3::J;
+	if (s.x != 0)
+	{
+		t = terrain.intersect_ray(o, Vector3(s.x, 0, 0), &n);
+		if (t > 0 && t <= 1)
+			s -= s.dot(n) * n;// *(1 - t + 1e-5f);
+	}
+	if (s.y != 0)
+	{
+		t = terrain.intersect_ray(o, Vector3(0, s.y, 0), &n);
+		if (t > 0 && t <= 1)
+			s -= s.dot(n) * n;// *(1 - t + 1e-5f);
+	}
+	if (s.z != 0)
+	{
+		t = terrain.intersect_ray(o, Vector3(0, 0, s.z), &n);
+		if (t > 0 && t <= 1)
+			s -= s.dot(n) * n;// *(1 - t + 1e-5f);
 	}
 
-	position += displacement;
-	if (std::isfinite(t))
-	{
-		position -= (displacement.dot(n) + 0.00001f) * n;
-		return true;
-	}
-	else return false;
+	position += s;
 }
 
 }

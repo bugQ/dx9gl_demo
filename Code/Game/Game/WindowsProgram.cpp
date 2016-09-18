@@ -115,6 +115,7 @@ namespace
 	DebugMenu * debug_menu;
 
 	std::string * fps_display;
+	std::string * pos_display;
 
 	struct {
 		const float radius_min = 1.0f;
@@ -131,6 +132,11 @@ namespace
 	} debug_sphere;
 
 	void debug_sphere_reset() { debug_sphere.reset(); }
+	void camera_reset()
+	{
+		fly_cam->fly_cam.position = Vector3(1.f, 1.f, 1.01f);
+		fly_cam->fly_cam.rotation = Versor::rotation_y(3.14159265f);
+	}
 
 	// Window classes are almost always identified by name;
 	// there is also a unique ATOM associated with them,
@@ -146,14 +152,6 @@ namespace
 
 int CreateMainWindowAndReturnExitCodeWhenItCloses(const HINSTANCE i_thisInstanceOfTheProgram, const int i_initialWindowDisplayState)
 {
-	std::ostringstream oss;
-	Vector3 n;
-	float t;
-	bool collided = Triangle3(Vector3(0, 0, 0), Vector3(0, 0, 1), Vector3(0, 1, 0))
-		.intersect_segment(Vector3(-1.5, 0.25, 0.25), Vector3(0.5, 0.25, 0.25), t, n);
-	oss << (int)collided << " (" << n.x << ", " << n.y << ", " << n.z << ") " << t << std::endl;
-	UserOutput::Print(oss.str());
-
 	// Try to create the main window
 	if (CreateMainWindow(i_thisInstanceOfTheProgram, i_initialWindowDisplayState))
 	{
@@ -248,6 +246,9 @@ bool CreateMainWindow(const HINSTANCE i_thisInstanceOfTheProgram, const int i_in
 	ATOM mainWindowClass = RegisterMainWindowClass(i_thisInstanceOfTheProgram);
 	if (mainWindowClass != NULL)
 	{
+		Vector3 maybej = Matrix4::rotation_q(Versor::rotation_z(1.57079633f)).predot0(Vector3::I).xyz();
+		std::ostringstream oss;
+
 		s_mainWindow = CreateMainWindowHandle(i_thisInstanceOfTheProgram, i_initialWindowDisplayState);
 		if (s_mainWindow == NULL)
 		{
@@ -266,8 +267,14 @@ bool CreateMainWindow(const HINSTANCE i_thisInstanceOfTheProgram, const int i_in
 
 		terrain = Physics::Terrain::FromBinFile(terrain_file, cm);
 
-		fly_cam = new FlyCam(Vector3(0, 0, 10), 0, camera_track_speed, camera_pan_speed);
+		fly_cam = new FlyCam(Vector3(1.f, 1.f, 1.01f), 3.14159265f, camera_track_speed, camera_pan_speed);
 		player = new Player(Vector3(0, 0, 10), 0, 2, *terrain, 2.0f);
+
+		/**
+		oss << "(" << maybej.x << ", " << maybej.y << ", " << maybej.z << ")";
+		UserOutput::Print(oss.str());
+		/**/
+
 		active_cam = &player->head_cam;
 		active_controller = player;
 
@@ -275,9 +282,12 @@ bool CreateMainWindow(const HINSTANCE i_thisInstanceOfTheProgram, const int i_in
 		eae6320::Graphics::InitWireframe(*wireframe);
 
 		fps_display = new std::string;
+		pos_display = new std::string;
 
 		debug_menu = new DebugMenu();
 		debug_menu->add_text("fps", *fps_display);
+		debug_menu->add_text("fly_cam.position", *pos_display);
+		debug_menu->add_button("fly_cam.reset", camera_reset);
 		debug_menu->add_checkbox("debug_sphere.active", debug_sphere.active);
 		debug_menu->add_slider("debug_sphere.radius",
 			debug_sphere.radius_min, debug_sphere.radius_max, debug_sphere.radius);
@@ -678,6 +688,9 @@ bool UnregisterMainWindowClass(const HINSTANCE i_thisInstanceOfTheProgram)
 	}
 }
 
+inline Vector4 color(bool b) { return b ? Vector4(0.7f, 1, 0.4f, 1) : Vector4(1, 0.4f, 0.7f, 1); }
+inline float randf() { return (float)rand() / RAND_MAX - 0.5f; }
+
 void Render()
 {
 	Clear();
@@ -698,6 +711,19 @@ void Render()
 		wireframe->addLine(tri.b, Vector4::One, tri.c, Vector4::One);
 		wireframe->addLine(tri.c, Vector4::One, tri.a, Vector4::One);
 	}
+	/**
+	for (size_t i = 0; i < 2048; ++i)
+	{
+		Vector3 n;
+		Vector3 o = player->position + Versor::rotation_y(player->yaw).rotate(Vector3(0,0,0.0025f));
+		Vector3 d = Versor::rotation_y(player->yaw).rotate(Vector3(randf() * 32, randf() * 18, -16));
+		//Vector3 o(randf() * 6, randf() * 6, 0.1f);
+		//Vector3 d(randf() * 0.05, randf() * 0.05, -0.2f);
+		//Vector3 d(randf() * 6, randf() * 6, 4.f);
+		bool collided = terrain->intersect_ray(o, d, &n) < 1;
+		wireframe->addLine(o, color(collided), o + d, color(collided));
+	}
+	/**/
 	eae6320::Graphics::DrawWireframe(*wireframe, *active_cam);
 	wireframe->clear();
 
@@ -706,7 +732,10 @@ void Render()
 			DrawSprite(*sprites[i]);
 
 	fps_display->swap(std::to_string(Time::GetFramesPerSecond()));
-
+	std::ostringstream oss;
+	Vector3 pos = player->position;
+	oss << "(" << pos.x << ", " << pos.y << ", " << pos.z << ")";
+	pos_display->swap(oss.str());
 
 	if(active_controller == debug_menu)
 		debug_menu->Draw();
@@ -785,6 +814,29 @@ bool WaitForMainWindowToClose(int& o_exitCode)
 				{
 					active_controller = debug_menu;
 					prevkey = VK_OEM_3;
+				}
+			}
+			else if (active_controller == fly_cam)
+			{
+				if (UserInput::IsKeyPressed(VK_TAB))
+				{
+					if (prevkey != VK_TAB)
+					{
+						active_cam = &player->head_cam;
+						active_controller = player;
+						prevkey = VK_TAB;
+					}
+				}
+				else
+					prevkey = -1;
+			}
+			else if (UserInput::IsKeyPressed(VK_TAB))
+			{
+				if (prevkey != VK_TAB)
+				{
+					active_cam = &fly_cam->fly_cam;
+					active_controller = fly_cam;
+					prevkey = VK_TAB;
 				}
 			}
 			else
