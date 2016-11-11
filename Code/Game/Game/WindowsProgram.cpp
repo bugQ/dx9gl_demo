@@ -268,7 +268,7 @@ bool CreateMainWindow(const HINSTANCE i_thisInstanceOfTheProgram, const int i_in
 		terrain = Physics::Terrain::FromBinFile(terrain_file, cm);
 
 		fly_cam = new FlyCam(Vector3(1.f, 1.f, 1.01f), 3.14159265f, camera_track_speed, camera_pan_speed);
-		player = new Player(Vector3(0, 0, 10), 0, 2, *terrain, 2.0f);
+		player = new Player(Vector3(0, 0, 0), 0, 1.5f, *terrain, 2.0f);
 
 		/**
 		oss << "(" << maybej.x << ", " << maybej.y << ", " << maybej.z << ")";

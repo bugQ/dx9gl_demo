@@ -50,6 +50,7 @@ namespace {
 				goto OnExit;
 			}
 
+
 			const char * const poskey = "position";
 			lua_getfield(&luaState, -1, poskey); // position array now at -1
 			++depth;
@@ -64,38 +65,28 @@ namespace {
 				goto OnExit;
 			}
 
-			lua_rawgeti(&luaState, -1, 1); // x coordinate now at -1
+			double xyz[3];
 			++depth;
+			for (int j = 0; j < 3; j++)
+			{
+				lua_rawgeti(&luaState, -1, j+1); // coordinate now at -1
 
-			if (!lua_isnumber(&luaState, -1))
-				goto OnBadPos;
+				if (!lua_isnumber(&luaState, -1))
+					goto OnBadPos;
 
-			vertices[i].x = static_cast<float>(lua_tonumber(&luaState, -1));
+				xyz[j] = lua_tonumber(&luaState, -1);
 
-			lua_pop(&luaState, 1); // pop x, leave position array
+				lua_pop(&luaState, 1);
+			}
 			--depth;
 
-			lua_rawgeti(&luaState, -1, 2);// y coordinate now at -1
-			++depth;
+			vertices[i].x = static_cast<float>(xyz[0]);
+			vertices[i].y = static_cast<float>(xyz[1]);
+			vertices[i].z = static_cast<float>(xyz[2]);
 
-			if (!lua_isnumber(&luaState, -1))
-				goto OnBadPos;
-
-			vertices[i].y = (float)lua_tonumber(&luaState, -1);
-
-			lua_pop(&luaState, 1); // pop y, leave position array
+			lua_pop(&luaState, 1); // pop position array, leave vertex
 			--depth;
 
-			lua_rawgeti(&luaState, -1, 3); // z coordinate now at -1
-			++depth;
-
-			if (!lua_isnumber(&luaState, -1))
-				goto OnBadPos;
-
-			vertices[i].z = (float)lua_tonumber(&luaState, -1);
-
-			lua_pop(&luaState, 2); // pop z and position, leave vertex
-			depth -= 2;
 
 			const char * const colorkey = "color";
 			lua_getfield(&luaState, -1, colorkey); // color array now at -1
@@ -136,7 +127,45 @@ namespace {
 			vertices[i].a = static_cast<uint8_t>(rgba[3] * 255);
 
 			lua_pop(&luaState, 1); // pop color, leave vertex
-			depth -= 1;
+			--depth;
+
+
+			const char * const normalkey = "normal";
+			lua_getfield(&luaState, -1, normalkey); // color array now at -1
+			++depth;
+
+			if (!lua_istable(&luaState, -1) || luaL_len(&luaState, -1) != 3)
+			{
+			OnBadNormal:
+				std::stringstream errstr;
+				errstr << normalkey << " of " << key << " must come in triples!";
+				UserOutput::Print(errstr.str());
+				numVertices = -1;
+				goto OnExit;
+			}
+
+			double nxyz[3];
+			++depth;
+			for (int j = 0; j < 3; j++)
+			{
+				lua_rawgeti(&luaState, -1, j+1); // coordinate now at -1
+
+				if (!lua_isnumber(&luaState, -1))
+					goto OnBadNormal;
+
+				nxyz[j] = lua_tonumber(&luaState, -1);
+
+				lua_pop(&luaState, 1);
+			}
+			--depth;
+
+			vertices[i].nx = static_cast<float>(nxyz[0]);
+			vertices[i].ny = static_cast<float>(nxyz[1]);
+			vertices[i].nz = static_cast<float>(nxyz[2]);
+
+			lua_pop(&luaState, 1); // pop normal, leave vertex
+			--depth;
+
 
 			const char * const uvkey = "uv";
 			lua_getfield(&luaState, -1, uvkey); // uv array now at -1

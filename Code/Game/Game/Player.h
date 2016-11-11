@@ -10,6 +10,7 @@ namespace eae6320
 		Camera head_cam;
 		const Physics::Terrain & terrain;
 		float speed;
+		bool grounded;
 
 		virtual void update(Controls controls, float dt);
 		void update_cam();

@@ -23,7 +23,9 @@ Triangle3 * cache_triangles(const Graphics::Mesh::Data * mesh_data, Vector3 scal
 		triangles[i] = Triangle3(
 			Vector3(a->x, a->y, a->z).scale(scale),
 			Vector3(b->x, b->y, b->z).scale(scale),
-			Vector3(c->x, c->y, c->z).scale(scale));
+			Vector3(c->x, c->y, c->z).scale(scale),
+			Vector3(b->nx, b->ny, b->nz)
+		);
 	}
 
 	return triangles;
@@ -66,10 +68,6 @@ float Terrain::intersect_ray(Vector3 o, Vector3 dir, Vector3 * n) const
 	for (size_t i = 0; i < num_triangles; ++i)
 	{
 		Vector3 n_i = triangles[i].normal;
-/*		if ((q - p).dot(n_i) > 0)
-			n_i = -n_i;
-		Vector3 s = n_i * r;
-		*/
 		float t_i = triangles[i].intersect_ray(o, dir);
 		if (t_i > 0 && t_i < t)
 		{

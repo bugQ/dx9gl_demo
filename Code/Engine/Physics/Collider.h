@@ -10,12 +10,14 @@ namespace Physics
 struct Collider : public UprightEntity
 {
 	float height;
+	Vector3 velocity;
 
 	Collider(Vector3 position, float yaw, float height)
-		: UprightEntity(position, yaw), height(height) {}
+		: UprightEntity(position, yaw), height(height), velocity(0,0,0) {}
 	virtual ~Collider() {}
 
-	void move(Vector3 displacement, const Terrain & terrain);
+	// returns true if colliding with ground
+	bool move(Vector3 displacement, const Terrain & terrain);
 };
 }
 }

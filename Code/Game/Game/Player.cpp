@@ -4,7 +4,7 @@ namespace eae6320
 {
 
 Player::Player(Vector3 position, float yaw, float height, const Physics::Terrain & terrain, float speed)
-	: Collider(position, yaw, height), terrain(terrain), speed(speed)
+	: Collider(position, yaw, height), terrain(terrain), speed(speed), grounded(false)
 {
 	update_cam();
 }
@@ -12,10 +12,17 @@ Player::Player(Vector3 position, float yaw, float height, const Physics::Terrain
 void Player::update(Controls controls, float dt)
 {
 	yaw += dt * -controls.joy_right.x;
-	Vector3 dir(controls.joy_left.x, -0.1f, -controls.joy_left.y);
+	if (grounded && controls.joy_right.y > 0) {
+		velocity.y = speed;
+		grounded = false;
+	}
+	velocity.y -= speed * dt;
+	Vector3 dir(controls.joy_left.x, 0, -controls.joy_left.y);
 	dir = head_cam.rotation.rotate(dir);
-	if (dir != Vector3::Zero)
-		move(dir * speed * dt, terrain);
+	Vector3 prev = position;
+	grounded = move((dir * speed + velocity) * dt, terrain);
+	if (grounded)
+		velocity.y = 0;
 	update_cam();
 }
 
