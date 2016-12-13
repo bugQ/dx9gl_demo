@@ -26,18 +26,14 @@ void Wireframe::addLine(Vector3 p1, Vector4 color1, Vector3 p2, Vector4 color2)
 		return;
 
 	Mesh::Vertex & start = points[num_lines * 2];
-	start.x = p1.x;
-	start.y = p1.y;
-	start.z = p1.z;
+	start.position = p1;
 	start.r = static_cast<uint8_t>(color1.x * 255);
 	start.g = static_cast<uint8_t>(color1.y * 255);
 	start.b = static_cast<uint8_t>(color1.z * 255);
 	start.a = static_cast<uint8_t>(color1.w * 255);
 
 	Mesh::Vertex & end = points[num_lines * 2 + 1];
-	end.x = p2.x;
-	end.y = p2.y;
-	end.z = p2.z;
+	end.position = p2;
 	end.r = static_cast<uint8_t>(color2.x * 255);
 	end.g = static_cast<uint8_t>(color2.y * 255);
 	end.b = static_cast<uint8_t>(color2.z * 255);

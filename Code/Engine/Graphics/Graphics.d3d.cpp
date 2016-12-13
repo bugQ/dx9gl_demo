@@ -274,22 +274,22 @@ void eae6320::Graphics::DrawSpriteQuad(Sprite & sprite)
 		// Fill the buffer
 		{
 			Mesh::Vertex &v0 = vertexData[0];
-			v0.x = xy.x0; v0.y = xy.y0; v0.z = 1.0f;
+			v0.position = Vector3(xy.x0, xy.y0, 1.0f);
 			v0.r = v0.g = v0.b = v0.a = UINT8_MAX;
 			v0.u = uv.x0; v0.v = uv.y0;
 
 			Mesh::Vertex &v1 = vertexData[1];
-			v1.x = xy.x1; v1.y = xy.y0; v1.z = 1.0f;
+			v1.position = Vector3(xy.x1, xy.y0, 1.0f);
 			v1.r = v1.g = v1.b = v1.a = UINT8_MAX;
 			v1.u = uv.x1; v1.v = uv.y0;
 
 			Mesh::Vertex &v2 = vertexData[2];
-			v2.x = xy.x0; v2.y = xy.y1; v2.z = 1.0f;
+			v2.position = Vector3(xy.x0, xy.y1, 1.0f);
 			v2.r = v2.g = v2.b = v2.a = UINT8_MAX;
 			v2.u = uv.x0; v2.v = uv.y1;
 
 			Mesh::Vertex &v3 = vertexData[3];
-			v3.x = xy.x1; v3.y = xy.y1; v3.z = 1.0f;
+			v3.position = Vector3(xy.x1, xy.y1, 1.0f);
 			v3.r = v3.g = v3.b = v3.a = UINT8_MAX;
 			v3.u = uv.x1; v3.v = uv.y1;
 		}

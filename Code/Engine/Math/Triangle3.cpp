@@ -1,9 +1,15 @@
 #include "Triangle3.h"
+#include "AABB3.h"
 #include <limits>
 #include <assert.h>
 
 namespace eae6320
 {
+	Triangle3::Triangle3(Vector3 a, Vector3 b, Vector3 c, Vector3 normal)
+		: a(a), b(b), c(c), normal(normal),
+			box(Vector3::min3(Vector3::min3(a, b), c), Vector3::max3(Vector3::max3(a, b), c))
+	{}
+
 	float Triangle3::intersect_ray(Vector3 o, Vector3 dir) const
 	{
 		float diverge = std::numeric_limits<float>::infinity();

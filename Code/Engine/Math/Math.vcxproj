@@ -160,6 +160,9 @@
     <ClCompile Include="Matrix4.cpp" />
     <ClCompile Include="Triangle3.cpp" />
     <ClCompile Include="Vector2.cpp" />
+    <ClCompile Include="AABB3.cpp">
+      <FileType>Document</FileType>
+    </ClCompile>
     <None Include="Vector2.inl">
       <FileType>Document</FileType>
     </None>
@@ -167,6 +170,7 @@
     <ClCompile Include="Vector4.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AABB3.h" />
     <ClInclude Include="Matrix4.h" />
     <ClInclude Include="Triangle3.h" />
     <ClInclude Include="Vector2.h" />

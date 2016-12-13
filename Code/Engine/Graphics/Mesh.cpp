@@ -6,6 +6,7 @@
 #include <sstream>
 #include <fstream>
 #include <cassert>
+#include <limits>
 
 namespace {
 	using namespace eae6320;
@@ -13,9 +14,15 @@ namespace {
 
 	const int numVerticesPerPolygon = 3;
 
-	int LoadVertices(lua_State &luaState, Mesh::Vertex* &vertices)
+	int LoadVertices(lua_State &luaState, Mesh::Data* data)
 	{
+		assert(data != NULL);
+		Mesh::Vertex* &vertices = data->vertices;
 		assert(vertices == NULL);
+
+		float infty = std::numeric_limits<float>::infinity();
+		data->bounds.vmin = Vector3(infty, infty, infty);
+		data->bounds.vmax = -data->bounds.vmin;
 
 		int numVertices = -1;
 		int depth = 0;
@@ -80,9 +87,20 @@ namespace {
 			}
 			--depth;
 
-			vertices[i].x = static_cast<float>(xyz[0]);
-			vertices[i].y = static_cast<float>(xyz[1]);
-			vertices[i].z = static_cast<float>(xyz[2]);
+			float x = static_cast<float>(xyz[0]);
+			vertices[i].position.x = x;
+			if (x < data->bounds.vmin.x) data->bounds.vmin.x = x;
+			if (x > data->bounds.vmax.x) data->bounds.vmax.x = x;
+
+			float y = static_cast<float>(xyz[1]);
+			vertices[i].position.y = y;
+			if (y < data->bounds.vmin.y) data->bounds.vmin.y = y;
+			if (x > data->bounds.vmax.y) data->bounds.vmax.y = y;
+
+			float z = static_cast<float>(xyz[2]);
+			vertices[i].position.z = z;
+			if (z < data->bounds.vmin.z) data->bounds.vmin.z = z;
+			if (z > data->bounds.vmax.z) data->bounds.vmax.z = z;
 
 			lua_pop(&luaState, 1); // pop position array, leave vertex
 			--depth;
@@ -159,9 +177,9 @@ namespace {
 			}
 			--depth;
 
-			vertices[i].nx = static_cast<float>(nxyz[0]);
-			vertices[i].ny = static_cast<float>(nxyz[1]);
-			vertices[i].nz = static_cast<float>(nxyz[2]);
+			vertices[i].normal.x = static_cast<float>(nxyz[0]);
+			vertices[i].normal.y = static_cast<float>(nxyz[1]);
+			vertices[i].normal.z = static_cast<float>(nxyz[2]);
 
 			lua_pop(&luaState, 1); // pop normal, leave vertex
 			--depth;
@@ -220,8 +238,10 @@ namespace {
 		return numVertices;
 	}
 
-	int LoadIndices(lua_State &luaState, Mesh::Index* &indices)
+	int LoadIndices(lua_State &luaState, Mesh::Data* &data)
 	{
+		assert(data != NULL);
+		Mesh::Index* &indices = data->indices;
 		assert(indices == NULL);
 
 		int numIndices = -1;
@@ -307,12 +327,11 @@ namespace {
 		assert(meshData == NULL);
 		meshData = new Mesh::Data();
 
-		meshData->num_vertices = LoadVertices(luaState, meshData->vertices);
+		meshData->num_vertices = LoadVertices(luaState, meshData);
 		if (meshData->num_vertices < 0)
 			goto OnExit;
 
-		Mesh::Index * indices = NULL;
-		meshData->num_triangles = LoadIndices(luaState, meshData->indices) / numVerticesPerPolygon;
+		meshData->num_triangles = LoadIndices(luaState, meshData) / numVerticesPerPolygon;
 		if (meshData->num_triangles < 0)
 			goto OnExit;
 
@@ -357,6 +376,8 @@ namespace Graphics
 			return NULL;
 		}
 
+		infile.read(reinterpret_cast<char *>(&meshData->bounds),
+			sizeof(meshData->bounds));
 		infile.read(reinterpret_cast<char *>(&meshData->num_vertices),
 			sizeof(meshData->num_vertices));
 		infile.read(reinterpret_cast<char *>(&meshData->num_triangles),
@@ -369,6 +390,7 @@ namespace Graphics
 			meshData->num_vertices * sizeof(Mesh::Vertex));
 		infile.read(reinterpret_cast<char *>(meshData->indices),
 			3 * meshData->num_triangles * sizeof(Mesh::Index));
+
 		infile.close();
 
 		if (infile.fail())

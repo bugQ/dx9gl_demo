@@ -53,6 +53,24 @@ inline Vector3 Vector3::unit() const
 	return Vector3(x / n, y / n, z / n);
 }
 
+inline uint8_t Vector3::octant() const
+{
+	uint8_t octant = 0;
+	if (x < 0) octant += 1;
+	if (y < 0) octant += 2;
+	if (z < 0) octant += 4;
+	return octant;
+}
+
+inline Vector3 Vector3::min3(Vector3 const & u, Vector3 const & v)
+{
+	return Vector3(fminf(u.x, v.x), fminf(u.y, v.y), fminf(u.z, v.z));
+}
+
+inline Vector3 Vector3::max3(Vector3 const & u, Vector3 const & v)
+{
+	return Vector3(fmaxf(u.x, v.x), fmaxf(u.y, v.y), fmaxf(u.z, v.z));
+}
 
 /* writing all these makes me feel quite sycophantic */
 

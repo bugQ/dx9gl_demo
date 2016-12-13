@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <limits>
+#include <cstdint>
 
 namespace eae6320
 {
@@ -24,6 +25,11 @@ namespace eae6320
 		float norm() const;
 		Vector3 & normalize();
 		Vector3 unit() const;
+
+		uint8_t octant() const;
+
+		static Vector3 min3(Vector3 const & u, Vector3 const & v);
+		static Vector3 max3(Vector3 const & u, Vector3 const & v);
 
 		float x, y, z;
 	};

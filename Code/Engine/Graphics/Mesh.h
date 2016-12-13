@@ -1,5 +1,8 @@
 #pragma once
 
+#include "../Math/Vector3.h"
+#include "../Math/AABB3.h"
+
 #if defined ( EAE6320_PLATFORM_GL )
 #if defined ( _WIN32 )
 // <windows.h> must be #included before <gl/GL.h>
@@ -26,11 +29,11 @@ namespace Graphics
 			// POSITION
 			// 3 floats == 12 bytes
 			// Offset = 0
-			float x, y, z;
+			Vector3 position;
 			// NORMAL
 			// 3 floats == 12 bytes
 			// Offset = 12
-			float nx, ny, nz;
+			Vector3 normal;
 			// COLOR0
 			// 4 uint8_ts == 4 bytes
 			// Offset = 24
@@ -52,6 +55,7 @@ namespace Graphics
 		// should always have 3*num_triangles indices
 		struct Data
 		{
+			AABB3 bounds;
 			Vertex * vertices;
 			Index * indices;
 			uint32_t num_vertices;
