@@ -72,6 +72,11 @@ inline Vector3 Vector3::max3(Vector3 const & u, Vector3 const & v)
 	return Vector3(fmaxf(u.x, v.x), fmaxf(u.y, v.y), fmaxf(u.z, v.z));
 }
 
+inline float Vector3::max_dim() const
+{
+	return fmaxf(fmaxf(x, y), z);
+}
+
 /* writing all these makes me feel quite sycophantic */
 
 inline bool operator==(Vector3 const & lhs, Vector3 const & rhs)

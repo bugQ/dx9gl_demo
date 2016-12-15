@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Graphics/Mesh.h"
+#include "../Graphics/Wireframe.h"
 #include "../Math/Triangle3.h"
 
 #include <vector>
@@ -14,10 +15,10 @@ namespace Physics
 		struct Octree
 		{
 			static const uint8_t MAX_DEPTH = 8;
-			static const float FILL_DEPTH_RATIO = 1.5f;
+			static const float FILL_DEPTH_RATIO;
 
 			// invariant: branches are either all NULL (leaf node) or all allocated
-			Octree * branch[8];
+			Octree * branch[8] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
 			// invariant: children's bounds are strictly smaller than parent's
 			AABB3 bounds;
 			// invariant: children's max_depth is 1 less than parent's
@@ -55,6 +56,9 @@ namespace Physics
 			void propagate_all(const Triangle3 * triangles, uint32_t num_triangles);
 			// ensure 
 			void optimize(const Triangle3 * triangles, uint32_t num_triangles);
+
+			// draw debug cubes colored based on depth
+			void draw(Graphics::Wireframe &);
 		};
 
 		const Triangle3 * triangles;
@@ -62,12 +66,20 @@ namespace Physics
 
 		Octree octree;
 
+		bool debug_octree = false;
 
 		static Terrain * FromBinFile(const char * collision_mesh_path, Vector3 scale);
 		Terrain(const Graphics::Mesh::Data &, Vector3 scale);
 		~Terrain() { delete[] triangles; }
 
 		void init_octree() { octree.populate(triangles, num_triangles); }
+
+		void draw_octree(Graphics::Wireframe & wireframe)
+		{
+#ifdef _DEBUG
+			if (debug_octree) octree.draw(wireframe);
+#endif
+		}
 
 		float intersect_ray(Vector3 p, Vector3 q, Vector3 * n) const;
 	};

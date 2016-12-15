@@ -27,7 +27,10 @@ namespace eae6320
 		Vector4 & normalize();
 		Vector4 unit() const;
 
-		float x, y, z, w;
+		union { float x, r; };
+		union { float y, g; };
+		union { float z, b; };
+		union { float w, a; };
 	};
 
 	/* writing all these made me feel quite sycophantic */

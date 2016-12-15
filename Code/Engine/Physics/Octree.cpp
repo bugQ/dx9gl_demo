@@ -1,7 +1,9 @@
 #include "stdafx.h"
 
 #include "Terrain.h"
-#include "../Math/Triangle3.h"
+
+#include <deque>
+
 
 namespace eae6320
 {
@@ -23,9 +25,9 @@ void Terrain::Octree::insert(uint32_t id, const Triangle3 & triangle)
 	Octree *node;
 	Vector3 tri2center = triangle.box.vmin + triangle.box.vmax;
 
-	for (node = this;
-		node->max_depth > 0 && node->bounds.contains(triangle.box);
-		node = node->branch[(tri2center - node->bounds.vmin - node->bounds.vmax).octant()])
+	for ( node = this
+		; node->max_depth > 0 && node->bounds.contains(triangle.box)
+		; node = node->branch[(tri2center - node->bounds.vmin - node->bounds.vmax).octant()])
 	{
 		if (node->is_leaf())
 			node->branch_out();
@@ -43,8 +45,7 @@ void Terrain::Octree::propagate_all(const Triangle3 * triangles, uint32_t num_tr
 
 	object_ids.clear();
 
-	for (uint8_t i = 0; i < 8; ++i)
-		branch[i]->propagate_all(triangles, num_triangles);
+	for (uint8_t i = 0; i < 8; ++i) branch[i]->propagate_all(triangles, num_triangles);
 }
 
 void Terrain::Octree::propagate(uint32_t id, const Triangle3 & triangle)
@@ -53,8 +54,8 @@ void Terrain::Octree::propagate(uint32_t id, const Triangle3 & triangle)
 
 	if (is_leaf())
 		object_ids.push_back(id);
-	else for (uint8_t i = 0; i < 8; ++i)
-		branch[i]->propagate(id, triangle);
+	else
+		for (uint8_t i = 0; i < 8; ++i) branch[i]->propagate(id, triangle);
 }
 
 void Terrain::Octree::optimize(const Triangle3 * triangles, uint32_t num_triangles)
@@ -67,9 +68,35 @@ void Terrain::Octree::optimize(const Triangle3 * triangles, uint32_t num_triangl
 
 	if (is_leaf()) return;
 
-	for (uint8_t i = 0; i < 8; ++i)
-		branch[i]->propagate_all(triangles, num_triangles);
+	for (uint8_t i = 0; i < 8; ++i) branch[i]->propagate_all(triangles, num_triangles);
 }
+
+#ifdef _DEBUG
+void Terrain::Octree::draw(Graphics::Wireframe & wireframe)
+{
+	std::deque<Octree *> queue;
+	Octree * node;
+	queue.push_back(this);
+	
+	while (!queue.empty())
+	{
+		node = queue.front();
+		queue.pop_front();
+
+		if (node->is_leaf())
+		{
+			float hue = (MAX_DEPTH - node->max_depth) * 360.0f / MAX_DEPTH;
+			Graphics::Color depth_color = Graphics::Color::fromHSV(hue, 1.0f, 0.5f);
+			wireframe.addAABB(node->bounds, depth_color);
+		}
+		else
+		{
+			for (uint8_t i = 0; i < 8; ++i)
+				queue.push_back(node->branch[i]);
+		}
+	}
+}
+#endif
 
 }
 }

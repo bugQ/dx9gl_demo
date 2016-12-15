@@ -20,7 +20,7 @@ Wireframe::~Wireframe()
 	delete mesh;
 }
 
-void Wireframe::addLine(Vector3 p1, Vector4 color1, Vector3 p2, Vector4 color2)
+void Wireframe::addLine(Vector3 p1, Color color1, Vector3 p2, Color color2)
 {
 	if (num_lines >= MAXLINES)
 		return;
@@ -42,10 +42,8 @@ void Wireframe::addLine(Vector3 p1, Vector4 color1, Vector3 p2, Vector4 color2)
 	++num_lines;
 }
 
-void Wireframe::addAABB(Vector3 center, Vector3 extents, Vector4 color)
+void Wireframe::addAABB(Vector3 p0, Vector3 p7, Color color)
 {
-	Vector3 p0 = center - extents;
-	Vector3 p7 = center + extents;
 	Vector3 p1 = Vector3(p7.x, p0.y, p0.z);
 	Vector3 p2 = Vector3(p0.x, p7.y, p0.z);
 	Vector3 p3 = Vector3(p7.x, p7.y, p0.z);
@@ -67,7 +65,12 @@ void Wireframe::addAABB(Vector3 center, Vector3 extents, Vector4 color)
 	addLine(p6, color, p7, color);
 }
 
-void Wireframe::addSphere(Vector3 center, float radius, uint8_t resolution, Vector4 color)
+void Wireframe::addAABB(AABB3 box, Color color)
+{
+	addAABB(box.vmin, box.vmax, color);
+}
+
+void Wireframe::addSphere(Vector3 center, float radius, uint8_t resolution, Color color)
 {
 	static const float pi = acos(-1.0f);
 	float dphi = pi / resolution;
@@ -111,7 +114,7 @@ void Wireframe::addSphere(Vector3 center, float radius, uint8_t resolution, Vect
 	}
 }
 
-void Wireframe::addCylinder(Vector3 center, float radius, float extent, uint8_t resolution, Vector4 color)
+void Wireframe::addCylinder(Vector3 center, float radius, float extent, uint8_t resolution, Color color)
 {
 	static const float tau = acos(-1.0f) * 2.0f;
 	float dtheta = tau / resolution;

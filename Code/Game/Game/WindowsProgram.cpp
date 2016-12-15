@@ -127,7 +127,7 @@ namespace
 		void draw(Wireframe* wireframe)
 		{
 			if (!active) return;
-			wireframe->addSphere(Vector3(0, 0, 0), radius, 16, Vector4(1.0f, 0.7f, 0.2f, 1.0f));
+			wireframe->addSphere(Vector3(0, 0, 0), radius, 16, Color(1.0f, 0.7f, 0.2f, 1.0f));
 		}
 	} debug_sphere;
 
@@ -292,6 +292,7 @@ bool CreateMainWindow(const HINSTANCE i_thisInstanceOfTheProgram, const int i_in
 		debug_menu->add_slider("debug_sphere.radius",
 			debug_sphere.radius_min, debug_sphere.radius_max, debug_sphere.radius);
 		debug_menu->add_button("debug_sphere.reset", debug_sphere_reset);
+		debug_menu->add_checkbox("terrain.debug_octree", terrain->debug_octree);
 
 		return true;
 
@@ -704,6 +705,9 @@ void Render()
 			DrawModel(*models[i], *active_cam);
 
 	debug_sphere.draw(wireframe);
+	terrain->draw_octree(*wireframe);
+
+	/**
 	for (size_t i = 0; i < terrain->num_triangles; ++i)
 	{
 		Triangle3 tri = terrain->triangles[i];
@@ -724,6 +728,8 @@ void Render()
 		wireframe->addLine(o, color(collided), o + d, color(collided));
 	}
 	/**/
+
+
 	eae6320::Graphics::DrawWireframe(*wireframe, *active_cam);
 	wireframe->clear();
 

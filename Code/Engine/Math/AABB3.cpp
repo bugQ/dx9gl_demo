@@ -38,4 +38,15 @@ namespace eae6320
 
 		return subbox;
 	}
+
+	AABB3 AABB3::square() const
+	{
+		Vector3 extents = (vmax - vmin) / 2;
+
+		float max_extent = extents.max_dim();
+
+		Vector3 diff = Vector3(max_extent, max_extent, max_extent) - extents;
+
+		return AABB3(vmin - diff, vmax + diff);
+	}
 }

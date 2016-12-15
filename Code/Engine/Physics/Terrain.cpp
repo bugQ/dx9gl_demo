@@ -8,6 +8,8 @@ namespace eae6320
 namespace Physics
 {
 
+const float Terrain::Octree::FILL_DEPTH_RATIO = 1.5f;
+
 Triangle3 * cache_triangles(const Graphics::Mesh::Data & mesh_data, Vector3 scale)
 {
 	Triangle3 * triangles = new Triangle3[mesh_data.num_triangles];
@@ -29,7 +31,7 @@ Triangle3 * cache_triangles(const Graphics::Mesh::Data & mesh_data, Vector3 scal
 Terrain::Terrain(const Graphics::Mesh::Data & mesh_data, Vector3 scale)
 	: triangles(cache_triangles(mesh_data, scale))
 	, num_triangles(mesh_data.num_triangles)
-	, octree(mesh_data.bounds.scale(scale))
+	, octree(mesh_data.bounds.scale(scale).square())
 {
 }
 

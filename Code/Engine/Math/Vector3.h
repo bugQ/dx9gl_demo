@@ -30,8 +30,11 @@ namespace eae6320
 
 		static Vector3 min3(Vector3 const & u, Vector3 const & v);
 		static Vector3 max3(Vector3 const & u, Vector3 const & v);
+		float max_dim() const;
 
-		float x, y, z;
+		union { float x, r; };
+		union { float y, g; };
+		union { float z, b; };
 	};
 
 	/* writing all these made me feel quite sycophantic */

@@ -22,5 +22,6 @@ namespace eae6320
 		bool intersects(const AABB3 &) const;
 
 		AABB3 octant(uint8_t n) const;
+		AABB3 square() const;
 	};
 }
