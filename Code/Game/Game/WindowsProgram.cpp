@@ -284,7 +284,7 @@ bool CreateMainWindow(const HINSTANCE i_thisInstanceOfTheProgram, const int i_in
 		UserOutput::Print(oss.str());
 		/**/
 
-		active_cam = &player->head_cam;
+		active_cam = &player->float_cam;
 		active_controller = player;
 
 		wireframe = new Wireframe(materials[0]);
@@ -717,6 +717,7 @@ void Render()
 	debug_sphere.draw(*wireframe);
 	debug_ray.draw(*wireframe);
 	terrain->draw_octree(*wireframe);
+	player->draw_debug(*wireframe);
 
 	/**
 	for (size_t i = 0; i < terrain->num_triangles; ++i)
@@ -815,7 +816,7 @@ bool WaitForMainWindowToClose(int& o_exitCode)
 				{
 					if (prevkey != VK_OEM_3)
 					{
-						if (active_cam == &player->head_cam)
+						if (active_cam == &player->float_cam)
 							active_controller = player;
 						else if (active_cam == &fly_cam->fly_cam)
 							active_controller = fly_cam;
@@ -839,7 +840,7 @@ bool WaitForMainWindowToClose(int& o_exitCode)
 				{
 					if (prevkey != VK_TAB)
 					{
-						active_cam = &player->head_cam;
+						active_cam = &player->float_cam;
 						active_controller = player;
 						prevkey = VK_TAB;
 					}

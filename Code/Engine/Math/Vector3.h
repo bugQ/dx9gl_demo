@@ -21,10 +21,14 @@ namespace eae6320
 		float dot(Vector3 const & rhs) const;
 		Vector3 cross(Vector3 const & rhs) const;
 		Vector3 scale(Vector3 const & rhs) const;
+		Vector3 project(Vector3 normal) const;
 
 		float norm() const;
+		float norm_sq() const;
 		Vector3 & normalize();
+		Vector3 orthonormal(Vector3 tangent);
 		Vector3 unit() const;
+		Vector3 abs() const;
 
 		uint8_t octant() const;
 

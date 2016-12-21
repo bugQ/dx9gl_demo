@@ -48,3 +48,12 @@ inline Versor Versor::rotation_z(float radians)
 	float c = cos(half), s = sin(half);
 	return Versor(0.0f, 0.0f, s, c);
 }
+
+inline Versor Versor::orientation(Vector3 forward, Vector3 up)
+{
+	up = forward.orthonormal(up);
+	Vector3 right = up.cross(forward);
+
+	Versor q(up.z - forward.y, forward.x - right.z, right.y - up.x, right.x + up.y + forward.z + 1.0f);
+	return q.normalize();
+}

@@ -2,15 +2,18 @@ inline Vector3::Vector3() {}
 inline Vector3::Vector3(float x, float y, float z) : x(x), y(y), z(z) {}
 inline Vector3::Vector3(Vector3 const & v) : x(v.x), y(v.y), z(v.z) {}
 
-inline Vector3 Vector3::operator+() const {
+inline Vector3 Vector3::operator+() const
+{
 	return Vector3(+x, +y, +z);
 }
 
-inline Vector3 Vector3::operator-() const {
+inline Vector3 Vector3::operator-() const
+{
 	return Vector3(-x, -y, -z);
 }
 
-inline float Vector3::operator[](size_t i) const {
+inline float Vector3::operator[](size_t i) const
+{
 	switch (i) {
 	case 0: return x;
 	case 1: return y;
@@ -19,21 +22,34 @@ inline float Vector3::operator[](size_t i) const {
 	}
 }
 
-inline float Vector3::dot(Vector3 const & rhs) const {
+inline float Vector3::dot(Vector3 const & rhs) const
+{
 	return x*rhs.x + y*rhs.y + z*rhs.z;
 }
 
-inline Vector3 Vector3::cross(Vector3 const & rhs) const {
+inline Vector3 Vector3::cross(Vector3 const & rhs) const
+{
 	return Vector3(y*rhs.z - z*rhs.y, x*rhs.z - z*rhs.x, x*rhs.y - y*rhs.x);
 }
 
-inline Vector3 Vector3::scale(Vector3 const & rhs) const {
+inline Vector3 Vector3::scale(Vector3 const & rhs) const
+{
 	return Vector3(x * rhs.x, y * rhs.y, z * rhs.z);
+}
+
+inline Vector3 Vector3::project(Vector3 normal) const
+{
+	return (dot(normal) / norm_sq()) * normal;
 }
 
 inline float Vector3::norm() const
 {
-	return sqrt(x*x + y*y + z*z);
+	return sqrt(norm_sq());
+}
+
+inline float Vector3::norm_sq() const
+{
+	return dot(*this);
 }
 
 inline Vector3 & Vector3::normalize()
@@ -45,12 +61,23 @@ inline Vector3 & Vector3::normalize()
 	return *this;
 }
 
+inline Vector3 Vector3::orthonormal(Vector3 tangent)
+{
+	tangent -= tangent.project(*this);
+	return tangent.normalize();
+}
+
 inline Vector3 Vector3::unit() const
 {
 	float n = norm();
 	if (n == 0.0f)
 		return Vector3::Zero;
 	return Vector3(x / n, y / n, z / n);
+}
+
+inline Vector3 Vector3::abs() const
+{
+	return Vector3(fabsf(x), fabsf(y), fabsf(z));
 }
 
 inline uint8_t Vector3::octant() const

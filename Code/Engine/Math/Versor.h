@@ -17,6 +17,8 @@ namespace eae6320
 		static Versor rotation_x(float radians);
 		static Versor rotation_y(float radians);
 		static Versor rotation_z(float radians);
+
+		static Versor orientation(Vector3 dir, Vector3 up = Vector3::J);
 	};
 	inline Versor operator*(Versor const & lhs, Versor const & rhs);
 
