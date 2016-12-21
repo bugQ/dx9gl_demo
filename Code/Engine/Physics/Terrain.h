@@ -5,6 +5,7 @@
 #include "../Math/Triangle3.h"
 
 #include <vector>
+#include <queue>
 
 namespace eae6320
 {
@@ -57,8 +58,10 @@ namespace Physics
 			// ensure 
 			void optimize(const Triangle3 * triangles, uint32_t num_triangles);
 
+			size_t intersect(Segment3 segment, std::queue<const Octree *> & hitboxes) const;
+
 			// draw debug cubes colored based on depth
-			void draw(Graphics::Wireframe &);
+			void draw(Graphics::Wireframe &) const;
 		};
 
 		const Triangle3 * triangles;
@@ -75,13 +78,21 @@ namespace Physics
 		void init_octree() { octree.populate(triangles, num_triangles); }
 
 		void draw_octree(Graphics::Wireframe & wireframe)
-		{
 #ifdef _DEBUG
-			if (debug_octree) octree.draw(wireframe);
+		{ if (debug_octree) octree.draw(wireframe); }
+#else
+		{}
 #endif
-		}
 
-		float intersect_ray(Vector3 p, Vector3 q, Vector3 * n) const;
+		void draw_raycast(Segment3 segment, Graphics::Wireframe & wireframe)
+#ifdef _DEBUG
+		;
+#else
+		{}
+#endif
+
+
+		float intersect_ray(Vector3 o, Vector3 dir, Vector3 * n) const;
 	};
 }
 }

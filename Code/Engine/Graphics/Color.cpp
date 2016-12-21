@@ -7,6 +7,9 @@ namespace eae6320
 namespace Graphics
 {
 
+const Color Color::White = Color(1, 1, 1, 1);
+const Color Color::Black = Color(0, 0, 0, 1);
+
 Color Color::fromHSV(float hue, float sat, float val)
 {
 

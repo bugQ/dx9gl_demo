@@ -2,7 +2,7 @@
 
 #include "Terrain.h"
 
-#include <deque>
+#include <queue>
 
 
 namespace eae6320
@@ -40,12 +40,15 @@ void Terrain::Octree::propagate_all(const Triangle3 * triangles, uint32_t num_tr
 {
 	if (is_leaf()) return;
 
-	for (std::vector<uint32_t>::const_iterator it = object_ids.begin(); it != object_ids.end(); ++it)
+	for ( std::vector<uint32_t>::const_iterator it = object_ids.begin()
+		; it != object_ids.end()
+		; ++it )
 		propagate(*it, triangles[*it]);
 
 	object_ids.clear();
 
-	for (uint8_t i = 0; i < 8; ++i) branch[i]->propagate_all(triangles, num_triangles);
+	for (uint8_t i = 0; i < 8; ++i)
+		branch[i]->propagate_all(triangles, num_triangles);
 }
 
 void Terrain::Octree::propagate(uint32_t id, const Triangle3 & triangle)
@@ -55,7 +58,8 @@ void Terrain::Octree::propagate(uint32_t id, const Triangle3 & triangle)
 	if (is_leaf())
 		object_ids.push_back(id);
 	else
-		for (uint8_t i = 0; i < 8; ++i) branch[i]->propagate(id, triangle);
+		for (uint8_t i = 0; i < 8; ++i)
+			branch[i]->propagate(id, triangle);
 }
 
 void Terrain::Octree::optimize(const Triangle3 * triangles, uint32_t num_triangles)
@@ -68,20 +72,38 @@ void Terrain::Octree::optimize(const Triangle3 * triangles, uint32_t num_triangl
 
 	if (is_leaf()) return;
 
-	for (uint8_t i = 0; i < 8; ++i) branch[i]->propagate_all(triangles, num_triangles);
+	for (uint8_t i = 0; i < 8; ++i)
+		branch[i]->propagate_all(triangles, num_triangles);
+}
+
+size_t Terrain::Octree::intersect(Segment3 segment, std::queue<const Octree *> & hitboxes) const
+{
+	if (!bounds.intersects(segment))
+		return 0;
+
+	if (is_leaf())
+	{
+		hitboxes.push(this);
+		return 1;
+	}
+
+	size_t count = 0;
+	for (uint8_t i = 0; i < 8; ++i)
+		count += branch[i]->intersect(segment, hitboxes);
+	return count;
 }
 
 #ifdef _DEBUG
-void Terrain::Octree::draw(Graphics::Wireframe & wireframe)
+void Terrain::Octree::draw(Graphics::Wireframe & wireframe) const
 {
-	std::deque<Octree *> queue;
-	Octree * node;
-	queue.push_back(this);
+	std::queue<const Octree *> queue;
+	const Octree * node;
+	queue.push(this);
 	
 	while (!queue.empty())
 	{
 		node = queue.front();
-		queue.pop_front();
+		queue.pop();
 
 		if (node->is_leaf())
 		{
@@ -92,7 +114,7 @@ void Terrain::Octree::draw(Graphics::Wireframe & wireframe)
 		else
 		{
 			for (uint8_t i = 0; i < 8; ++i)
-				queue.push_back(node->branch[i]);
+				queue.push(node->branch[i]);
 		}
 	}
 }

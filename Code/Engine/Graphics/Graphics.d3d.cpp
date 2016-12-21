@@ -172,7 +172,7 @@ bool eae6320::Graphics::Initialize( const HWND i_renderingWindow )
 #ifdef _DEBUG
 	{
 		const HRESULT result = D3DXCreateFont(s_direct3dDevice
-			, 32 // font height
+			, 24 // font height
 			, 0 // font width
 			, FW_NORMAL // font weight
 			, 1 // mip levels

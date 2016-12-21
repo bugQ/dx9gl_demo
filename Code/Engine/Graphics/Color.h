@@ -9,6 +9,8 @@ namespace Graphics
 
 struct Color : public Vector4
 {
+	static const Color White, Black;
+
 	Color() {}
 	Color(float r, float g, float b, float a) : Vector4(r,g,b,a) { }
 	

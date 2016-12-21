@@ -23,6 +23,33 @@ namespace eae6320
 			&& vmax.z <= other.vmin.z;
 	}
 
+	bool AABB3::intersects(const Segment3 & ray) const
+	{
+		Vector3 c = (vmin + vmax) / 2; // Box center-point
+		Vector3 e = vmax - c; // Box halflength extents
+		Vector3 m = (ray.a + ray.b) / 2; // Segment midpoint
+		Vector3 d = ray.b - m; // Segment halflength vector
+		m = m - c; // Segment midpoint relative to box center
+
+				   // Try world coordinate axes as separating axes
+		Vector3 ad = d.abs();
+		Vector3 check = ad + e - m.abs();
+		if (check.x < 0 || check.y < 0 || check.z < 0)
+			return false;
+
+		// Add in an epsilon term to counteract arithmetic errors when segment is
+		// (near) parallel to a coordinate axis
+		ad += Vector3(1e-9f, 1e-9f, 1e-9f);
+
+		// Try cross products of segment direction vector with coordinate axes
+		if (fabsf(m.y * d.z - m.z * d.y) > e.y * ad.z + e.z * ad.y) return false;
+		if (fabsf(m.z * d.x - m.x * d.z) > e.x * ad.z + e.z * ad.x) return false;
+		if (fabsf(m.x * d.y - m.y * d.x) > e.x * ad.y + e.y * ad.x) return false;
+
+		// No separating axis found; segment must be overlapping AABB
+		return true;
+	}
+
 	AABB3 AABB3::octant(uint8_t n) const
 	{
 		AABB3 subbox(*this);

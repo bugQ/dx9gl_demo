@@ -42,6 +42,11 @@ void Wireframe::addLine(Vector3 p1, Color color1, Vector3 p2, Color color2)
 	++num_lines;
 }
 
+void Wireframe::addLine(Segment3 segment, Color color)
+{
+	addLine(segment.a, color, segment.b, color);
+}
+
 void Wireframe::addAABB(Vector3 p0, Vector3 p7, Color color)
 {
 	Vector3 p1 = Vector3(p7.x, p0.y, p0.z);

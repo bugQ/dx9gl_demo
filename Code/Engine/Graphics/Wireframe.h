@@ -3,6 +3,7 @@
 #include "Material.h"
 #include "Color.h"
 #include "../Math/Vector3.h"
+#include "../Math/Segment3.h"
 #include "../Math/AABB3.h"
 #include <vector>
 
@@ -23,6 +24,7 @@ struct Wireframe
 	Material * material;
 
 	void addLine(Vector3 p1, Color color1, Vector3 p2, Color color2);
+	void addLine(Segment3 segment, Color color);
 	void addAABB(Vector3 p0, Vector3 p7, Color color);
 	void addAABB(AABB3 box, Color color);
 	void addSphere(Vector3 center, float radius, uint8_t resolution, Color color);

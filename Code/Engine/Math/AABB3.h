@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Vector3.h"
+#include "Segment3.h"
 
 namespace eae6320
 {
@@ -20,6 +21,7 @@ namespace eae6320
 
 		bool contains(const AABB3 &) const;
 		bool intersects(const AABB3 &) const;
+		bool intersects(const Segment3 &) const;
 
 		AABB3 octant(uint8_t n) const;
 		AABB3 square() const;

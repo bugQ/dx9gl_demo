@@ -49,6 +49,31 @@ Terrain * Terrain::FromBinFile(const char * collision_mesh_path, Vector3 scale)
 float Terrain::intersect_ray(Vector3 o, Vector3 dir, Vector3 * n) const
 {
 	float t = std::numeric_limits<float>::infinity();
+
+	/**
+	std::queue<const Octree *> hitboxes;
+	const Octree * node;
+
+	octree.intersect(Segment3(o, o + dir), hitboxes);
+
+	while (!hitboxes.empty())
+	{
+		node = hitboxes.front();
+		hitboxes.pop();
+
+		for (uint32_t id : node->object_ids)
+		{
+			Vector3 n_i = triangles[id].normal;
+			float t_i = triangles[id].intersect_ray(o, dir);
+			if (t_i > 0 && t_i < t)
+			{
+				t = t_i;
+				if (n) *n = triangles[id].normal;
+			}
+		}
+	}
+
+	/*/ // naive impl, check entire triangle list
 	for (size_t i = 0; i < num_triangles; ++i)
 	{
 		Vector3 n_i = triangles[i].normal;
@@ -59,8 +84,30 @@ float Terrain::intersect_ray(Vector3 o, Vector3 dir, Vector3 * n) const
 			if (n) *n = triangles[i].normal;
 		}
 	}
+	/**/
+
 	return t;
 }
+
+#ifdef _DEBUG
+void Terrain::draw_raycast(Segment3 segment, Graphics::Wireframe & wireframe)
+{
+	wireframe.addLine(segment, Graphics::Color::White);
+
+	std::queue<const Octree *> hitboxes;
+	const Octree * node;
+
+	octree.intersect(segment, hitboxes);
+
+	while (!hitboxes.empty())
+	{
+		node = hitboxes.front();
+		hitboxes.pop();
+
+		node->draw(wireframe);
+	}
+}
+#endif
 
 }
 }
