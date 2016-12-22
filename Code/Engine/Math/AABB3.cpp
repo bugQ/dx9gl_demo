@@ -15,12 +15,12 @@ namespace eae6320
 
 	bool AABB3::intersects(const AABB3 & other) const
 	{
-		return vmin.x >= other.vmax.x
-			&& vmin.y >= other.vmax.y
-			&& vmin.z >= other.vmax.z
-			&& vmax.x <= other.vmin.x
-			&& vmax.y <= other.vmin.y
-			&& vmax.z <= other.vmin.z;
+		return vmin.x <= other.vmax.x
+			&& vmin.y <= other.vmax.y
+			&& vmin.z <= other.vmax.z
+			&& vmax.x >= other.vmin.x
+			&& vmax.y >= other.vmin.y
+			&& vmax.z >= other.vmin.z;
 	}
 
 	bool AABB3::intersects(const Segment3 & ray) const

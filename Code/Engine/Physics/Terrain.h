@@ -59,9 +59,22 @@ namespace Physics
 			void optimize(const Triangle3 * triangles, uint32_t num_triangles);
 
 			size_t intersect(Segment3 segment, std::queue<const Octree *> & hitboxes) const;
+			size_t find(uint32_t id, std::queue<const Octree *> & hitboxes) const;
+
+			void take_inventory(std::vector<bool> & inventory) const
+#ifdef _DEBUG
+			;
+#else
+			{}
+#endif
 
 			// draw debug cubes colored based on depth
-			void draw(Graphics::Wireframe &) const;
+			void draw(Graphics::Wireframe &) const
+#ifdef _DEBUG
+			;
+#else
+			{}
+#endif
 		};
 
 		const Triangle3 * triangles;
@@ -85,6 +98,13 @@ namespace Physics
 #endif
 
 		void draw_raycast(Segment3 segment, Graphics::Wireframe & wireframe)
+#ifdef _DEBUG
+		;
+#else
+		{}
+#endif
+
+		void test_octree()
 #ifdef _DEBUG
 		;
 #else

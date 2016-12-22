@@ -31,6 +31,7 @@ This file contains all of the function definitions for this example program
 #include "../../Engine/Debug_Runtime/UserOutput.h"
 #include <sstream>
 
+
 // Static Data Initialization
 //===========================
 
@@ -255,7 +256,6 @@ bool CreateMainWindow(const HINSTANCE i_thisInstanceOfTheProgram, const int i_in
 	ATOM mainWindowClass = RegisterMainWindowClass(i_thisInstanceOfTheProgram);
 	if (mainWindowClass != NULL)
 	{
-		Vector3 maybej = Matrix4::rotation_q(Versor::rotation_z(1.57079633f)).predot0(Vector3::I).xyz();
 		std::ostringstream oss;
 
 		s_mainWindow = CreateMainWindowHandle(i_thisInstanceOfTheProgram, i_initialWindowDisplayState);
@@ -276,13 +276,10 @@ bool CreateMainWindow(const HINSTANCE i_thisInstanceOfTheProgram, const int i_in
 
 		terrain = Physics::Terrain::FromBinFile(terrain_file, cm);
 
+		terrain->test_octree();
+
 		fly_cam = new FlyCam(Vector3(1.f, 1.f, 1.01f), 3.14159265f, camera_track_speed, camera_pan_speed);
 		player = new Player(Vector3(0, 0, 0), 0, 1.5f, *terrain, 2.0f);
-
-		/**
-		oss << "(" << maybej.x << ", " << maybej.y << ", " << maybej.z << ")";
-		UserOutput::Print(oss.str());
-		/**/
 
 		active_cam = &player->float_cam;
 		active_controller = player;

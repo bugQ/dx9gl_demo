@@ -17,7 +17,7 @@ void Terrain::Octree::populate(const Triangle3 * triangles, uint32_t num_triangl
 
 	propagate_all(triangles, num_triangles);
 
-	optimize(triangles, num_triangles);
+	//optimize(triangles, num_triangles);
 }
 
 void Terrain::Octree::insert(uint32_t id, const Triangle3 & triangle)
@@ -40,10 +40,8 @@ void Terrain::Octree::propagate_all(const Triangle3 * triangles, uint32_t num_tr
 {
 	if (is_leaf()) return;
 
-	for ( std::vector<uint32_t>::const_iterator it = object_ids.begin()
-		; it != object_ids.end()
-		; ++it )
-		propagate(*it, triangles[*it]);
+	for (uint32_t id : object_ids)
+		propagate(id, triangles[id]);
 
 	object_ids.clear();
 
@@ -73,27 +71,55 @@ void Terrain::Octree::optimize(const Triangle3 * triangles, uint32_t num_triangl
 	if (is_leaf()) return;
 
 	for (uint8_t i = 0; i < 8; ++i)
-		branch[i]->propagate_all(triangles, num_triangles);
+		branch[i]->optimize(triangles, num_triangles);
 }
 
-size_t Terrain::Octree::intersect(Segment3 segment, std::queue<const Octree *> & hitboxes) const
+size_t Terrain::Octree::intersect(Segment3 segment, std::queue<const Octree *> & boxes) const
 {
 	if (!bounds.intersects(segment))
 		return 0;
 
 	if (is_leaf())
 	{
-		hitboxes.push(this);
+		boxes.push(this);
 		return 1;
 	}
 
 	size_t count = 0;
 	for (uint8_t i = 0; i < 8; ++i)
-		count += branch[i]->intersect(segment, hitboxes);
+		count += branch[i]->intersect(segment, boxes);
+	return count;
+}
+
+size_t Terrain::Octree::find(uint32_t id, std::queue<const Octree *> & boxes) const
+{
+	size_t count = 0;
+
+	for (uint32_t _id : object_ids)
+		if (_id == id)
+			++count;
+
+	if (count > 0)
+		boxes.push(this);
+
+	if (!is_leaf())
+		for (uint8_t i = 0; i < 8; ++i)
+			count += branch[i]->find(id, boxes);
+
 	return count;
 }
 
 #ifdef _DEBUG
+void Terrain::Octree::take_inventory(std::vector<bool> & inventory) const
+{
+	for (uint32_t id : object_ids)
+		inventory[id] = true;
+
+	if (!is_leaf())
+		for (uint8_t i = 0; i < 8; ++i)
+			branch[i]->take_inventory(inventory);
+}
+
 void Terrain::Octree::draw(Graphics::Wireframe & wireframe) const
 {
 	std::queue<const Octree *> queue;

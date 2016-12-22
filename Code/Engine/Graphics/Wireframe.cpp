@@ -47,6 +47,13 @@ void Wireframe::addLine(Segment3 segment, Color color)
 	addLine(segment.a, color, segment.b, color);
 }
 
+void Wireframe::addTriangle(Triangle3 tri, Color color)
+{
+	addLine(tri.a, color, tri.b, color);
+	addLine(tri.b, color, tri.c, color);
+	addLine(tri.c, color, tri.a, color);
+}
+
 void Wireframe::addAABB(Vector3 p0, Vector3 p7, Color color)
 {
 	Vector3 p1 = Vector3(p7.x, p0.y, p0.z);

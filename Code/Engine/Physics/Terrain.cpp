@@ -2,6 +2,7 @@
 #include "Terrain.h"
 #include <limits>
 #include <algorithm>
+#include <cassert>
 
 namespace eae6320
 {
@@ -105,7 +106,28 @@ void Terrain::draw_raycast(Segment3 segment, Graphics::Wireframe & wireframe)
 		hitboxes.pop();
 
 		node->draw(wireframe);
+
+		for (uint32_t id : node->object_ids)
+			wireframe.addTriangle(triangles[id], Graphics::Color::White);
 	}
+}
+
+void Terrain::test_octree()
+{
+	std::vector<bool> triangle_inventory(num_triangles, false);
+
+	octree.take_inventory(triangle_inventory);
+
+	for (size_t i = 0; i < num_triangles; ++i)
+		assert(triangle_inventory[i]);
+
+	std::queue<const Octree *> boxes_with_4;
+	octree.find(4, boxes_with_4);
+
+	std::queue<const Octree *> hitboxes;
+	octree.intersect(Segment3(Vector3(0, 0, 0), Vector3(0, -10, 0)), hitboxes);
+
+	
 }
 #endif
 
