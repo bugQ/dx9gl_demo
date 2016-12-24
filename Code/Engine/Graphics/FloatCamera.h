@@ -7,6 +7,8 @@
 
 #include "Wireframe.h"
 
+#include <array>
+
 namespace eae6320
 {
 namespace Graphics
@@ -14,12 +16,12 @@ namespace Graphics
 
 struct FloatCamera : public Camera
 {
-	const float float_cam_radius = 3.0f, float_cam_height = 1.0f;
-	const float tangent_x = 0.32f, tangent_y = 0.16f;
-	const float tangent_speed = 10.0f, max_speed = 3.0f;
 
 	Vector2 tangent_velocity;
 	Vector3 velocity;
+
+	std::deque<Vector3> position_buffer;
+
 	const Vector3 & target;
 	const Physics::Terrain & terrain;
 

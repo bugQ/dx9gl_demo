@@ -6,6 +6,8 @@ namespace eae6320
 {
 	struct Versor : Vector4
 	{
+		static const Versor Identity;
+
 		Versor();
 		Versor(float x, float y, float z, float w);
 		Versor(Vector4 const & v);

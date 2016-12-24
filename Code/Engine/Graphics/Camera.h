@@ -11,6 +11,10 @@ struct Camera
 {
 	Vector3 position;
 	Versor rotation;
+
+	Camera(Vector3 position, Versor rotation = Versor::Identity)
+		: position(position), rotation(rotation)
+	{}
 };
 }
 }

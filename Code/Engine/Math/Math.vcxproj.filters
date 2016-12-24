@@ -59,9 +59,6 @@
     <None Include="Vector2.inl">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="AABB3.cpp">
-      <Filter>Source Files</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Vector3.cpp">
@@ -80,6 +77,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Segment3.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AABB3.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Versor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

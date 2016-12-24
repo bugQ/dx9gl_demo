@@ -6,6 +6,11 @@ namespace eae6320
 namespace Graphics
 {
 
+	const float float_cam_radius = 3.0f, float_cam_height = 1.0f;
+	const float tangent_x = 0.32f, tangent_y = 0.16f;
+	const float tangent_speed = 10.0f, max_speed = 3.0f;
+	const size_t buffer_length = 10;
+
 void FloatCamera::update(float dt)
 {
 	Vector3 float_dir = (target - position).normalize();
@@ -39,7 +44,13 @@ void FloatCamera::update(float dt)
 	tangent_velocity.clip(tangent_speed);
 	velocity += rotation.rotate(Vector3(tangent_velocity.x, tangent_velocity.y, 0));
 
-	position += dt * velocity.clip(max_speed);
+	position_buffer.pop_front();
+	position_buffer.push_back(position_buffer.back() + dt * velocity.clip(max_speed));
+
+	Vector3 pos_sum = Vector3::Zero;
+	for (Vector3 & v : position_buffer)
+		pos_sum += v;
+	position = pos_sum / position_buffer.size();
 
 	tangent_velocity = Vector2::Zero;
 	velocity /= 2;
@@ -98,9 +109,10 @@ void FloatCamera::draw_debug(Wireframe & wireframe)
 }
 
 FloatCamera::FloatCamera(const Vector3 & target, const Physics::Terrain & terrain)
-	: target(target), terrain(terrain), tangent_velocity(0, 0), velocity(0, 0, 0)
+	: Camera(target + Vector3(0, float_cam_height, float_cam_radius))
+	, target(target), terrain(terrain), tangent_velocity(0, 0), velocity(0, 0, 0)
+	, position_buffer(buffer_length, position)
 {
-	position = target + Vector3(0, float_cam_height, float_cam_radius);
 }
 
 }

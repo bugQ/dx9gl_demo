@@ -4,7 +4,8 @@ namespace eae6320
 {
 
 Player::Player(Vector3 position, float yaw, float height, const Physics::Terrain & terrain, float speed)
-	: Collider(position, yaw, height), terrain(terrain), speed(speed), grounded(false), float_cam(this->position, terrain)
+	: Collider(position, yaw, height), terrain(terrain), speed(speed), grounded(false)
+	, head_cam(position), float_cam(this->position, terrain)
 {
 	update_cam();
 }

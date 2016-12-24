@@ -164,6 +164,7 @@
     <ClCompile Include="AABB3.cpp">
       <FileType>Document</FileType>
     </ClCompile>
+    <ClCompile Include="Versor.cpp" />
     <None Include="Vector2.inl">
       <FileType>Document</FileType>
     </None>
