@@ -19,6 +19,7 @@ namespace eae6320
 
 		float norm() const;
 		Vector2 & normalize();
+		Vector2 & clip(float magnitude);
 		Vector2 unit() const;
 
 		float x, y, z;

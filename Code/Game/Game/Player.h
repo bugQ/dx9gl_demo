@@ -9,8 +9,8 @@ namespace eae6320
 {
 	struct Player : public Physics::Collider, public Controller
 	{
-		Camera head_cam;
-		FloatCamera float_cam;
+		Graphics::Camera head_cam;
+		Graphics::FloatCamera float_cam;
 		float float_cam_radius = 1.0f, float_cam_height = 0.5f;
 		const Physics::Terrain & terrain;
 		float speed;

@@ -5,9 +5,12 @@
 
 namespace eae6320
 {
+namespace Graphics
+{
 struct Camera
 {
 	Vector3 position;
 	Versor rotation;
 };
+}
 }

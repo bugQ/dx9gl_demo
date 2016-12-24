@@ -12,7 +12,7 @@ namespace Physics
 		Vector3 position;
 		float yaw;
 
-		Camera perspective()
+		Graphics::Camera perspective()
 		{
 			return { position, Versor::rotation_y(yaw) };
 		}

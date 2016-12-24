@@ -109,7 +109,7 @@ namespace
 	FlyCam * fly_cam;
 	Player * player;
 
-	Camera * active_cam;
+	Graphics::Camera * active_cam;
 	Controller * active_controller;
 
 	Wireframe * wireframe;
@@ -274,7 +274,10 @@ bool CreateMainWindow(const HINSTANCE i_thisInstanceOfTheProgram, const int i_in
 		models = BuildModels(model_specs, meshes, materials, num_models);
 		sprites = BuildSprites(sprite_specs, materials, num_sprites);
 
-		terrain = Physics::Terrain::FromBinFile(terrain_file, cm);
+		wireframe = new Wireframe(materials[0]);
+		eae6320::Graphics::InitWireframe(*wireframe);
+
+		terrain = Physics::Terrain::FromBinFile(terrain_file, cm, *wireframe);
 
 		terrain->test_octree();
 
@@ -284,8 +287,6 @@ bool CreateMainWindow(const HINSTANCE i_thisInstanceOfTheProgram, const int i_in
 		active_cam = &player->float_cam;
 		active_controller = player;
 
-		wireframe = new Wireframe(materials[0]);
-		eae6320::Graphics::InitWireframe(*wireframe);
 
 		fps_display = new std::string;
 		pos_display = new std::string;
@@ -565,6 +566,8 @@ bool CleanupMainWindow()
 			MessageBox(NULL, errorMessage.c_str(), errorCaption, MB_OK | MB_ICONERROR);
 			return false;
 		}
+
+		delete terrain;
 
 		for (size_t i = countof(model_specs); i > 0; --i)
 			delete models[i - 1];

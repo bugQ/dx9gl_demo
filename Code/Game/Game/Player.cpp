@@ -4,7 +4,7 @@ namespace eae6320
 {
 
 Player::Player(Vector3 position, float yaw, float height, const Physics::Terrain & terrain, float speed)
-	: Collider(position, yaw, height), terrain(terrain), speed(speed), grounded(false), float_cam(this->position)
+	: Collider(position, yaw, height), terrain(terrain), speed(speed), grounded(false), float_cam(this->position, terrain)
 {
 	update_cam();
 }
@@ -57,7 +57,7 @@ void Player::update(Controls controls, float dt)
 
 	// cameras
 	update_cam();
-	float_cam.position -= float_cam.rotation.rotate(Vector3::I) * controls.joy_right.x * speed * dt;
+	float_cam.tangent_velocity.x -= controls.joy_right.x * speed;
 	float_cam.update(dt);
 }
 
@@ -83,6 +83,8 @@ void Player::draw_debug(Graphics::Wireframe & wireframe)
 	wireframe.addLine(carrot_base + Vector3::J * (height / 16), carrot_orange, carrot_tip, carrot_orange);
 	wireframe.addLine(carrot_base + perp * (height / 16), carrot_orange, carrot_tip, carrot_orange);
 	wireframe.addLine(carrot_base - perp * (height / 16), carrot_orange, carrot_tip, carrot_orange);
+
+	float_cam.draw_debug(wireframe);
 }
 #endif
 

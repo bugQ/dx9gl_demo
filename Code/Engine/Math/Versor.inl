@@ -12,17 +12,17 @@ inline Versor operator*(Versor const & lhs, Versor const & rhs)
 		);
 }
 
-inline Versor Versor::inverse()
+inline Versor Versor::inverse() const
 {
 	return Versor(-x, -y, -z, w);
 }
 
-inline Versor Versor::rotate_by(Versor rotation)
+inline Versor Versor::rotate_by(Versor rotation) const
 {
 	return rotation * (*this) * rotation.inverse();
 }
 
-inline Vector3 Versor::rotate(Vector3 direction)
+inline Vector3 Versor::rotate(Vector3 direction) const
 {
 	return Versor(Vector4(direction, 0.0f)).rotate_by(*this).xyz();
 }
@@ -49,10 +49,10 @@ inline Versor Versor::rotation_z(float radians)
 	return Versor(0.0f, 0.0f, s, c);
 }
 
-inline Versor Versor::orientation(Vector3 forward, Vector3 up)
+inline Versor Versor::orientation(const Vector3 & forward, Vector3 & up, Vector3 & right)
 {
 	up = forward.orthonormal(up);
-	Vector3 right = up.cross(forward);
+	right = up.cross(forward);
 
 	Versor q(up.z - forward.y, forward.x - right.z, right.y - up.x, right.x + up.y + forward.z + 1.0f);
 	return q.normalize();

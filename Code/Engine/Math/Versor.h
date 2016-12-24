@@ -10,15 +10,15 @@ namespace eae6320
 		Versor(float x, float y, float z, float w);
 		Versor(Vector4 const & v);
 
-		Versor inverse();
-		Versor rotate_by(Versor rotation);
-		Vector3 rotate(Vector3 direction);
+		Versor inverse() const;
+		Versor rotate_by(Versor rotation) const;
+		Vector3 rotate(Vector3 direction) const;
 
 		static Versor rotation_x(float radians);
 		static Versor rotation_y(float radians);
 		static Versor rotation_z(float radians);
 
-		static Versor orientation(Vector3 dir, Vector3 up = Vector3::J);
+		static Versor orientation(const Vector3 & forward, Vector3 & up, Vector3 & right);
 	};
 	inline Versor operator*(Versor const & lhs, Versor const & rhs);
 

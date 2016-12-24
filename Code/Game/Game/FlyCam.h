@@ -11,7 +11,7 @@ namespace eae6320
 		float tracking_speed;
 		float panning_speed;
 
-		Camera fly_cam;
+		Graphics::Camera fly_cam;
 
 		FlyCam(Vector3 position, float yaw,
 			float tracking_speed, float pan_speed);

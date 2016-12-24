@@ -81,11 +81,12 @@ namespace Physics
 		const uint32_t num_triangles;
 
 		Octree octree;
+		Graphics::Wireframe & wireframe;
 
 		bool debug_octree = false;
 
-		static Terrain * FromBinFile(const char * collision_mesh_path, Vector3 scale);
-		Terrain(const Graphics::Mesh::Data &, Vector3 scale);
+		static Terrain * FromBinFile(const char * collision_mesh_path, Vector3 scale, Graphics::Wireframe & wireframe);
+		Terrain(const Graphics::Mesh::Data &, Vector3 scale, Graphics::Wireframe & wireframe);
 		~Terrain() { delete[] triangles; }
 
 		void init_octree() { octree.populate(triangles, num_triangles); }
@@ -112,7 +113,7 @@ namespace Physics
 #endif
 
 
-		float intersect_ray(Vector3 o, Vector3 dir, Vector3 * n) const;
+		float intersect_ray(Vector3 o, Vector3 dir, Vector3 * n = NULL) const;
 	};
 }
 }

@@ -26,7 +26,8 @@ namespace eae6320
 		float norm() const;
 		float norm_sq() const;
 		Vector3 & normalize();
-		Vector3 orthonormal(Vector3 tangent);
+		Vector3 & clip(float magnitude);
+		Vector3 orthonormal(Vector3 tangent) const;
 		Vector3 unit() const;
 		Vector3 abs() const;
 

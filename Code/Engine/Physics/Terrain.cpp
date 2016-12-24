@@ -29,17 +29,18 @@ Triangle3 * cache_triangles(const Graphics::Mesh::Data & mesh_data, Vector3 scal
 	return triangles;
 }
 
-Terrain::Terrain(const Graphics::Mesh::Data & mesh_data, Vector3 scale)
+Terrain::Terrain(const Graphics::Mesh::Data & mesh_data, Vector3 scale, Graphics::Wireframe & wireframe)
 	: triangles(cache_triangles(mesh_data, scale))
 	, num_triangles(mesh_data.num_triangles)
 	, octree(mesh_data.bounds.scale(scale).square())
+	, wireframe(wireframe)
 {
 }
 
-Terrain * Terrain::FromBinFile(const char * collision_mesh_path, Vector3 scale)
+Terrain * Terrain::FromBinFile(const char * collision_mesh_path, Vector3 scale, Graphics::Wireframe & wireframe)
 {
 	Graphics::Mesh::Data * mesh_data = Graphics::Mesh::Data::FromBinFile(collision_mesh_path);
-	Terrain * terrain = new Terrain(*mesh_data, scale);
+	Terrain * terrain = new Terrain(*mesh_data, scale, wireframe);
 	delete mesh_data;
 	terrain->init_octree();
 
@@ -50,6 +51,7 @@ Terrain * Terrain::FromBinFile(const char * collision_mesh_path, Vector3 scale)
 float Terrain::intersect_ray(Vector3 o, Vector3 dir, Vector3 * n) const
 {
 	float t = std::numeric_limits<float>::infinity();
+	size_t hit_i;
 
 	/**
 	std::queue<const Octree *> hitboxes;
@@ -83,9 +85,15 @@ float Terrain::intersect_ray(Vector3 o, Vector3 dir, Vector3 * n) const
 		{
 			t = t_i;
 			if (n) *n = triangles[i].normal;
+			hit_i = i;
 		}
 	}
 	/**/
+
+	if (t < std::numeric_limits<float>::infinity())
+	{
+		wireframe.addTriangle(triangles[hit_i], Graphics::Color::White);
+	}
 
 	return t;
 }
@@ -110,6 +118,10 @@ void Terrain::draw_raycast(Segment3 segment, Graphics::Wireframe & wireframe)
 		for (uint32_t id : node->object_ids)
 			wireframe.addTriangle(triangles[id], Graphics::Color::White);
 	}
+
+	Segment3 drop(Vector3(0,0,0),Vector3(0,-30,0));
+	if (segment != drop)
+		draw_raycast(drop, wireframe);
 }
 
 void Terrain::test_octree()

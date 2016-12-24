@@ -25,8 +25,15 @@ inline Vector2 & Vector2::normalize()
 	float n = norm();
 	if (n == 0.0f)
 		return *this;
-	x /= n; y /= n;
-	return *this;
+	return *this /= n;
+}
+
+inline Vector2 & Vector2::clip(float magnitude)
+{
+	float n = norm(), m = fabsf(magnitude);
+	if (n < m)
+		return *this;
+	return *this *= m / n;
 }
 
 inline Vector2 Vector2::unit() const

@@ -57,11 +57,18 @@ inline Vector3 & Vector3::normalize()
 	float n = norm();
 	if (n == 0.0f)
 		return *this;
-	x /= n; y /= n; z /= n;
-	return *this;
+	return *this /= n;
 }
 
-inline Vector3 Vector3::orthonormal(Vector3 tangent)
+inline Vector3 & Vector3::clip(float magnitude)
+{
+	float n = norm(), m = fabsf(magnitude);
+	if (n < m)
+		return *this;
+	return *this *= m / n;
+}
+
+inline Vector3 Vector3::orthonormal(Vector3 tangent) const
 {
 	tangent -= tangent.project(*this);
 	return tangent.normalize();
@@ -148,7 +155,7 @@ inline Vector3 operator*(float lhs, Vector3 const & rhs)
 
 inline Vector3 & operator*=(Vector3 & lhs, float rhs)
 {
-	lhs.x *= rhs; lhs.y *= rhs; lhs.x *= rhs; return lhs;
+	lhs.x *= rhs; lhs.y *= rhs; lhs.z *= rhs; return lhs;
 }
 
 inline Vector3 operator/(Vector3 const & lhs, float rhs)
