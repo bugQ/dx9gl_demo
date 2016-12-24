@@ -28,13 +28,13 @@ void FloatCamera::update(float dt)
 	Vector3 down_right = up + right;
 	Vector3 down_left = up - right;
 
-	float t_up_right = fminf(1, terrain.intersect_ray(target + up, offset + up_right));
-	float t_up_left = fminf(1, terrain.intersect_ray(target + up_left, offset + up_left));
-	float t_down_right = fminf(1, terrain.intersect_ray(target + down_right, offset + down_right));
-	float t_down_left = fminf(1, terrain.intersect_ray(target + down_left, offset + down_left));
+	float t_up = fminf(1, terrain.intersect_ray(target + up, offset + up));
+	float t_down = fminf(1, terrain.intersect_ray(target - up, offset - up));
+	float t_right = fminf(1, terrain.intersect_ray(target + right, offset + right));
+	float t_left = fminf(1, terrain.intersect_ray(target - right, offset - right));
 
-	tangent_velocity.x += tangent_speed * (t_up_right + t_down_right - t_up_left - t_down_left);
-	tangent_velocity.y += tangent_speed * (t_up_right + t_up_left - t_down_right - t_down_left);
+	tangent_velocity.x += tangent_speed * (t_right - t_left);
+	tangent_velocity.y += tangent_speed * (t_up - t_down);
 
 	tangent_velocity.clip(tangent_speed);
 	velocity += rotation.rotate(Vector3(tangent_velocity.x, tangent_velocity.y, 0));
@@ -42,7 +42,7 @@ void FloatCamera::update(float dt)
 	position += dt * velocity.clip(max_speed);
 
 	tangent_velocity = Vector2::Zero;
-	velocity = Vector3::Zero;
+	velocity /= 2;
 }
 
 void FloatCamera::draw_debug(Wireframe & wireframe)
