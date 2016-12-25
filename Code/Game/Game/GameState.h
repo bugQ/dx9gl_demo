@@ -26,6 +26,8 @@ struct GameState
 	{
 		return local_player() != NULL;
 	}
+
+	Graphics::Color team_color(uint16_t player_id);
 };
 
 }

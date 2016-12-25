@@ -4,6 +4,7 @@
 #include "../../Engine/Physics/Collider.h"
 #include "Controller.h"
 #include "../../Engine/Graphics/Wireframe.h"
+#include "../../Engine/Graphics/Color.h"
 
 namespace eae6320
 {
@@ -14,9 +15,11 @@ namespace eae6320
 		float speed;
 		bool grounded;
 
+		Graphics::Color team_color;
+
 		Physics::Terrain * terrain = NULL;
 		void(*update_callback)() = NULL;
-		const float callback_interval = 0.1f;
+		const float callback_interval = 1/30.0f;
 		float callback_timer = callback_interval;
 
 		virtual void update(Controls controls, float dt);
@@ -35,7 +38,7 @@ namespace eae6320
 			return Segment3(head_cam.position, head_cam.rotation.rotate(-Vector3::K) * 100);
 		}
 
-		Player(Vector3 position, float yaw, float height = 1.5f, float speed = 2.0f);
+		Player(Graphics::Color team_color, Vector3 position, float yaw, float height = 1.5f, float speed = 2.0f);
 
 		virtual ~Player();
 	};

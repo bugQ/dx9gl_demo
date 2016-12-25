@@ -85,6 +85,8 @@ void Neterface::Update()
 			out_bits.Write((uint16_t)1);
 			peer->Send(&out_bits, HIGH_PRIORITY, RELIABLE_ORDERED, 0, address, false);
 
+			SendPlayerUpdate();
+
 			//m_totalClients++;
 			//SendPlayerPosition();
 			break;
@@ -108,6 +110,7 @@ void Neterface::Update()
 			game_state.local_player_id = local_player_id;
 			game_state.init_player(PlayerUpdateCallback);
 			assert(game_state.active());
+			SendPlayerUpdate();
 			break;
 		
 		case PLAYER_UPDATE:
@@ -122,7 +125,8 @@ void Neterface::Update()
 			in_bits.Read(remote_player_yaw);
 			
 			if (game_state.players[remote_player_id] == NULL)
-				game_state.players[remote_player_id] = new Player(remote_player_pos, remote_player_yaw);
+				game_state.players[remote_player_id]
+					= new Player(game_state.team_color(remote_player_id), remote_player_pos, remote_player_yaw);
 			else
 				game_state.players[remote_player_id]->remote_update(remote_player_pos, remote_player_yaw);
 			break;

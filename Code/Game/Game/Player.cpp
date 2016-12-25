@@ -6,8 +6,9 @@
 namespace eae6320
 {
 
-Player::Player(Vector3 position, float yaw, float height, float speed)
-	: Collider(position, yaw, height), speed(speed), grounded(false)
+Player::Player(Graphics::Color team_color, Vector3 position, float yaw, float height, float speed)
+	: team_color(team_color)
+	, Collider(position, yaw, height), speed(speed), grounded(false)
 	, head_cam(position), float_cam(this->position)
 {
 	update_cam();
@@ -92,9 +93,9 @@ void Player::update_cam()
 #ifdef _DEBUG
 void Player::draw_debug(Graphics::Wireframe & wireframe)
 {
-	wireframe.addSphere(position - Vector3::J * (height / 3), height / 4, 8, Graphics::Color::White);
-	wireframe.addSphere(position - Vector3::J * (2 * height / 3), height / 3, 8, Graphics::Color::White);
-	wireframe.addSphere(position, height / 5, 8, Graphics::Color::White);
+	wireframe.addSphere(position - Vector3::J * (2 * height / 3), height / 3, 8, team_color);
+	wireframe.addSphere(position - Vector3::J * (height / 3), height / 4, 8, team_color);
+	wireframe.addSphere(position, height / 5, 8, team_color);
 
 	Vector3 dir = head_cam.rotation.rotate(-Vector3::K);
 	Vector3 perp = dir.cross(Vector3::J);

@@ -26,9 +26,15 @@ void GameState::init_player(void (*update_callback)())
 
 	float yaw = local_player_id * 6.283185307f / max_players;
 	Vector3 position = Versor::rotation_y(yaw).rotate(-Vector3::K * 2);
+	Graphics::Color color = team_color(local_player_id);
 
-	players[local_player_id] = new Player(position, yaw);
+	players[local_player_id] = new Player(color, position, yaw);
 	players[local_player_id]->update_callback = update_callback;
+}
+
+Graphics::Color GameState::team_color(uint16_t player_id)
+{
+	return Graphics::Color::fromHSV(360.0f * player_id / max_players, 0.25f, 0.93f);
 }
 
 }
