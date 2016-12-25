@@ -24,9 +24,10 @@ This file contains all of the function definitions for this example program
 #include "../../Engine/Time/Time.h"
 #include "../../Engine/UserInput/UserInput.h"
 
+#include "Neterface.h"
 #include "Controller.h"
 #include "FlyCam.h"
-#include "Player.h"
+#include "GameState.h"
 
 #include "../../Engine/Debug_Runtime/UserOutput.h"
 #include <sstream>
@@ -107,7 +108,10 @@ namespace
 	Physics::Terrain * terrain;
 
 	FlyCam * fly_cam;
-	Player * player;
+	GameState * game_state;
+
+	Neterface * neterface;
+	DebugMenu * start_menu;
 
 	Graphics::Camera * active_cam;
 	Controller * active_controller;
@@ -136,8 +140,8 @@ namespace
 		bool active;
 		void draw(Wireframe & wireframe)
 		{
-			if (!active) return;
-			terrain->draw_raycast(player->line_of_sight(), wireframe);
+			if (!active || !game_state->active()) return;
+			terrain->draw_raycast(game_state->local_player()->line_of_sight(), wireframe);
 		}
 	} debug_ray;
 
@@ -146,6 +150,19 @@ namespace
 	{
 		fly_cam->fly_cam.position = Vector3(1.f, 1.f, 1.01f);
 		fly_cam->fly_cam.rotation = Versor::rotation_y(3.14159265f);
+	}
+
+
+	void start_server()
+	{
+		neterface = new Neterface(NULL, 8477, *game_state);
+	}
+
+	void start_client()
+	{
+		if (neterface != NULL)
+			delete neterface;
+		neterface = new Neterface("127.0.0.1", 8477, *game_state);
 	}
 
 	// Window classes are almost always identified by name;
@@ -282,10 +299,15 @@ bool CreateMainWindow(const HINSTANCE i_thisInstanceOfTheProgram, const int i_in
 		terrain->test_octree();
 
 		fly_cam = new FlyCam(Vector3(1.f, 1.f, 1.01f), 3.14159265f, camera_track_speed, camera_pan_speed);
-		player = new Player(Vector3(0, 0, 0), 0, 1.5f, *terrain, 2.0f);
 
-		active_cam = &player->float_cam;
-		active_controller = player;
+		game_state = new GameState(2);
+
+		start_menu = new DebugMenu();
+		start_menu->add_button("Start Game as Server", start_server);
+		start_menu->add_button("Start Game as Client (server must be running on 127.0.0.1)", start_client);
+
+		active_cam = &fly_cam->fly_cam;
+		active_controller = start_menu;
 
 
 		fps_display = new std::string;
@@ -717,30 +739,10 @@ void Render()
 	debug_sphere.draw(*wireframe);
 	debug_ray.draw(*wireframe);
 	terrain->draw_octree(*wireframe);
-	player->draw_debug(*wireframe);
 
-	/**
-	for (size_t i = 0; i < terrain->num_triangles; ++i)
-	{
-		Triangle3 tri = terrain->triangles[i];
-		wireframe->addLine(tri.a, Vector4::One, tri.b, Vector4::One);
-		wireframe->addLine(tri.b, Vector4::One, tri.c, Vector4::One);
-		wireframe->addLine(tri.c, Vector4::One, tri.a, Vector4::One);
-	}
-	/**
-	for (size_t i = 0; i < 2048; ++i)
-	{
-		Vector3 n;
-		Vector3 o = player->position + Versor::rotation_y(player->yaw).rotate(Vector3(0,0,0.0025f));
-		Vector3 d = Versor::rotation_y(player->yaw).rotate(Vector3(randf() * 32, randf() * 18, -16));
-		//Vector3 o(randf() * 6, randf() * 6, 0.1f);
-		//Vector3 d(randf() * 0.05, randf() * 0.05, -0.2f);
-		//Vector3 d(randf() * 6, randf() * 6, 4.f);
-		bool collided = terrain->intersect_ray(o, d, &n) < 1;
-		wireframe->addLine(o, color(collided), o + d, color(collided));
-	}
-	/**/
-
+	for (size_t i = 0; i < game_state->max_players; ++i)
+		if (game_state->players[i] != NULL)
+			game_state->players[i]->draw_debug(*wireframe);
 
 	eae6320::Graphics::DrawWireframe(*wireframe, *active_cam);
 	wireframe->clear();
@@ -750,12 +752,23 @@ void Render()
 			DrawSprite(*sprites[i]);
 
 	fps_display->swap(std::to_string(Time::GetFramesPerSecond()));
-	std::ostringstream oss;
-	Vector3 pos = player->position;
-	oss << "(" << pos.x << ", " << pos.y << ", " << pos.z << ")";
-	pos_display->swap(oss.str());
 
-	if(active_controller == debug_menu)
+	if (game_state->local_player() != NULL)
+	{
+		std::ostringstream oss;
+		Vector3 pos = game_state->local_player()->position;
+		oss << "(" << pos.x << ", " << pos.y << ", " << pos.z << ")";
+		pos_display->swap(oss.str());
+	}
+	else
+	{
+		std::string msg("game not started");
+		pos_display->swap(msg);
+	}
+	
+	if (active_controller == start_menu)
+		start_menu->Draw();
+	else if (active_controller == debug_menu)
 		debug_menu->Draw();
 
 	EndFrame();
@@ -808,60 +821,74 @@ bool WaitForMainWindowToClose(int& o_exitCode)
 			if (UserInput::IsKeyPressed(VK_RIGHT)) joy_right += Vector2::I;
 			Controller::Controls controls = { joy_left, joy_right };
 
+			if (GetFocus() == s_mainWindow) {
+				if (active_controller == start_menu)
+				{
+					if (game_state->active())
+					{
+						game_state->local_player()->terrain = terrain;
+						active_cam = &game_state->local_player()->float_cam;
+						active_controller = game_state->local_player();
+					}
+				}
 #ifdef _DEBUG
-			static int prevkey = -1;
-			if (active_controller == debug_menu)
-			{
-				if (UserInput::IsKeyPressed(VK_OEM_3))
+				static int prevkey = -1;
+				if (active_controller == debug_menu)
+				{
+					if (UserInput::IsKeyPressed(VK_OEM_3))
+					{
+						if (prevkey != VK_OEM_3)
+						{
+							if (game_state->active() && active_cam == &game_state->local_player()->float_cam)
+								active_controller = game_state->local_player();
+							else if (active_cam == &fly_cam->fly_cam)
+								active_controller = fly_cam;
+							prevkey = VK_OEM_3;
+						}
+					}
+					else
+						prevkey = -1;
+				}
+				else if (UserInput::IsKeyPressed(VK_OEM_3))
 				{
 					if (prevkey != VK_OEM_3)
 					{
-						if (active_cam == &player->float_cam)
-							active_controller = player;
-						else if (active_cam == &fly_cam->fly_cam)
-							active_controller = fly_cam;
+						active_controller = debug_menu;
 						prevkey = VK_OEM_3;
 					}
 				}
-				else
-					prevkey = -1;
-			}
-			else if (UserInput::IsKeyPressed(VK_OEM_3))
-			{
-				if (prevkey != VK_OEM_3)
+				else if (active_controller == fly_cam)
 				{
-					active_controller = debug_menu;
-					prevkey = VK_OEM_3;
+					if (game_state->active() && UserInput::IsKeyPressed(VK_TAB))
+					{
+						if (prevkey != VK_TAB)
+						{
+							active_cam = &game_state->local_player()->float_cam;
+							active_controller = game_state->local_player();
+							prevkey = VK_TAB;
+						}
+					}
+					else
+						prevkey = -1;
 				}
-			}
-			else if (active_controller == fly_cam)
-			{
-				if (UserInput::IsKeyPressed(VK_TAB))
+				else if (UserInput::IsKeyPressed(VK_TAB))
 				{
 					if (prevkey != VK_TAB)
 					{
-						active_cam = &player->float_cam;
-						active_controller = player;
+						active_cam = &fly_cam->fly_cam;
+						active_controller = fly_cam;
 						prevkey = VK_TAB;
 					}
 				}
 				else
 					prevkey = -1;
-			}
-			else if (UserInput::IsKeyPressed(VK_TAB))
-			{
-				if (prevkey != VK_TAB)
-				{
-					active_cam = &fly_cam->fly_cam;
-					active_controller = fly_cam;
-					prevkey = VK_TAB;
-				}
-			}
-			else
-				prevkey = -1;
 #endif // _DEBUG
 
-			active_controller->update(controls, dt);
+				active_controller->update(controls, dt);
+			}
+
+			if (neterface != NULL)
+				neterface->Update();
 
 			Render();
 		}

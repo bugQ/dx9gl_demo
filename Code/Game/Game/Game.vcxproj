@@ -121,7 +121,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3dx9.lib;d3d9.lib;Math.lib;Time.lib;Physics.lib;UserInput.lib;Windows.lib;Debug_Runtime.lib;Graphics.lib;Lua.lib;opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3dx9.lib;d3d9.lib;RakNet.lib;Math.lib;Time.lib;Physics.lib;UserInput.lib;Windows.lib;Debug_Runtime.lib;Graphics.lib;Lua.lib;opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(LibDir);$(DXSDK_DIR)Lib\x64</AdditionalLibraryDirectories>
     </Link>
     <CustomBuildStep>
@@ -173,7 +173,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>d3dx9.lib;d3d9.lib;Math.lib;Time.lib;Physics.lib;UserInput.lib;Windows.lib;Debug_Runtime.lib;Graphics.lib;Lua.lib;opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3dx9.lib;d3d9.lib;RakNet.lib;Math.lib;Time.lib;Physics.lib;UserInput.lib;Windows.lib;Debug_Runtime.lib;Graphics.lib;Lua.lib;opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(LibDir);$(DXSDK_DIR)Lib\x64</AdditionalLibraryDirectories>
     </Link>
     <CustomBuildStep>
@@ -200,6 +200,8 @@
     <ClInclude Include="Controller.h" />
     <ClInclude Include="DebugMenu.h" />
     <ClInclude Include="FlyCam.h" />
+    <ClInclude Include="GameState.h" />
+    <ClInclude Include="Neterface.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Resources\Resource.h" />
     <ClInclude Include="Resources\targetver.h" />
@@ -210,6 +212,8 @@
     <ClCompile Include="DebugMenu.cpp" />
     <ClCompile Include="EntryPoint.cpp" />
     <ClCompile Include="FlyCam.cpp" />
+    <ClCompile Include="GameState.cpp" />
+    <ClCompile Include="Neterface.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="WindowsProgram.cpp" />
   </ItemGroup>

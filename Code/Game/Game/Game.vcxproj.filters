@@ -30,6 +30,8 @@
     <ClInclude Include="Player.h" />
     <ClInclude Include="Controller.h" />
     <ClInclude Include="FlyCam.h" />
+    <ClInclude Include="Neterface.h" />
+    <ClInclude Include="GameState.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EntryPoint.cpp" />
@@ -38,5 +40,7 @@
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Controller.cpp" />
     <ClCompile Include="FlyCam.cpp" />
+    <ClCompile Include="Neterface.cpp" />
+    <ClCompile Include="GameState.cpp" />
   </ItemGroup>
 </Project>

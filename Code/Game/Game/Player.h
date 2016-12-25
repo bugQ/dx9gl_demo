@@ -11,12 +11,16 @@ namespace eae6320
 	{
 		Graphics::Camera head_cam;
 		Graphics::FloatCamera float_cam;
-		float float_cam_radius = 1.0f, float_cam_height = 0.5f;
-		const Physics::Terrain & terrain;
 		float speed;
 		bool grounded;
 
+		Physics::Terrain * terrain = NULL;
+		void(*update_callback)() = NULL;
+		const float callback_interval = 0.1f;
+		float callback_timer = callback_interval;
+
 		virtual void update(Controls controls, float dt);
+		void remote_update(const Vector3 & pos, float rot);
 		void update_cam();
 
 		void draw_debug(Graphics::Wireframe & wireframe)
@@ -31,8 +35,7 @@ namespace eae6320
 			return Segment3(head_cam.position, head_cam.rotation.rotate(-Vector3::K) * 100);
 		}
 
-		Player(Vector3 position, float yaw, float height,
-			const Physics::Terrain & terrain, float speed);
+		Player(Vector3 position, float yaw, float height = 1.5f, float speed = 2.0f);
 
 		virtual ~Player();
 	};

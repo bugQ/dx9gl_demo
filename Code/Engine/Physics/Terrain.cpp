@@ -95,6 +95,13 @@ float Terrain::intersect_ray(Vector3 o, Vector3 dir, Vector3 * n) const
 		wireframe.addTriangle(triangles[hit_i], Graphics::Color::White);
 	}
 
+	/*
+	{1570, 1673, 1891}
+	1570: { -564.306, -302.53, 1200 }
+	1673: { -564.306, 47.4699, 1462.5 }
+	1891: { -564.306, -302.53, 1462.5 }
+	 */
+
 	return t;
 }
 

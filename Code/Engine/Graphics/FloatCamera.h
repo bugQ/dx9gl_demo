@@ -23,13 +23,10 @@ struct FloatCamera : public Camera
 	std::deque<Vector3> position_buffer;
 
 	const Vector3 & target;
-	const Physics::Terrain & terrain;
 
-	void update(float dt);
+	void update(Physics::Terrain & terrain, float dt);
 
-	void draw_debug(Wireframe & wireframe);
-
-	FloatCamera(const Vector3 & target, const Physics::Terrain & terrain);
+	FloatCamera(const Vector3 & target);
 };
 
 }

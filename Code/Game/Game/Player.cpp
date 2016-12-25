@@ -1,18 +1,24 @@
 #include "Player.h"
 
+#include <cassert>
+
+
 namespace eae6320
 {
 
-Player::Player(Vector3 position, float yaw, float height, const Physics::Terrain & terrain, float speed)
-	: Collider(position, yaw, height), terrain(terrain), speed(speed), grounded(false)
-	, head_cam(position), float_cam(this->position, terrain)
+Player::Player(Vector3 position, float yaw, float height, float speed)
+	: Collider(position, yaw, height), speed(speed), grounded(false)
+	, head_cam(position), float_cam(this->position)
 {
 	update_cam();
 }
 
 void Player::update(Controls controls, float dt)
 {
-	//yaw += dt * -controls.joy_right.x;
+	assert(terrain != NULL);
+
+	float prev_yaw = yaw;
+	Vector3 prev_pos = position;
 
 	// jumping
 	if (grounded && controls.joy_right.y > 0) {
@@ -43,13 +49,12 @@ void Player::update(Controls controls, float dt)
 		dir = head_cam.rotation.rotate(-Vector3::K);
 	}
 
-	Vector3 prev = position;
-	grounded = move((dir * speed + velocity) * dt, terrain);
+	grounded = move((dir * speed + velocity) * dt, *terrain);
 	if (grounded)
 		velocity.y = 0;
 
 	// heading
-	Vector3 disp = position - prev;
+	Vector3 disp = position - prev_pos;
 	disp.y = 0;
 	if (dir.z != 0 && dir.x != 0)
 	{
@@ -59,7 +64,23 @@ void Player::update(Controls controls, float dt)
 	// cameras
 	update_cam();
 	float_cam.tangent_velocity.x -= controls.joy_right.x * speed;
-	float_cam.update(dt);
+	float_cam.update(*terrain, dt);
+
+	// callback
+	callback_timer -= dt;
+	if (callback_timer < 0 && position != prev_pos || yaw != prev_yaw)
+	{
+		callback_timer = callback_interval;
+		if (update_callback != NULL)
+			update_callback();
+	}
+}
+
+void Player::remote_update(const Vector3 & pos, float rot)
+{
+	position = pos;
+	yaw = rot;
+	update_cam();
 }
 
 void Player::update_cam()
@@ -84,8 +105,6 @@ void Player::draw_debug(Graphics::Wireframe & wireframe)
 	wireframe.addLine(carrot_base + Vector3::J * (height / 16), carrot_orange, carrot_tip, carrot_orange);
 	wireframe.addLine(carrot_base + perp * (height / 16), carrot_orange, carrot_tip, carrot_orange);
 	wireframe.addLine(carrot_base - perp * (height / 16), carrot_orange, carrot_tip, carrot_orange);
-
-	float_cam.draw_debug(wireframe);
 }
 #endif
 
